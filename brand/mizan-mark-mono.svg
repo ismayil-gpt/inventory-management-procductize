@@ -1,0 +1,16 @@
+<svg viewBox="0 0 512 512" fill="none" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Mizan">
+  <title>Mizan mark (monochrome — uses currentColor)</title>
+  <g fill="currentColor" stroke="currentColor">
+    <rect x="171" y="402" width="170" height="22" rx="3" stroke="none"/>
+    <rect x="196" y="380" width="120" height="22" rx="3" stroke="none"/>
+    <rect x="245" y="150" width="22" height="234" rx="3" stroke="none"/>
+    <rect x="100" y="140" width="312" height="20" rx="3" stroke="none"/>
+    <circle cx="256" cy="150" r="19" stroke="none"/>
+    <path d="M104 160 L66 214" stroke-width="12" stroke-linecap="round" fill="none"/>
+    <path d="M104 160 L142 214" stroke-width="12" stroke-linecap="round" fill="none"/>
+    <path d="M60 214 Q104 260 148 214" stroke-width="16" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+    <path d="M408 160 L370 214" stroke-width="12" stroke-linecap="round" fill="none"/>
+    <path d="M408 160 L446 214" stroke-width="12" stroke-linecap="round" fill="none"/>
+    <path d="M364 214 Q408 260 452 214" stroke-width="16" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+  </g>
+</svg>

@@ -1,0 +1,53 @@
+# Dependencies
+node_modules/
+**/node_modules/
+
+# Build output
+dist/
+**/dist/
+build/
+**/build/
+*.tsbuildinfo
+
+# Python
+__pycache__/
+**/__pycache__/
+*.pyc
+.pytest_cache/
+**/.pytest_cache/
+.venv/
+venv/
+*.egg-info/
+
+# Environment / secrets — never commit real values
+.env
+.env.*
+!infrastructure/environment-templates/.env.example
+!frontend/.env.production.example
+
+# TLS keys/certs — generated locally, never committed (even self-signed dev ones)
+infrastructure/nginx/certs/*.pem
+infrastructure/nginx/certs/*.key
+infrastructure/nginx/certs/*.crt
+
+# Logs
+*.log
+npm-debug.log*
+pnpm-debug.log*
+
+# OS / editor
+.DS_Store
+.vscode/
+.idea/
+
+# Test / coverage
+coverage/
+**/coverage/
+playwright-report/
+test-results/
+
+# Prisma
+database/migrations/dev.db
+
+# Misc
+*.tmp

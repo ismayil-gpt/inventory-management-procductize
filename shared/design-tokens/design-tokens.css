@@ -1,0 +1,143 @@
+/* =============================================================================
+ * Mizan — Design Tokens (single source of truth)
+ * Ref: CLAUDE.md §9. Consumed as CSS custom properties by frontend + PDFs.
+ * Do NOT hardcode colours, sizes, radii or fonts anywhere else.
+ *
+ * Design thesis (§9.1): the interface is an INSTRUMENT, not a brochure — dense,
+ * quiet, precise. Identity comes from aviation wayfinding: segmented codes,
+ * monospaced figures, high contrast. One bold element (the designator strip);
+ * everything else disciplined.
+ * ========================================================================== */
+
+:root,
+:root[data-theme="light"] {
+  /* ---- Surfaces ---- */
+  --canvas:          #F4F6F7;
+  --surface:         #FFFFFF;
+  --surface-sunken:  #EDF1F2;
+  --hairline:        #D6DEE2;
+  --hairline-strong: #B9C6CC;
+
+  /* ---- Ink ---- */
+  --ink:             #0D1B22;
+  --ink-muted:       #566A75;
+  --ink-faint:       #8497A0;
+
+  /* ---- Primary (institutional deep teal) ---- */
+  --primary:         #0B4F5E;
+  --primary-hover:   #08404C;
+  --primary-soft:    #E1EDF0;
+  --on-primary:      #FFFFFF;
+
+  /* ---- Gold (designator + genuine emphasis only) ---- */
+  --gold:            #A67C1A;
+  --gold-soft:       #F7EFDC;
+
+  /* ---- Semantic / stock state ---- */
+  --ok:              #1E6B45;  --ok-soft:       #E3F1E9;
+  --warn:            #8A5A00;  --warn-soft:     #FAF0DC;
+  --critical:        #9B2226;  --critical-soft: #F9E5E5;
+  --info:            #0B4F5E;  --info-soft:     #E1EDF0;
+  --focus:           #0B4F5E;
+}
+
+:root[data-theme="dark"] {
+  /* Graphite — neutral warm-grey panels at night, teal-cyan accent. NOT black. */
+  --canvas:          #141518;
+  --surface:         #1C1E22;
+  --surface-sunken:  #0F1013;
+  --hairline:        #2E3138;
+  --hairline-strong: #43474F;
+
+  --ink:             #E8E9EC;
+  --ink-muted:       #9CA0A8;
+  --ink-faint:       #6E727B;
+
+  --primary:         #46A9BE;
+  --primary-hover:   #59BCCF;
+  --primary-soft:    #12292F;
+  --on-primary:      #06171B;
+
+  --gold:            #D9AC4B;
+  --gold-soft:       #2A2315;
+
+  --ok:              #52AC7E;  --ok-soft:       #142A21;
+  --warn:            #D4A23E;  --warn-soft:     #2A2315;
+  --critical:        #E06A6E;  --critical-soft: #2E1719;
+  --info:            #46A9BE;  --info-soft:     #12292F;
+  --focus:           #6FC6D8;
+}
+
+/* Follow the OS when no explicit data-theme is set (the toggle stamps data-theme). */
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme]) {
+    --canvas:          #141518;
+    --surface:         #1C1E22;
+    --surface-sunken:  #0F1013;
+    --hairline:        #2E3138;
+    --hairline-strong: #43474F;
+    --ink:             #E8E9EC;
+    --ink-muted:       #9CA0A8;
+    --ink-faint:       #6E727B;
+    --primary:         #46A9BE;
+    --primary-hover:   #59BCCF;
+    --primary-soft:    #12292F;
+    --on-primary:      #06171B;
+    --gold:            #D9AC4B;
+    --gold-soft:       #2A2315;
+    --ok:              #52AC7E;  --ok-soft:       #142A21;
+    --warn:            #D4A23E;  --warn-soft:     #2A2315;
+    --critical:        #E06A6E;  --critical-soft: #2E1719;
+    --info:            #46A9BE;  --info-soft:     #12292F;
+    --focus:           #6FC6D8;
+  }
+}
+
+:root {
+  /* ---- Typography (§9.3). Self-hosted IBM Plex — no external CDN. ---- */
+  --font-sans:        'IBM Plex Sans', 'IBM Plex Sans Arabic', ui-sans-serif, sans-serif;
+  --font-sans-arabic: 'IBM Plex Sans Arabic', 'IBM Plex Sans', ui-sans-serif, sans-serif;
+  --font-mono:        'IBM Plex Mono', ui-monospace, 'SF Mono', monospace;
+
+  --text-2xs:   11px;  --leading-2xs:  16px;  /* uppercase labels, tracking .06em */
+  --text-xs:    12px;  --leading-xs:   18px;  /* table meta, captions */
+  --text-sm:    13px;  --leading-sm:   20px;  /* table body — default for data */
+  --text-base:  15px;  --leading-base: 24px;  /* body copy */
+  --text-lg:    18px;  --leading-lg:   26px;  /* section headings */
+  --text-xl:    22px;  --leading-xl:   30px;  /* page titles */
+  --text-2xl:   28px;  --leading-2xl:  36px;  /* dashboard figures */
+  --text-designator: 34px;                    /* designator strip (mono, 500) */
+
+  --tracking-label: 0.06em;
+  --tracking-designator: 0.04em;
+
+  /* ---- Geometry (§9.5). Never exceed 4px radius. ---- */
+  --radius-sm: 2px;   /* inputs, chips */
+  --radius-md: 3px;   /* buttons, panels — default */
+  --radius-lg: 4px;   /* modals */
+
+  /* ---- Spacing — 8px grid ---- */
+  --space-1: 4px;   --space-2: 8px;   --space-3: 12px;  --space-4: 16px;
+  --space-6: 24px;  --space-8: 32px;  --space-12: 48px; --space-16: 64px;
+
+  /* ---- Elevation — only genuinely floating layers (§9.5) ---- */
+  --shadow-floating: 0 2px 8px rgb(0 0 0 / 0.12);
+
+  /* ---- Motion (§9.9) ---- */
+  --motion-duration: 140ms;
+  --motion-easing: cubic-bezier(0.2, 0, 0.2, 1);
+
+  /* ---- Layout (§9.7) ---- */
+  --rail-width: 220px;
+  --rail-width-collapsed: 56px;
+  --status-strip-height: 32px;
+  --content-max-width: 1440px;
+  --content-gutter: 24px;
+}
+
+/* All numerals align — quantities in a column must line up (§9.3). */
+.tabular { font-variant-numeric: tabular-nums; }
+
+@media (prefers-reduced-motion: reduce) {
+  :root { --motion-duration: 0ms; }
+}

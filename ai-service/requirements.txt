@@ -1,0 +1,17 @@
+# Mizan AI service. Ref: CLAUDE.md §4, §3.3.
+fastapi==0.115.0
+uvicorn[standard]==0.30.6
+pydantic==2.9.2
+pydantic-settings==2.5.2
+httpx==0.27.2
+apscheduler==3.10.4
+# Stage 2 (production device): forecasting
+statsmodels==0.14.2
+# Embeddings/vector search (sentence-transformers, faiss-cpu) deliberately NOT added —
+# see OPEN-QUESTIONS.md #9. This 8GB Jetson is already memory-marginal with Ollama +
+# the app stack loaded (see #8); a second resident ML model isn't worth the OOM risk
+# at a 50-product catalogue. Product-name matching uses stdlib difflib instead.
+
+# Testing (§15)
+pytest==8.3.3
+pytest-asyncio==0.24.0

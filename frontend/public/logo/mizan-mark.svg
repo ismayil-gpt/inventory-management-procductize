@@ -1,0 +1,21 @@
+<svg viewBox="0 0 512 512" fill="none" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Mizan">
+  <title>Mizan mark</title>
+  <!-- Base plinth -->
+  <rect x="171" y="402" width="170" height="22" rx="3" fill="#0B4F5E"/>
+  <rect x="196" y="380" width="120" height="22" rx="3" fill="#0B4F5E"/>
+  <!-- Central post -->
+  <rect x="245" y="150" width="22" height="234" rx="3" fill="#0B4F5E"/>
+  <!-- Balance beam (level = in balance) -->
+  <rect x="100" y="140" width="312" height="20" rx="3" fill="#0B4F5E"/>
+  <!-- Pivot / fulcrum accent -->
+  <circle cx="256" cy="150" r="19" fill="#A67C1A"/>
+  <circle cx="256" cy="150" r="7" fill="#0B4F5E"/>
+  <!-- Left pan: chains + shallow bowl -->
+  <path d="M104 160 L66 214" stroke="#0B4F5E" stroke-width="12" stroke-linecap="round"/>
+  <path d="M104 160 L142 214" stroke="#0B4F5E" stroke-width="12" stroke-linecap="round"/>
+  <path d="M60 214 Q104 260 148 214" stroke="#0B4F5E" stroke-width="16" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+  <!-- Right pan: chains + shallow bowl -->
+  <path d="M408 160 L370 214" stroke="#0B4F5E" stroke-width="12" stroke-linecap="round"/>
+  <path d="M408 160 L446 214" stroke="#0B4F5E" stroke-width="12" stroke-linecap="round"/>
+  <path d="M364 214 Q408 260 452 214" stroke="#0B4F5E" stroke-width="16" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+</svg>

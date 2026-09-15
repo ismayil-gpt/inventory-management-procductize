@@ -1,0 +1,111 @@
+# =============================================================================
+# Mizan — Development environment (Jetson). Ref: CLAUDE.md §2, §13.1.
+# The architecture must NOT change moving to production — only configuration.
+# See docker-compose.production.yml for the on-premise/GPU counterpart.
+#
+# Network segmentation (DESC §11.1 #11): only nginx is published to the host.
+# postgres, redis, minio and ai-service are reachable ONLY on the internal
+# Docker network.
+#
+# Ollama is deliberately NOT a service here — it runs natively as a systemd
+# service on this box for direct GPU access (see OPEN-QUESTIONS.md #8 on this
+# board's tight memory budget). ai-service reaches it via host.docker.internal.
+# =============================================================================
+
+name: mizan-development
+
+services:
+  nginx:
+    image: nginx:1.27-alpine
+    depends_on: [frontend, backend]
+    ports:
+      - "443:443"   # self-signed TLS in development (DESC #1)
+      - "80:80"
+    volumes:
+      - ./infrastructure/nginx/nginx.development.conf:/etc/nginx/nginx.conf:ro
+      - ./infrastructure/nginx/certs:/etc/nginx/certs:ro
+    networks: [mizan-internal]
+
+  frontend:
+    build:
+      context: .
+      dockerfile: infrastructure/docker/frontend.Dockerfile
+    expose: ["80"]
+    networks: [mizan-internal]
+
+  backend:
+    build:
+      context: .
+      dockerfile: infrastructure/docker/backend.Dockerfile
+    depends_on: [postgres, redis, minio]
+    expose: ["3000"]
+    env_file: [.env.development]
+    healthcheck:
+      test: ["CMD", "wget", "-qO-", "http://localhost:3000/api/v1/health"]
+      interval: 30s
+      timeout: 5s
+      retries: 5
+    networks: [mizan-internal]
+
+  ai-service:
+    build:
+      context: .
+      dockerfile: infrastructure/docker/ai-service.Dockerfile
+    depends_on: [postgres]
+    expose: ["8000"]           # NOT published — internal only (§7)
+    env_file: [.env.development]
+    environment:
+      # Overrides the .env.development value: Ollama is native on this host, not
+      # a compose service. host-gateway (below) resolves this to the Jetson itself.
+      OLLAMA_URL: http://host.docker.internal:11434
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request;urllib.request.urlopen('http://localhost:8000/health')"]
+      interval: 30s
+      timeout: 5s
+      retries: 5
+    networks: [mizan-internal]
+
+  postgres:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_USER: mizan
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_DB: mizan_inventory
+    expose: ["5432"]           # NOT published — internal only (§11 #11)
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U mizan -d mizan_inventory"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks: [mizan-internal]
+
+  redis:
+    image: redis:7-alpine
+    expose: ["6379"]
+    volumes:
+      - redis-data:/data
+    networks: [mizan-internal]
+
+  minio:
+    image: minio/minio:latest
+    command: server /data --console-address ":9001"
+    environment:
+      MINIO_ROOT_USER: ${MINIO_ACCESS_KEY}
+      MINIO_ROOT_PASSWORD: ${MINIO_SECRET_KEY}
+    expose: ["9000", "9001"]
+    volumes:
+      - minio-data:/data
+    networks: [mizan-internal]
+
+networks:
+  mizan-internal:
+    driver: bridge
+
+volumes:
+  postgres-data:
+  redis-data:
+  minio-data:

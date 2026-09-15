@@ -1,0 +1,29 @@
+<svg viewBox="0 0 720 220" fill="none" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Mizan — Inventory Intelligence">
+  <title>Mizan logo</title>
+  <!-- ===== Mark ===== -->
+  <g transform="translate(20 20) scale(0.352)">
+    <rect x="171" y="402" width="170" height="22" rx="3" fill="#0B4F5E"/>
+    <rect x="196" y="380" width="120" height="22" rx="3" fill="#0B4F5E"/>
+    <rect x="245" y="150" width="22" height="234" rx="3" fill="#0B4F5E"/>
+    <rect x="100" y="140" width="312" height="20" rx="3" fill="#0B4F5E"/>
+    <circle cx="256" cy="150" r="19" fill="#A67C1A"/>
+    <circle cx="256" cy="150" r="7" fill="#0B4F5E"/>
+    <path d="M104 160 L66 214" stroke="#0B4F5E" stroke-width="12" stroke-linecap="round"/>
+    <path d="M104 160 L142 214" stroke="#0B4F5E" stroke-width="12" stroke-linecap="round"/>
+    <path d="M60 214 Q104 260 148 214" stroke="#0B4F5E" stroke-width="16" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+    <path d="M408 160 L370 214" stroke="#0B4F5E" stroke-width="12" stroke-linecap="round"/>
+    <path d="M408 160 L446 214" stroke="#0B4F5E" stroke-width="12" stroke-linecap="round"/>
+    <path d="M364 214 Q408 260 452 214" stroke="#0B4F5E" stroke-width="16" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+  </g>
+  <!-- ===== Wordmark ===== -->
+  <text x="210" y="112" font-family="'IBM Plex Mono','IBM Plex Sans',ui-monospace,monospace"
+        font-size="72" font-weight="600" letter-spacing="6" fill="#0B4F5E">MIZAN</text>
+  <!-- Signature gold rule (echoes the location designator strip) -->
+  <rect x="212" y="130" width="300" height="3" fill="#A67C1A"/>
+  <!-- Tagline -->
+  <text x="213" y="164" font-family="'IBM Plex Sans',ui-sans-serif,sans-serif"
+        font-size="19" font-weight="500" letter-spacing="6.5" fill="#566A75">INVENTORY  INTELLIGENCE</text>
+  <!-- Arabic name -->
+  <text x="690" y="112" text-anchor="end" font-family="'IBM Plex Sans Arabic','Segoe UI',sans-serif"
+        font-size="40" font-weight="500" fill="#0B4F5E" direction="rtl">ميزان</text>
+</svg>

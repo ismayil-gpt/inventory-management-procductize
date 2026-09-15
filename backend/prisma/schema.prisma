@@ -1,0 +1,283 @@
+// =============================================================================
+// Mizan — Database schema (Prisma)  ·  Ref: CLAUDE.md §5 and §5A
+// PostgreSQL 16. AuditLog and StockMovement are APPEND-ONLY (see migrations).
+// Storage structure, catalogue and vocabulary are CONFIGURATION, never code.
+// =============================================================================
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum Role {
+  ADMIN
+  STORE_KEEPER
+}
+
+enum MovementType {
+  GOODS_IN
+  GOODS_OUT
+  TRANSFER
+  CYCLE_COUNT
+  ADJUSTMENT
+}
+
+enum BarcodeSource {
+  MANUFACTURER
+  INTERNAL
+}
+
+enum RecommendationStatus {
+  PENDING
+  APPROVED
+  AMENDED
+  REJECTED
+  ORDERED
+  RECEIVED
+}
+
+model User {
+  id                String    @id @default(cuid())
+  email             String    @unique
+  passwordHash      String
+  displayName       String
+  role              Role
+  preferredLanguage String    @default("en")
+  preferredTheme    String    @default("system")
+  isActive          Boolean   @default(true)
+  mfaSecret         String?
+  failedLoginCount  Int       @default(0)
+  lockedUntil       DateTime?
+  lastLoginAt       DateTime?
+  createdAt         DateTime  @default(now())
+}
+
+// One row for a single-customer deployment. Present from day one so the platform
+// can serve multiple customers later without a schema migration. Every
+// tenant-owned row below carries organizationId.
+model Organization {
+  id              String   @id @default(cuid())
+  code            String   @unique // e.g. "DEMO"
+  nameEn          String
+  nameAr          String
+  timezone        String   @default("Asia/Dubai")
+  defaultLanguage String   @default("en")
+  logoObjectKey   String?
+  isActive        Boolean  @default(true)
+  createdAt       DateTime @default(now())
+}
+
+// Location types are DATA, not code. A warehouse customer configures
+// SITE > WAREHOUSE > AISLE > RACK > LEVEL > BIN. A store-room customer configures
+// STORE_ROOM > RACK > LEVEL. Nothing in the application hardcodes either.
+model LocationType {
+  id             String  @id @default(cuid())
+  organizationId String
+  code           String  // SITE WAREHOUSE STORE_ROOM ZONE AISLE RACK LEVEL BIN
+  nameEn         String  // "Store Room"
+  nameAr         String
+  depth          Int     // 0 = top of the tree
+  canHoldStock   Boolean @default(false) // true only for the level that stores goods
+  codePattern    String? // optional validation, e.g. "^SR\\d+$"
+  sortOrder      Int     @default(0)
+  isActive       Boolean @default(true)
+
+  @@unique([organizationId, code])
+}
+
+// A single self-referencing tree of arbitrary depth. One store room or fifty
+// warehouses use the same structure. designator = ancestor codes joined by "-".
+model LocationNode {
+  id               String   @id @default(cuid())
+  organizationId   String
+  parentId         String?  // null = root node
+  locationTypeId   String
+  code             String   // "SR1", "R1", "L1"
+  nameEn           String?
+  nameAr           String?
+  materialisedPath String   // "/rootId/childId/leafId" — fast subtree queries
+  designator       String   // cached: "SR1-R1-L1" — recomputed on move or rename
+  depth            Int
+  barcode          String?  @unique // present only when the type canHoldStock
+  isActive         Boolean  @default(true)
+  sortOrder        Int      @default(0)
+  createdAt        DateTime @default(now())
+
+  @@unique([parentId, code])
+  @@index([organizationId, designator])
+  @@index([materialisedPath])
+}
+
+model ProductCategory {
+  id               String  @id @default(cuid())
+  organizationId   String
+  parentId         String? // categories nest to any depth
+  code             String
+  nameEn           String
+  nameAr           String
+  materialisedPath String
+  sortOrder        Int     @default(0)
+  isActive         Boolean @default(true)
+
+  @@unique([organizationId, code])
+}
+
+model UnitOfMeasure {
+  id             String  @id @default(cuid())
+  organizationId String
+  code           String  // "UNIT" "BOX" "CARTON" "KG" "LITRE"
+  nameEn         String
+  nameAr         String
+  isBaseUnit     Boolean @default(false)
+
+  @@unique([organizationId, code])
+}
+
+// Different customers stock different things. Each deployment defines the extra
+// fields it needs rather than shipping a fixed product schema.
+model ProductAttributeDefinition {
+  id             String  @id @default(cuid())
+  organizationId String
+  key            String  // "brand", "voltage", "shelfLifeDays"
+  labelEn        String
+  labelAr        String
+  dataType       String  // TEXT NUMBER BOOLEAN DATE SELECT
+  selectOptions  Json?   // for SELECT
+  isRequired     Boolean @default(false)
+  sortOrder      Int     @default(0)
+
+  @@unique([organizationId, key])
+}
+
+model Product {
+  id               String        @id @default(cuid())
+  organizationId   String
+  sku              String
+  barcode          String        @unique
+  barcodeSource    BarcodeSource
+  nameEn           String
+  nameAr           String
+  categoryId       String?
+  baseUnitId       String        // -> UnitOfMeasure
+  packSize         Int           @default(1)
+  reorderPoint     Int
+  minLevel         Int
+  maxLevel         Int
+  supplierId       String?
+  customAttributes Json?         // validated against ProductAttributeDefinition
+  isActive         Boolean       @default(true)
+
+  @@unique([organizationId, sku])
+}
+
+model StockPosition {
+  id             String   @id @default(cuid())
+  productId      String
+  locationNodeId String // must be a node whose type canHoldStock
+  quantity       Int
+  updatedAt      DateTime @updatedAt
+
+  @@unique([productId, locationNodeId])
+}
+
+// APPEND-ONLY. See migrations/0001_append_only_rules.sql.
+model StockMovement {
+  id                 String       @id @default(cuid())
+  clientId           String       @unique // idempotency key from the device
+  type               MovementType
+  productId          String
+  fromLocationNodeId String?
+  toLocationNodeId   String?
+  quantity           Int
+  reason             String? // mandatory for ADJUSTMENT (>= 10 chars, enforced in service)
+  userId             String
+  createdAt          DateTime     @default(now())
+
+  @@index([productId, createdAt])
+  @@index([createdAt])
+}
+
+model Supplier {
+  id           String  @id @default(cuid())
+  name         String
+  email        String
+  phone        String?
+  leadTimeDays Int
+  isActive     Boolean @default(true)
+}
+
+model Recommendation {
+  id              String               @id @default(cuid())
+  productId       String
+  suggestedQty    Int
+  approvedQty     Int?
+  reasonCode      String               // BELOW_REORDER_POINT | FORECAST_DEPLETION | SEASONAL_UPLIFT
+  reasoningEn     String
+  reasoningAr     String
+  status          RecommendationStatus @default(PENDING)
+  generatedAt     DateTime             @default(now())
+  decidedByUserId String?
+  decidedAt       DateTime?
+  purchaseOrderId String?
+}
+
+model PurchaseOrder {
+  id         String    @id @default(cuid())
+  poNumber   String    @unique // PO-2026-0001
+  supplierId String
+  status     String    // DRAFT SENT RECEIVED
+  pdfKey     String?
+  sentAt     DateTime?
+  createdAt  DateTime  @default(now())
+}
+
+// APPEND-ONLY. See migrations/0001_append_only_rules.sql.
+model AuditLog {
+  id         String   @id @default(cuid())
+  actorId    String?
+  action     String
+  entityType String
+  entityId   String
+  before     Json?
+  after      Json?
+  ipAddress  String?
+  createdAt  DateTime @default(now())
+
+  @@index([createdAt])
+  @@index([entityType, entityId])
+}
+
+enum CycleCountStatus {
+  OPEN
+  CLOSED
+}
+
+// A stock-take session. Counting does NOT mutate stock directly (§12 r4) — it
+// records counted quantities; closing produces a variance report and (optionally)
+// applies each non-zero variance as an audited ADJUSTMENT movement.
+model CycleCount {
+  id              String           @id @default(cuid())
+  organizationId  String
+  status          CycleCountStatus @default(OPEN)
+  note            String?
+  createdByUserId String
+  createdAt       DateTime         @default(now())
+  closedAt        DateTime?
+}
+
+model CycleCountLine {
+  id             String   @id @default(cuid())
+  cycleCountId   String
+  productId      String
+  locationNodeId String
+  countedQty     Int
+  systemQty      Int // stock on record when the line was counted
+  createdAt      DateTime @default(now())
+
+  @@unique([cycleCountId, productId, locationNodeId])
+  @@index([cycleCountId])
+}

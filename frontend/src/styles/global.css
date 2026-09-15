@@ -1,0 +1,39 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Base — the interface is an instrument: quiet, dense, precise (§9.1). */
+html,
+body,
+#root {
+  height: 100%;
+}
+
+body {
+  margin: 0;
+  background: var(--canvas);
+  color: var(--ink);
+  font-family: var(--font-sans);
+  font-size: var(--text-sm);
+  line-height: var(--leading-sm);
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+}
+
+/* All figures align in columns (§9.3). */
+.tabular {
+  font-variant-numeric: tabular-nums;
+}
+
+/* Focus is always visible (§9.8, DESC accessibility). */
+:focus-visible {
+  outline: 2px solid var(--focus);
+  outline-offset: 1px;
+}
+
+/* Designators and codes are never translated/mirrored — keep them LTR (§10). */
+.designator {
+  font-family: var(--font-mono);
+  letter-spacing: var(--tracking-designator);
+  font-variant-numeric: tabular-nums;
+}
