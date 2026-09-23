@@ -1,8 +1,12 @@
-// §9.6 — the small designator chip used in tables: last two segments, mono,
-// with the full designator in a tooltip. Codes are never translated; kept LTR.
+// §9.6 — the small designator chip used in tables: mono, with the full
+// designator in a tooltip. Mirrors the full strip's depth rule (2-5 segments
+// show in full — dropping the store room from a 3-segment SR1-R1-L1 designator
+// makes two different shelves in different store rooms look identical) and
+// only collapses to the final two segments once depth reaches 6+, same
+// threshold as LocationDesignator. Codes are never translated; kept LTR.
 export function LocationChip({ designator }: { designator: string }) {
   const segments = designator.split('-');
-  const shown = segments.length > 2 ? segments.slice(-2) : segments;
+  const shown = segments.length >= 6 ? segments.slice(-2) : segments;
   const truncated = segments.length > shown.length;
 
   return (
