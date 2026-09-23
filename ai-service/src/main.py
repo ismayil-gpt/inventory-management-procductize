@@ -17,6 +17,7 @@ from fastapi import FastAPI
 from .replenishment.daily_review_job import run_daily_review
 from .shared.configuration import configuration
 from .assistant.api import router as assistant_router
+from .demand_forecasting.api import router as forecasting_router
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger("ai-service")
@@ -36,6 +37,7 @@ async def lifespan(_app: FastAPI):
 
 app = FastAPI(title="Mizan AI Service", version="0.1.0", lifespan=lifespan)
 app.include_router(assistant_router)
+app.include_router(forecasting_router)
 
 
 @app.get("/health")
