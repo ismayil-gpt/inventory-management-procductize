@@ -27,6 +27,8 @@ const DEMO_USERS = [
 
 async function main() {
   // ---- Clean (demo-owned tables only; append-only tables are never touched) ----
+  await prisma.cycleCountLine.deleteMany();
+  await prisma.cycleCount.deleteMany();
   await prisma.recommendation.deleteMany();
   await prisma.stockPosition.deleteMany();
   await prisma.product.deleteMany();
@@ -69,7 +71,9 @@ async function main() {
   const cat_CAT_DISPOSE = await prisma.productCategory.create({ data: { organizationId, code: 'CAT-DISPOSE', nameEn: 'Disposables & Tissue', nameAr: 'المستهلكات والمناديل', materialisedPath: '/CAT-DISPOSE', sortOrder: 0 } });
   const cat_CAT_CLEAN = await prisma.productCategory.create({ data: { organizationId, code: 'CAT-CLEAN', nameEn: 'Cleaning Supplies', nameAr: 'مواد التنظيف', materialisedPath: '/CAT-CLEAN', sortOrder: 0 } });
   const cat_CAT_OFFICE = await prisma.productCategory.create({ data: { organizationId, code: 'CAT-OFFICE', nameEn: 'Office Consumables', nameAr: 'مستلزمات المكتب', materialisedPath: '/CAT-OFFICE', sortOrder: 0 } });
-  const catByCode: Record<string,string> = { 'CAT-HOTBEV': cat_CAT_HOTBEV.id, 'CAT-COLDBEV': cat_CAT_COLDBEV.id, 'CAT-DAIRY': cat_CAT_DAIRY.id, 'CAT-SWEET': cat_CAT_SWEET.id, 'CAT-DISPOSE': cat_CAT_DISPOSE.id, 'CAT-CLEAN': cat_CAT_CLEAN.id, 'CAT-OFFICE': cat_CAT_OFFICE.id };
+  const cat_CAT_BAKERY = await prisma.productCategory.create({ data: { organizationId, code: 'CAT-BAKERY', nameEn: 'Bakery & Kitchen', nameAr: 'المخبوزات والمطبخ', materialisedPath: '/CAT-BAKERY', sortOrder: 0 } });
+  const cat_CAT_SAFETY = await prisma.productCategory.create({ data: { organizationId, code: 'CAT-SAFETY', nameEn: 'Safety & PPE', nameAr: 'السلامة ومعدات الوقاية', materialisedPath: '/CAT-SAFETY', sortOrder: 0 } });
+  const catByCode: Record<string,string> = { 'CAT-HOTBEV': cat_CAT_HOTBEV.id, 'CAT-COLDBEV': cat_CAT_COLDBEV.id, 'CAT-DAIRY': cat_CAT_DAIRY.id, 'CAT-SWEET': cat_CAT_SWEET.id, 'CAT-DISPOSE': cat_CAT_DISPOSE.id, 'CAT-CLEAN': cat_CAT_CLEAN.id, 'CAT-OFFICE': cat_CAT_OFFICE.id, 'CAT-BAKERY': cat_CAT_BAKERY.id, 'CAT-SAFETY': cat_CAT_SAFETY.id };
 
   // ---- Suppliers ----
   const sup_SUP_BEV = await prisma.supplier.create({ data: { name: 'Gulf Beverages & Catering Supplies LLC', email: 'orders@gulfbeverages.ae', leadTimeDays: 4 } });
@@ -77,13 +81,18 @@ async function main() {
   const sup_SUP_CLEAN = await prisma.supplier.create({ data: { name: 'Al Noor Hygiene & Cleaning Supplies', email: 'orders@alnoorhygiene.ae', leadTimeDays: 5 } });
   const sup_SUP_OFFICE = await prisma.supplier.create({ data: { name: 'Capital Office Supplies Trading', email: 'cs@capitaloffice.ae', leadTimeDays: 7 } });
   const sup_SUP_WATER = await prisma.supplier.create({ data: { name: 'PureAqua Water Solutions', email: 'delivery@pureaqua.ae', leadTimeDays: 2 } });
-  const supByCode: Record<string,string> = { 'SUP-BEV': sup_SUP_BEV.id, 'SUP-PANTRY': sup_SUP_PANTRY.id, 'SUP-CLEAN': sup_SUP_CLEAN.id, 'SUP-OFFICE': sup_SUP_OFFICE.id, 'SUP-WATER': sup_SUP_WATER.id };
-  const leadTimeByCode: Record<string, number> = { 'SUP-BEV': 4, 'SUP-PANTRY': 3, 'SUP-CLEAN': 5, 'SUP-OFFICE': 7, 'SUP-WATER': 2 };
+  const sup_SUP_BAKERY = await prisma.supplier.create({ data: { name: 'Al Khaleej Bakery & Kitchen Supplies', email: 'orders@khaleejbakery.ae', leadTimeDays: 6 } });
+  const sup_SUP_SAFETY = await prisma.supplier.create({ data: { name: 'Gulf Safety Equipment Trading', email: 'sales@gulfsafety.ae', leadTimeDays: 5 } });
+  const supByCode: Record<string,string> = { 'SUP-BEV': sup_SUP_BEV.id, 'SUP-PANTRY': sup_SUP_PANTRY.id, 'SUP-CLEAN': sup_SUP_CLEAN.id, 'SUP-OFFICE': sup_SUP_OFFICE.id, 'SUP-WATER': sup_SUP_WATER.id, 'SUP-BAKERY': sup_SUP_BAKERY.id, 'SUP-SAFETY': sup_SUP_SAFETY.id };
+  const leadTimeByCode: Record<string, number> = { 'SUP-BEV': 4, 'SUP-PANTRY': 3, 'SUP-CLEAN': 5, 'SUP-OFFICE': 7, 'SUP-WATER': 2, 'SUP-BAKERY': 6, 'SUP-SAFETY': 5 };
 
-  // ---- Location tree (2 store rooms x 6 racks x 5 levels = 60 shelves) ----
+  // ---- Location tree (3 store rooms x 6 racks x 5 levels = 90 shelves) ----
+  // SR3 added alongside the wider product catalogue below — a growing
+  // catalogue needs somewhere to actually sit (§5A: storage structure is
+  // configuration, so a third store room is just more of the same shape).
   const nodeIdByDesignator: Record<string,string> = {};
   const locationSeed: Array<{code:string;designator:string;depth:number;typeCode:string;parent:string;barcode:string|null}> = [];
-  for (const sr of ['SR1', 'SR2']) {
+  for (const sr of ['SR1', 'SR2', 'SR3']) {
     locationSeed.push({ code: sr, designator: sr, depth: 0, typeCode: 'STORE_ROOM', parent: '', barcode: null });
     for (let r = 1; r <= 6; r++) {
       const rackDes = `${sr}-R${r}`;
@@ -164,6 +173,32 @@ async function main() {
     { sku:'PRD-0048', barcode:'INT-000048001', source:'INTERNAL', nameEn:'Assorted Dates Gift Box (Repacked)', nameAr:'علبة تمور هدايا (معبأة)', cat:'CAT-SWEET', unit:'BOX', pack:1, reorder:10, min:5, max:40, supplier:'SUP-PANTRY', cost:32.00 },
     { sku:'PRD-0049', barcode:'INT-000049001', source:'INTERNAL', nameEn:'Majlis Incense Bakhoor 50g', nameAr:'بخور مجلس ٥٠غ', cat:'CAT-OFFICE', unit:'BOX', pack:1, reorder:8, min:4, max:30, supplier:'SUP-OFFICE', cost:29.50 },
     { sku:'PRD-0050', barcode:'INT-000050001', source:'INTERNAL', nameEn:'Rose Water Spray 250ml', nameAr:'ماء ورد بخّاخ ٢٥٠مل', cat:'CAT-OFFICE', unit:'BOTTLE', pack:1, reorder:10, min:5, max:35, supplier:'SUP-OFFICE', cost:16.90 },
+    // ---- Added: wider catalogue for SR3 + more demo depth (25 more SKUs) ----
+    { sku:'PRD-0051', barcode:'6291600000051', source:'MANUFACTURER', nameEn:'Turkish Coffee 250g', nameAr:'قهوة تركية ٢٥٠غ', cat:'CAT-HOTBEV', unit:'BOX', pack:1, reorder:15, min:8, max:50, supplier:'SUP-BEV', cost:16.90 },
+    { sku:'PRD-0052', barcode:'6291600000052', source:'MANUFACTURER', nameEn:'Karak Chai Mix 400g', nameAr:'خلطة شاي كرك ٤٠٠غ', cat:'CAT-HOTBEV', unit:'BOX', pack:1, reorder:18, min:9, max:60, supplier:'SUP-BEV', cost:19.40 },
+    { sku:'PRD-0053', barcode:'6291600000053', source:'MANUFACTURER', nameEn:'Milk Tea Sachets (100s)', nameAr:'أكياس شاي بالحليب (١٠٠)', cat:'CAT-HOTBEV', unit:'BOX', pack:1, reorder:12, min:6, max:40, supplier:'SUP-BEV', cost:21.10 },
+    { sku:'PRD-0054', barcode:'6291600000054', source:'MANUFACTURER', nameEn:'Sparkling Water 330ml (24s)', nameAr:'مياه غازية ٣٣٠مل (٢٤)', cat:'CAT-COLDBEV', unit:'CARTON', pack:24, reorder:35, min:18, max:140, supplier:'SUP-WATER', cost:26.50 },
+    { sku:'PRD-0055', barcode:'6291600000055', source:'MANUFACTURER', nameEn:'Iced Tea Peach 250ml (12s)', nameAr:'شاي مثلج بالخوخ ٢٥٠مل (١٢)', cat:'CAT-COLDBEV', unit:'CARTON', pack:12, reorder:25, min:12, max:90, supplier:'SUP-WATER', cost:22.80 },
+    { sku:'PRD-0056', barcode:'6291600000056', source:'MANUFACTURER', nameEn:'Energy Drink 250ml (24s)', nameAr:'مشروب طاقة ٢٥٠مل (٢٤)', cat:'CAT-COLDBEV', unit:'CARTON', pack:24, reorder:20, min:10, max:80, supplier:'SUP-WATER', cost:44.00 },
+    { sku:'PRD-0057', barcode:'6291600000057', source:'MANUFACTURER', nameEn:'Condensed Milk 397g Tin', nameAr:'حليب مكثف محلى ٣٩٧غ', cat:'CAT-DAIRY', unit:'CARTON', pack:24, reorder:22, min:11, max:90, supplier:'SUP-PANTRY', cost:45.60 },
+    { sku:'PRD-0058', barcode:'6291600000058', source:'MANUFACTURER', nameEn:'Yogurt Drink 200ml (12s)', nameAr:'لبن رايب مشروب ٢٠٠مل (١٢)', cat:'CAT-DAIRY', unit:'CARTON', pack:12, reorder:18, min:9, max:70, supplier:'SUP-PANTRY', cost:19.90 },
+    { sku:'PRD-0059', barcode:'6291600000059', source:'MANUFACTURER', nameEn:'Chocolate Sandwich Cookies 300g', nameAr:'بسكويت ساندويتش بالشوكولاتة ٣٠٠غ', cat:'CAT-SWEET', unit:'BOX', pack:1, reorder:20, min:10, max:80, supplier:'SUP-PANTRY', cost:13.70 },
+    { sku:'PRD-0060', barcode:'6291600000060', source:'MANUFACTURER', nameEn:'Natural Honey Jar 500g', nameAr:'عسل طبيعي ٥٠٠غ', cat:'CAT-SWEET', unit:'BOX', pack:1, reorder:12, min:6, max:45, supplier:'SUP-PANTRY', cost:36.20 },
+    { sku:'PRD-0061', barcode:'6291600000061', source:'MANUFACTURER', nameEn:'Gummy Candy Assorted (500s)', nameAr:'حلوى جيلي متنوعة (٥٠٠)', cat:'CAT-SWEET', unit:'BOX', pack:1, reorder:15, min:8, max:55, supplier:'SUP-PANTRY', cost:18.40 },
+    { sku:'PRD-0062', barcode:'6291600000062', source:'MANUFACTURER', nameEn:'Foam Plates 9in (25s)', nameAr:'أطباق فوم ٩ إنش (٢٥)', cat:'CAT-DISPOSE', unit:'PACK', pack:1, reorder:35, min:18, max:140, supplier:'SUP-CLEAN', cost:7.20 },
+    { sku:'PRD-0063', barcode:'6291600000063', source:'MANUFACTURER', nameEn:'Disposable Cutlery Set (50s)', nameAr:'أدوات مائدة يمكن التخلص منها (٥٠)', cat:'CAT-DISPOSE', unit:'PACK', pack:1, reorder:30, min:15, max:110, supplier:'SUP-CLEAN', cost:10.80 },
+    { sku:'PRD-0064', barcode:'6291600000064', source:'MANUFACTURER', nameEn:'Toilet Bowl Cleaner 750ml', nameAr:'منظف مرحاض ٧٥٠مل', cat:'CAT-CLEAN', unit:'BOTTLE', pack:1, reorder:20, min:10, max:75, supplier:'SUP-CLEAN', cost:9.60 },
+    { sku:'PRD-0065', barcode:'6291600000065', source:'MANUFACTURER', nameEn:'Fabric Softener 1L', nameAr:'منعم أقمشة ١ لتر', cat:'CAT-CLEAN', unit:'BOTTLE', pack:1, reorder:18, min:9, max:65, supplier:'SUP-CLEAN', cost:12.30 },
+    { sku:'PRD-0066', barcode:'6291600000066', source:'MANUFACTURER', nameEn:'Correction Tape (10s)', nameAr:'شريط تصحيح (١٠)', cat:'CAT-OFFICE', unit:'PACK', pack:1, reorder:18, min:9, max:60, supplier:'SUP-OFFICE', cost:15.20 },
+    { sku:'PRD-0067', barcode:'6291600000067', source:'MANUFACTURER', nameEn:'Binder Clips Assorted (50s)', nameAr:'مشابك أوراق متنوعة (٥٠)', cat:'CAT-OFFICE', unit:'PACK', pack:1, reorder:15, min:8, max:55, supplier:'SUP-OFFICE', cost:8.70 },
+    { sku:'PRD-0068', barcode:'6291600000068', source:'MANUFACTURER', nameEn:'All-Purpose Flour 5kg', nameAr:'دقيق متعدد الاستخدامات ٥كغ', cat:'CAT-BAKERY', unit:'BOX', pack:1, reorder:15, min:8, max:55, supplier:'SUP-BAKERY', cost:22.40 },
+    { sku:'PRD-0069', barcode:'6291600000069', source:'MANUFACTURER', nameEn:'Vegetable Cooking Oil 5L', nameAr:'زيت طهي نباتي ٥ لتر', cat:'CAT-BAKERY', unit:'BOTTLE', pack:1, reorder:12, min:6, max:45, supplier:'SUP-BAKERY', cost:38.90 },
+    { sku:'PRD-0070', barcode:'6291600000070', source:'MANUFACTURER', nameEn:'Fine Table Salt 1kg', nameAr:'ملح طعام ناعم ١كغ', cat:'CAT-BAKERY', unit:'BOX', pack:1, reorder:20, min:10, max:70, supplier:'SUP-BAKERY', cost:4.80 },
+    { sku:'PRD-0071', barcode:'6291600000071', source:'MANUFACTURER', nameEn:'Ground Black Pepper 200g', nameAr:'فلفل أسود مطحون ٢٠٠غ', cat:'CAT-BAKERY', unit:'BOX', pack:1, reorder:14, min:7, max:48, supplier:'SUP-BAKERY', cost:17.60 },
+    { sku:'PRD-0072', barcode:'6291600000072', source:'MANUFACTURER', nameEn:'Disposable Nitrile Gloves (100s)', nameAr:'قفازات نيتريل يمكن التخلص منها (١٠٠)', cat:'CAT-SAFETY', unit:'BOX', pack:1, reorder:25, min:12, max:90, supplier:'SUP-SAFETY', cost:23.50 },
+    { sku:'PRD-0073', barcode:'6291600000073', source:'MANUFACTURER', nameEn:'Disposable Face Masks (50s)', nameAr:'كمامات وجه يمكن التخلص منها (٥٠)', cat:'CAT-SAFETY', unit:'BOX', pack:1, reorder:30, min:15, max:110, supplier:'SUP-SAFETY', cost:19.80 },
+    { sku:'PRD-0074', barcode:'6291600000074', source:'MANUFACTURER', nameEn:'Hi-Vis Safety Vest', nameAr:'سترة سلامة عاكسة', cat:'CAT-SAFETY', unit:'UNIT', pack:1, reorder:10, min:5, max:35, supplier:'SUP-SAFETY', cost:27.00 },
+    { sku:'PRD-0075', barcode:'6291600000075', source:'MANUFACTURER', nameEn:'First Aid Kit Standard', nameAr:'حقيبة إسعافات أولية قياسية', cat:'CAT-SAFETY', unit:'UNIT', pack:1, reorder:6, min:3, max:20, supplier:'SUP-SAFETY', cost:89.00 },
   ];
   for (const p of productSeed) {
     const created = await prisma.product.create({
@@ -199,6 +234,20 @@ async function main() {
     { sku:'PRD-0045', loc:'SR1-R6-L3', qty:19 }, { sku:'PRD-0046', loc:'SR2-R2-L3', qty:29 }, { sku:'PRD-0047', loc:'SR1-R2-L1', qty:47 },
     { sku:'PRD-0048', loc:'SR2-R1-L5', qty:23 }, { sku:'PRD-0049', loc:'SR2-R5-L2', qty:8 }, { sku:'PRD-0050', loc:'SR2-R3-L4', qty:15 },
     { sku:'PRD-0050', loc:'SR2-R5-L5', qty:6 },
+    // ---- SR3 — the new store room houses the wider catalogue (PRD-0051..0075) ----
+    { sku:'PRD-0051', loc:'SR3-R1-L1', qty:30 }, { sku:'PRD-0052', loc:'SR3-R1-L2', qty:35 },
+    { sku:'PRD-0053', loc:'SR3-R1-L3', qty:18 }, { sku:'PRD-0054', loc:'SR3-R1-L4', qty:70 },
+    { sku:'PRD-0055', loc:'SR3-R1-L5', qty:45 }, { sku:'PRD-0056', loc:'SR3-R2-L1', qty:38 },
+    { sku:'PRD-0057', loc:'SR3-R2-L2', qty:55 }, { sku:'PRD-0058', loc:'SR3-R2-L3', qty:33 },
+    { sku:'PRD-0059', loc:'SR3-R2-L4', qty:48 }, { sku:'PRD-0060', loc:'SR3-R2-L5', qty:22 },
+    { sku:'PRD-0061', loc:'SR3-R3-L1', qty:40 }, { sku:'PRD-0062', loc:'SR3-R3-L2', qty:90 },
+    { sku:'PRD-0063', loc:'SR3-R3-L3', qty:72 }, { sku:'PRD-0064', loc:'SR3-R3-L4', qty:42 },
+    { sku:'PRD-0065', loc:'SR3-R3-L5', qty:36 }, { sku:'PRD-0066', loc:'SR3-R4-L1', qty:34 },
+    { sku:'PRD-0067', loc:'SR3-R4-L2', qty:30 }, { sku:'PRD-0068', loc:'SR3-R4-L3', qty:32 },
+    { sku:'PRD-0069', loc:'SR3-R4-L4', qty:25 }, { sku:'PRD-0070', loc:'SR3-R4-L5', qty:48 },
+    { sku:'PRD-0071', loc:'SR3-R5-L1', qty:28 }, { sku:'PRD-0072', loc:'SR3-R5-L2', qty:60 },
+    { sku:'PRD-0073', loc:'SR3-R5-L3', qty:75 }, { sku:'PRD-0074', loc:'SR3-R5-L4', qty:20 },
+    { sku:'PRD-0075', loc:'SR3-R5-L5', qty:12 },
   ];
   for (const s of stockSeed) {
     await prisma.stockPosition.create({ data: { productId: productIdBySku[s.sku], locationNodeId: nodeIdByDesignator[s.loc], quantity: s.qty } });
@@ -213,18 +262,20 @@ async function main() {
     if (u.role === Role.STORE_KEEPER) keeperUserId = created.id;
   }
 
-  // ---- ~120 days of daily movement history per product ----
+  // ---- ~150 days of daily movement history per product ----
   // The AI Store Manager's reorder calculator (§8.2) uses a trailing-30-day
   // GOODS_OUT average as its plain input. The Stage-2 forecaster
   // (ai-service/src/demand_forecasting) needs more: forecast_models.py requires
   // >= 30 days of history before it will forecast at all, and
   // seasonal_analyser.py requires >= 90 days before it will even consider a
-  // seasonal signal. ~120 real days clears both with room to spare, so
-  // forecast lines and days-until-stockout have genuine signal instead of
-  // falling back to "insufficient history".
+  // seasonal signal. 150 real days clears both with a comfortable margin (the
+  // client asked for "at least 100 days" — this leaves 50 days of headroom
+  // rather than sitting right at the line), so forecast lines and
+  // days-until-stockout have genuine signal instead of falling back to
+  // "insufficient history".
   const DAY = 24 * 60 * 60 * 1000;
   const now = Date.now();
-  const HISTORY_DAYS = 120;
+  const HISTORY_DAYS = 150;
   const firstLocBySku: Record<string, string> = {};
   for (const s of stockSeed) if (!firstLocBySku[s.sku]) firstLocBySku[s.sku] = s.loc;
 
@@ -281,6 +332,96 @@ async function main() {
   }
   const movementCount = movementRows.length;
 
+  // ---- Cycle counts (§12 r4) — four closed historical sessions plus one
+  // still open, so the Cycle Counting screen isn't empty on first login. Each
+  // line snapshots a system quantity and a counted quantity; a non-zero
+  // variance on a CLOSED session becomes a real, audited ADJUSTMENT movement
+  // via the exact same signed-delta convention `cycle-counting.service.ts`
+  // uses (`quantity: variance`), not a re-derivation of that rule.
+  const cycleCountSeed: Array<{
+    daysAgo: number; note: string; status: 'OPEN' | 'CLOSED';
+    lines: Array<{ sku: string; loc: string; systemQty: number; delta: number }>;
+  }> = [
+    {
+      daysAgo: 50, note: 'Monthly stock-take — SR1', status: 'CLOSED',
+      lines: [
+        { sku: 'PRD-0002', loc: 'SR1-R5-L4', systemQty: 55, delta: 0 },
+        { sku: 'PRD-0004', loc: 'SR1-R3-L2', systemQty: 50, delta: -2 },
+        { sku: 'PRD-0011', loc: 'SR1-R2-L5', systemQty: 65, delta: 0 },
+        { sku: 'PRD-0017', loc: 'SR1-R1-L4', systemQty: 39, delta: 2 },
+        { sku: 'PRD-0041', loc: 'SR1-R3-L4', systemQty: 46, delta: 0 },
+      ],
+    },
+    {
+      daysAgo: 30, note: 'Monthly stock-take — SR2', status: 'CLOSED',
+      lines: [
+        { sku: 'PRD-0009', loc: 'SR2-R1-L4', systemQty: 24, delta: -2 },
+        { sku: 'PRD-0012', loc: 'SR2-R2-L2', systemQty: 27, delta: 0 },
+        { sku: 'PRD-0025', loc: 'SR2-R3-L2', systemQty: 39, delta: 0 },
+        { sku: 'PRD-0033', loc: 'SR2-R2-L5', systemQty: 102, delta: -3 },
+        { sku: 'PRD-0046', loc: 'SR2-R2-L3', systemQty: 29, delta: 1 },
+      ],
+    },
+    {
+      daysAgo: 14, note: 'New store room verification — SR3', status: 'CLOSED',
+      lines: [
+        { sku: 'PRD-0054', loc: 'SR3-R1-L4', systemQty: 70, delta: 0 },
+        { sku: 'PRD-0059', loc: 'SR3-R2-L4', systemQty: 48, delta: -1 },
+        { sku: 'PRD-0062', loc: 'SR3-R3-L2', systemQty: 90, delta: 0 },
+        { sku: 'PRD-0068', loc: 'SR3-R4-L3', systemQty: 32, delta: 0 },
+        { sku: 'PRD-0072', loc: 'SR3-R5-L2', systemQty: 60, delta: -2 },
+      ],
+    },
+    {
+      daysAgo: 5, note: 'Critical items spot-check', status: 'CLOSED',
+      lines: [
+        { sku: 'PRD-0037', loc: 'SR2-R2-L1', systemQty: 5, delta: 0 },
+        { sku: 'PRD-0043', loc: 'SR2-R6-L3', systemQty: 8, delta: -1 },
+        { sku: 'PRD-0049', loc: 'SR2-R5-L2', systemQty: 8, delta: 0 },
+        { sku: 'PRD-0031', loc: 'SR1-R4-L4', systemQty: 12, delta: 0 },
+        { sku: 'PRD-0013', loc: 'SR2-R1-L2', systemQty: 9, delta: 0 },
+      ],
+    },
+    {
+      daysAgo: 1, note: 'Weekly spot-check — in progress', status: 'OPEN',
+      lines: [
+        { sku: 'PRD-0018', loc: 'SR1-R5-L2', systemQty: 102, delta: -1 },
+        { sku: 'PRD-0022', loc: 'SR1-R3-L1', systemQty: 126, delta: 0 },
+      ],
+    },
+  ];
+
+  let adjustmentCount = 0;
+  for (const session of cycleCountSeed) {
+    const sessionDate = new Date(now - session.daysAgo * DAY);
+    const cycleCount = await prisma.cycleCount.create({
+      data: {
+        organizationId, note: session.note, createdByUserId: keeperUserId, status: session.status,
+        createdAt: sessionDate, closedAt: session.status === 'CLOSED' ? sessionDate : null,
+      },
+    });
+    for (const line of session.lines) {
+      await prisma.cycleCountLine.create({
+        data: {
+          cycleCountId: cycleCount.id, productId: productIdBySku[line.sku], locationNodeId: nodeIdByDesignator[line.loc],
+          countedQty: line.systemQty + line.delta, systemQty: line.systemQty, createdAt: sessionDate,
+        },
+      });
+      // Only a CLOSED session's variance is applied (§12 r4 — an open count
+      // never mutates stock; matches CycleCountingService.close()).
+      if (session.status === 'CLOSED' && line.delta !== 0) {
+        await prisma.stockMovement.create({
+          data: {
+            clientId: `seed-${randomUUID()}`, type: MovementType.ADJUSTMENT, productId: productIdBySku[line.sku],
+            toLocationNodeId: nodeIdByDesignator[line.loc], quantity: line.delta,
+            reason: `Cycle count ${cycleCount.id.slice(0, 8)} adjustment`, userId: keeperUserId, createdAt: sessionDate,
+          },
+        });
+        adjustmentCount++;
+      }
+    }
+  }
+
   // ---- Pre-seed recommendations using the SAME deterministic engine the daily job
   // uses, so the Replenishment screen is accurate and populated on first login,
   // identical in numbers and wording to a live run (§8.2, §8.3). ----
@@ -298,7 +439,7 @@ async function main() {
     recCount++;
   }
 
-  console.log(`Seed complete: 1 org, 3 location types, ${locationSeed.length} nodes (60 shelves), 7 categories, 7 units, 5 suppliers, ${productSeed.length} products (all with unitCost), ${stockSeed.length} stock rows, ${movementCount} movements (${HISTORY_DAYS}-day history), ${recCount} pre-seeded recommendations, ${DEMO_USERS.length} users.`);
+  console.log(`Seed complete: 1 org, 3 location types, ${locationSeed.length} nodes (90 shelves across 3 store rooms), 9 categories, 7 units, 7 suppliers, ${productSeed.length} products (all with unitCost), ${stockSeed.length} stock rows, ${movementCount} movements (${HISTORY_DAYS}-day history) + ${adjustmentCount} cycle-count adjustment movements, ${cycleCountSeed.length} cycle-count sessions, ${recCount} pre-seeded recommendations, ${DEMO_USERS.length} users.`);
   console.log('Demo logins:');
   for (const u of DEMO_USERS) console.log(`  ${u.role.padEnd(12)}  ${u.email}  /  ${u.password}`);
 }
