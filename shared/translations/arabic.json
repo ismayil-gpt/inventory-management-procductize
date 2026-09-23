@@ -154,7 +154,18 @@
     "synced": "تمت المزامنة",
     "failed": "فشل",
     "clearSynced": "مسح المتزامن",
-    "changeProduct": "تغيير المنتج"
+    "changeProduct": "تغيير المنتج",
+    "tabRecord": "تسجيل",
+    "tabHistory": "السجل",
+    "filterAllTypes": "كل الأنواع",
+    "filterAllProducts": "كل المنتجات",
+    "filterAllUsers": "كل المستخدمين",
+    "filterFrom": "من",
+    "filterTo": "إلى",
+    "historyEmpty": "لا توجد حركات مطابقة لهذه الفلاتر.",
+    "loadMore": "تحميل المزيد",
+    "resultCount": "{{count}} حركة",
+    "colReason": "السبب"
   },
   "replenishment": {
     "runNow": "تشغيل المراجعة الآن",

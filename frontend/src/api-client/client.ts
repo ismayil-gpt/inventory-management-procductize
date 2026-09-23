@@ -207,8 +207,8 @@ export function resolveLocationByBarcode(code: string) {
 // ---- Users (ADMIN) ----
 export interface UserRow { id: string; email: string; displayName: string; role: 'ADMIN' | 'STORE_KEEPER'; isActive: boolean; lastLoginAt: string | null; preferredLanguage: string; createdAt: string; }
 export interface UserWrite { email: string; displayName: string; role: 'ADMIN' | 'STORE_KEEPER'; password?: string; isActive?: boolean; preferredLanguage?: string; }
-export function useUsers() {
-  return useQuery({ queryKey: ['users'], queryFn: () => authFetch<UserRow[]>('/users'), retry: false });
+export function useUsers(enabled = true) {
+  return useQuery({ queryKey: ['users'], queryFn: () => authFetch<UserRow[]>('/users'), retry: false, enabled });
 }
 export function createUser(payload: UserWrite) {
   return authFetch<UserRow>('/users', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) });
@@ -416,6 +416,22 @@ export function createMovement(payload: MovementPayload): Promise<MovementResult
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify(payload),
   });
+}
+
+/** Browsable movement history (§6, distinct from the scan-to-record outbox on
+ * StockMovementsPage — this reads real GET /stock-movements rows). */
+export interface MovementHistoryFilters {
+  type?: MovementType; productId?: string; userId?: string; from?: string; to?: string; limit?: number;
+}
+export function useStockMovements(filters: MovementHistoryFilters) {
+  const q = new URLSearchParams();
+  if (filters.type) q.set('type', filters.type);
+  if (filters.productId) q.set('productId', filters.productId);
+  if (filters.userId) q.set('userId', filters.userId);
+  if (filters.from) q.set('from', filters.from);
+  if (filters.to) q.set('to', filters.to);
+  q.set('limit', String(filters.limit ?? 100));
+  return useQuery({ queryKey: ['stock-movements', filters], queryFn: () => authFetch<EnrichedMovement[]>(`/stock-movements?${q.toString()}`), retry: false });
 }
 
 // ---- Assistant (§8.4) ----

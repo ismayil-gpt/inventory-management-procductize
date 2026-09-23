@@ -107,6 +107,16 @@ const MOVEMENT_TYPE_KEY: Record<string, string> = {
   TRANSFER: 'movements.transfer', ADJUSTMENT: 'movements.adjustment', CYCLE_COUNT: 'movements.cycleCount',
 };
 
+/** `StockMovement.quantity` is a positive magnitude for GOODS_IN/GOODS_OUT/
+ * TRANSFER and only a signed delta for ADJUSTMENT — the sign shown must
+ * follow the type, not the stored number's own sign (a Goods Out row is a
+ * real decrease even though its `quantity` column is positive). */
+function signedQty(type: string, quantity: number): string {
+  if (type === 'GOODS_OUT') return `-${quantity}`;
+  if (type === 'TRANSFER') return `${quantity}`;
+  return quantity > 0 ? `+${quantity}` : `${quantity}`;
+}
+
 function RecentActivityTable({ rows, language }: { rows: DashboardSummary['recentActivity']; language: string }) {
   const { t } = useTranslation();
   const th: React.CSSProperties = { textAlign: 'start', fontSize: 'var(--text-2xs)', letterSpacing: 'var(--tracking-label)', textTransform: 'uppercase', color: 'var(--ink-muted)', fontWeight: 500, padding: '8px 12px', background: 'var(--surface-sunken)' };
@@ -138,7 +148,7 @@ function RecentActivityTable({ rows, language }: { rows: DashboardSummary['recen
                 {language === 'ar' ? r.productNameAr : r.productNameEn}
                 <span style={{ color: 'var(--ink-faint)', marginInlineStart: '6px', fontFamily: 'var(--font-mono)', fontSize: 'var(--text-2xs)' }}>{r.sku}</span>
               </td>
-              <td className="tabular" style={{ ...td, textAlign: 'end', fontWeight: 500 }}>{r.quantity > 0 ? '+' : ''}{r.quantity}</td>
+              <td className="tabular" style={{ ...td, textAlign: 'end', fontWeight: 500 }} dir="ltr">{signedQty(r.type, r.quantity)}</td>
               <td style={td}>{r.designator ? <LocationChip designator={r.designator} /> : '—'}</td>
               <td style={{ ...td, color: 'var(--ink-muted)' }}>{r.userDisplayName}</td>
             </tr>

@@ -154,7 +154,18 @@
     "synced": "Synced",
     "failed": "Failed",
     "clearSynced": "Clear synced",
-    "changeProduct": "Change product"
+    "changeProduct": "Change product",
+    "tabRecord": "Record",
+    "tabHistory": "History",
+    "filterAllTypes": "All types",
+    "filterAllProducts": "All products",
+    "filterAllUsers": "All users",
+    "filterFrom": "From",
+    "filterTo": "To",
+    "historyEmpty": "No movements match these filters.",
+    "loadMore": "Load more",
+    "resultCount": "{{count}} movements",
+    "colReason": "Reason"
   },
   "replenishment": {
     "runNow": "Run review now",
