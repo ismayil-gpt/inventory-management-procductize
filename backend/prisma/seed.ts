@@ -6,7 +6,7 @@
 //
 // Idempotent: it wipes the demo-owned tables first, so it can be re-run safely.
 // (It never touches AuditLog / StockMovement, which are append-only.)
-import { PrismaClient, Role, BarcodeSource, MovementType } from '@prisma/client';
+import { PrismaClient, Prisma, Role, BarcodeSource, MovementType } from '@prisma/client';
 import { hash } from '@node-rs/argon2';
 import { randomUUID } from 'node:crypto';
 import { calculateReorder } from '../src/modules/replenishment/reorder-calculator';
@@ -105,57 +105,65 @@ async function main() {
 
   // ---- Products ----
   const productIdBySku: Record<string,string> = {};
+  // `cost` = unit cost in AED (Organization.currency), per base unit as tracked
+  // (i.e. per box/carton/bottle — the same unit `stockSeed` quantities count in).
+  // Hand-assigned per product, not a flat per-category rate, so Projected Spend
+  // varies believably across both category and supplier. Consumables sit mostly
+  // AED 6-50; PRD-0045 (Printer Toner, an equipment-adjacent consumable) is the
+  // deliberate outlier at the top of the range, per the "equipment/asset items
+  // higher" instruction. Values are realistic wholesale/institutional-supply
+  // figures, not retail-consumer prices, and deliberately not round numbers.
   const productSeed = [
-    { sku:'PRD-0001', barcode:'6291041500213', source:'MANUFACTURER', nameEn:'Arabic Coffee Powder 250g', nameAr:'بن عربي مطحون ٢٥٠غ', cat:'CAT-HOTBEV', unit:'BOX', pack:1, reorder:20, min:10, max:80, supplier:'SUP-BEV' },
-    { sku:'PRD-0002', barcode:'6291041500220', source:'MANUFACTURER', nameEn:'Instant Coffee 200g Jar', nameAr:'قهوة سريعة التحضير ٢٠٠غ', cat:'CAT-HOTBEV', unit:'BOX', pack:1, reorder:15, min:8, max:60, supplier:'SUP-BEV' },
-    { sku:'PRD-0003', barcode:'7622210991027', source:'MANUFACTURER', nameEn:'Cardamom Whole 100g', nameAr:'هيل حبوب ١٠٠غ', cat:'CAT-HOTBEV', unit:'BOX', pack:1, reorder:10, min:5, max:30, supplier:'SUP-BEV' },
-    { sku:'PRD-0004', barcode:'6291041500244', source:'MANUFACTURER', nameEn:'Black Tea Bags (100s)', nameAr:'أكياس شاي أسود (١٠٠)', cat:'CAT-HOTBEV', unit:'BOX', pack:1, reorder:25, min:12, max:90, supplier:'SUP-BEV' },
-    { sku:'PRD-0005', barcode:'6291041500251', source:'MANUFACTURER', nameEn:'Green Tea Bags (100s)', nameAr:'أكياس شاي أخضر (١٠٠)', cat:'CAT-HOTBEV', unit:'BOX', pack:1, reorder:15, min:8, max:50, supplier:'SUP-BEV' },
-    { sku:'PRD-0006', barcode:'6291041500268', source:'MANUFACTURER', nameEn:'Hot Chocolate Powder 1kg', nameAr:'مسحوق شوكولاتة ساخنة ١كغ', cat:'CAT-HOTBEV', unit:'BOX', pack:1, reorder:10, min:5, max:40, supplier:'SUP-BEV' },
-    { sku:'PRD-0007', barcode:'6281006000112', source:'MANUFACTURER', nameEn:'Coffee Mate Creamer 450g', nameAr:'مبيّض القهوة ٤٥٠غ', cat:'CAT-DAIRY', unit:'BOX', pack:1, reorder:20, min:10, max:70, supplier:'SUP-PANTRY' },
-    { sku:'PRD-0008', barcode:'6281006000129', source:'MANUFACTURER', nameEn:'Evaporated Milk 410g Tin', nameAr:'حليب مبخر ٤١٠غ', cat:'CAT-DAIRY', unit:'CARTON', pack:24, reorder:30, min:15, max:120, supplier:'SUP-PANTRY' },
-    { sku:'PRD-0009', barcode:'6281006000136', source:'MANUFACTURER', nameEn:'Full Cream Milk Powder 900g', nameAr:'حليب كامل الدسم بودرة ٩٠٠غ', cat:'CAT-DAIRY', unit:'BOX', pack:1, reorder:18, min:9, max:60, supplier:'SUP-PANTRY' },
-    { sku:'PRD-0010', barcode:'6281006000143', source:'MANUFACTURER', nameEn:'UHT Milk 1L', nameAr:'حليب طويل الأمد ١ لتر', cat:'CAT-DAIRY', unit:'CARTON', pack:12, reorder:40, min:20, max:150, supplier:'SUP-PANTRY' },
-    { sku:'PRD-0011', barcode:'6291100000117', source:'MANUFACTURER', nameEn:'White Sugar 1kg', nameAr:'سكر أبيض ١كغ', cat:'CAT-SWEET', unit:'CARTON', pack:10, reorder:35, min:18, max:140, supplier:'SUP-PANTRY' },
-    { sku:'PRD-0012', barcode:'6291100000124', source:'MANUFACTURER', nameEn:'Sugar Sticks (1000s)', nameAr:'أعواد سكر (١٠٠٠)', cat:'CAT-SWEET', unit:'BOX', pack:1, reorder:20, min:10, max:60, supplier:'SUP-PANTRY' },
-    { sku:'PRD-0013', barcode:'6291100000131', source:'MANUFACTURER', nameEn:'Sweetener Tablets (500s)', nameAr:'أقراص التحلية (٥٠٠)', cat:'CAT-SWEET', unit:'BOX', pack:1, reorder:12, min:6, max:40, supplier:'SUP-PANTRY' },
-    { sku:'PRD-0014', barcode:'6291100000148', source:'MANUFACTURER', nameEn:'Assorted Biscuits 500g', nameAr:'بسكويت متنوع ٥٠٠غ', cat:'CAT-SWEET', unit:'BOX', pack:1, reorder:25, min:12, max:90, supplier:'SUP-PANTRY' },
-    { sku:'PRD-0015', barcode:'6291100000155', source:'MANUFACTURER', nameEn:'Dark Chocolate Bars (24s)', nameAr:'ألواح شوكولاتة داكنة (٢٤)', cat:'CAT-SWEET', unit:'BOX', pack:24, reorder:15, min:8, max:60, supplier:'SUP-PANTRY' },
-    { sku:'PRD-0016', barcode:'6291100000162', source:'MANUFACTURER', nameEn:'Dates 500g Pack', nameAr:'تمر ٥٠٠غ', cat:'CAT-SWEET', unit:'BOX', pack:1, reorder:20, min:10, max:80, supplier:'SUP-PANTRY' },
-    { sku:'PRD-0017', barcode:'6291100000179', source:'MANUFACTURER', nameEn:'Mixed Nuts 250g', nameAr:'مكسّرات مشكّلة ٢٥٠غ', cat:'CAT-SWEET', unit:'BOX', pack:1, reorder:15, min:8, max:50, supplier:'SUP-PANTRY' },
-    { sku:'PRD-0018', barcode:'6291200000114', source:'MANUFACTURER', nameEn:'Bottled Water 500ml (24s)', nameAr:'مياه معبأة ٥٠٠مل (٢٤)', cat:'CAT-COLDBEV', unit:'CARTON', pack:24, reorder:60, min:30, max:240, supplier:'SUP-WATER' },
-    { sku:'PRD-0019', barcode:'6291200000121', source:'MANUFACTURER', nameEn:'Bottled Water 1.5L (6s)', nameAr:'مياه معبأة ١.٥ لتر (٦)', cat:'CAT-COLDBEV', unit:'CARTON', pack:6, reorder:40, min:20, max:160, supplier:'SUP-WATER' },
-    { sku:'PRD-0020', barcode:'6291200000138', source:'MANUFACTURER', nameEn:'Orange Juice 1L', nameAr:'عصير برتقال ١ لتر', cat:'CAT-COLDBEV', unit:'CARTON', pack:12, reorder:20, min:10, max:80, supplier:'SUP-WATER' },
-    { sku:'PRD-0021', barcode:'6291200000145', source:'MANUFACTURER', nameEn:'Laban Up 180ml (18s)', nameAr:'لبن أب ١٨٠مل (١٨)', cat:'CAT-COLDBEV', unit:'CARTON', pack:18, reorder:15, min:8, max:60, supplier:'SUP-WATER' },
-    { sku:'PRD-0022', barcode:'6291300000111', source:'MANUFACTURER', nameEn:'Facial Tissue Box (100s)', nameAr:'محارم وجه (١٠٠)', cat:'CAT-DISPOSE', unit:'CARTON', pack:30, reorder:40, min:20, max:150, supplier:'SUP-CLEAN' },
-    { sku:'PRD-0023', barcode:'6291300000128', source:'MANUFACTURER', nameEn:'Toilet Roll (12s)', nameAr:'لفائف حمام (١٢)', cat:'CAT-DISPOSE', unit:'CARTON', pack:8, reorder:50, min:25, max:200, supplier:'SUP-CLEAN' },
-    { sku:'PRD-0024', barcode:'6291300000135', source:'MANUFACTURER', nameEn:'Kitchen Towel Roll (6s)', nameAr:'مناشف مطبخ (٦)', cat:'CAT-DISPOSE', unit:'CARTON', pack:8, reorder:30, min:15, max:120, supplier:'SUP-CLEAN' },
-    { sku:'PRD-0025', barcode:'6291300000142', source:'MANUFACTURER', nameEn:'Paper Cups 8oz (50s)', nameAr:'أكواب ورقية ٨أونصة (٥٠)', cat:'CAT-DISPOSE', unit:'PACK', pack:1, reorder:45, min:22, max:180, supplier:'SUP-CLEAN' },
-    { sku:'PRD-0026', barcode:'6291300000159', source:'MANUFACTURER', nameEn:'Paper Cups 4oz Arabic (50s)', nameAr:'أكواب ورقية ٤أونصة (٥٠)', cat:'CAT-DISPOSE', unit:'PACK', pack:1, reorder:40, min:20, max:160, supplier:'SUP-CLEAN' },
-    { sku:'PRD-0027', barcode:'6291300000166', source:'MANUFACTURER', nameEn:'Plastic Stirrers (1000s)', nameAr:'محرّكات بلاستيكية (١٠٠٠)', cat:'CAT-DISPOSE', unit:'BOX', pack:1, reorder:15, min:8, max:50, supplier:'SUP-CLEAN' },
-    { sku:'PRD-0028', barcode:'6291300000173', source:'MANUFACTURER', nameEn:'Plastic Teaspoons (100s)', nameAr:'ملاعق بلاستيكية (١٠٠)', cat:'CAT-DISPOSE', unit:'PACK', pack:1, reorder:20, min:10, max:70, supplier:'SUP-CLEAN' },
-    { sku:'PRD-0029', barcode:'6291300000180', source:'MANUFACTURER', nameEn:'Napkins Dinner (100s)', nameAr:'مناديل سفرة (١٠٠)', cat:'CAT-DISPOSE', unit:'PACK', pack:1, reorder:35, min:18, max:140, supplier:'SUP-CLEAN' },
-    { sku:'PRD-0030', barcode:'6291400000118', source:'MANUFACTURER', nameEn:'Dishwashing Liquid 1L', nameAr:'سائل غسيل الصحون ١ لتر', cat:'CAT-CLEAN', unit:'BOTTLE', pack:1, reorder:20, min:10, max:70, supplier:'SUP-CLEAN' },
-    { sku:'PRD-0031', barcode:'6291400000125', source:'MANUFACTURER', nameEn:'Multi-Surface Cleaner 750ml', nameAr:'منظف متعدد الأسطح ٧٥٠مل', cat:'CAT-CLEAN', unit:'BOTTLE', pack:1, reorder:18, min:9, max:60, supplier:'SUP-CLEAN' },
-    { sku:'PRD-0032', barcode:'6291400000132', source:'MANUFACTURER', nameEn:'Hand Soap Refill 1L', nameAr:'صابون يدين لإعادة التعبئة ١ لتر', cat:'CAT-CLEAN', unit:'BOTTLE', pack:1, reorder:25, min:12, max:90, supplier:'SUP-CLEAN' },
-    { sku:'PRD-0033', barcode:'6291400000149', source:'MANUFACTURER', nameEn:'Hand Sanitizer 500ml', nameAr:'معقّم اليدين ٥٠٠مل', cat:'CAT-CLEAN', unit:'BOTTLE', pack:1, reorder:30, min:15, max:110, supplier:'SUP-CLEAN' },
-    { sku:'PRD-0034', barcode:'6291400000156', source:'MANUFACTURER', nameEn:'Disinfectant Wipes (80s)', nameAr:'مناديل مطهّرة (٨٠)', cat:'CAT-CLEAN', unit:'BOX', pack:1, reorder:25, min:12, max:90, supplier:'SUP-CLEAN' },
-    { sku:'PRD-0035', barcode:'6291400000163', source:'MANUFACTURER', nameEn:'Garbage Bags Large (50s)', nameAr:'أكياس قمامة كبيرة (٥٠)', cat:'CAT-CLEAN', unit:'ROLL', pack:1, reorder:30, min:15, max:120, supplier:'SUP-CLEAN' },
-    { sku:'PRD-0036', barcode:'6291400000170', source:'MANUFACTURER', nameEn:'Glass Cleaner 500ml', nameAr:'منظف زجاج ٥٠٠مل', cat:'CAT-CLEAN', unit:'BOTTLE', pack:1, reorder:12, min:6, max:40, supplier:'SUP-CLEAN' },
-    { sku:'PRD-0037', barcode:'6291400000187', source:'MANUFACTURER', nameEn:'Floor Cleaner 5L', nameAr:'منظف أرضيات ٥ لتر', cat:'CAT-CLEAN', unit:'BOTTLE', pack:1, reorder:10, min:5, max:35, supplier:'SUP-CLEAN' },
-    { sku:'PRD-0038', barcode:'6291400000194', source:'MANUFACTURER', nameEn:'Air Freshener Spray 300ml', nameAr:'معطّر جو بخّاخ ٣٠٠مل', cat:'CAT-CLEAN', unit:'BOTTLE', pack:1, reorder:20, min:10, max:70, supplier:'SUP-CLEAN' },
-    { sku:'PRD-0039', barcode:'6291500000115', source:'MANUFACTURER', nameEn:'A4 Paper Ream 80gsm', nameAr:'ورق A4 ٨٠غ', cat:'CAT-OFFICE', unit:'CARTON', pack:5, reorder:40, min:20, max:160, supplier:'SUP-OFFICE' },
-    { sku:'PRD-0040', barcode:'6291500000122', source:'MANUFACTURER', nameEn:'Ballpoint Pens Blue (50s)', nameAr:'أقلام حبر زرقاء (٥٠)', cat:'CAT-OFFICE', unit:'BOX', pack:1, reorder:25, min:12, max:90, supplier:'SUP-OFFICE' },
-    { sku:'PRD-0041', barcode:'6291500000139', source:'MANUFACTURER', nameEn:'Whiteboard Marker Set (4s)', nameAr:'أقلام سبورة (٤)', cat:'CAT-OFFICE', unit:'PACK', pack:1, reorder:20, min:10, max:70, supplier:'SUP-OFFICE' },
-    { sku:'PRD-0042', barcode:'6291500000146', source:'MANUFACTURER', nameEn:'Stapler Pins (5000s)', nameAr:'دبابيس تدبيس (٥٠٠٠)', cat:'CAT-OFFICE', unit:'BOX', pack:1, reorder:15, min:8, max:50, supplier:'SUP-OFFICE' },
-    { sku:'PRD-0043', barcode:'6291500000153', source:'MANUFACTURER', nameEn:'Sticky Notes 3x3 (12s)', nameAr:'أوراق لاصقة ٣×٣ (١٢)', cat:'CAT-OFFICE', unit:'PACK', pack:1, reorder:20, min:10, max:70, supplier:'SUP-OFFICE' },
-    { sku:'PRD-0044', barcode:'6291500000160', source:'MANUFACTURER', nameEn:'File Folders A4 (25s)', nameAr:'مجلدات ملفات A4 (٢٥)', cat:'CAT-OFFICE', unit:'PACK', pack:1, reorder:18, min:9, max:60, supplier:'SUP-OFFICE' },
-    { sku:'PRD-0045', barcode:'6291500000177', source:'MANUFACTURER', nameEn:'Printer Toner Black', nameAr:'حبر طابعة أسود', cat:'CAT-OFFICE', unit:'UNIT', pack:1, reorder:8, min:4, max:24, supplier:'SUP-OFFICE' },
-    { sku:'PRD-0046', barcode:'6291500000184', source:'MANUFACTURER', nameEn:'Highlighters Assorted (6s)', nameAr:'أقلام تحديد متنوعة (٦)', cat:'CAT-OFFICE', unit:'PACK', pack:1, reorder:15, min:8, max:50, supplier:'SUP-OFFICE' },
-    { sku:'PRD-0047', barcode:'INT-000047001', source:'INTERNAL', nameEn:'Arabic Coffee Blend (Repacked) 500g', nameAr:'خلطة قهوة عربية (معبأة) ٥٠٠غ', cat:'CAT-HOTBEV', unit:'BOX', pack:1, reorder:15, min:8, max:50, supplier:'SUP-BEV' },
-    { sku:'PRD-0048', barcode:'INT-000048001', source:'INTERNAL', nameEn:'Assorted Dates Gift Box (Repacked)', nameAr:'علبة تمور هدايا (معبأة)', cat:'CAT-SWEET', unit:'BOX', pack:1, reorder:10, min:5, max:40, supplier:'SUP-PANTRY' },
-    { sku:'PRD-0049', barcode:'INT-000049001', source:'INTERNAL', nameEn:'Majlis Incense Bakhoor 50g', nameAr:'بخور مجلس ٥٠غ', cat:'CAT-OFFICE', unit:'BOX', pack:1, reorder:8, min:4, max:30, supplier:'SUP-OFFICE' },
-    { sku:'PRD-0050', barcode:'INT-000050001', source:'INTERNAL', nameEn:'Rose Water Spray 250ml', nameAr:'ماء ورد بخّاخ ٢٥٠مل', cat:'CAT-OFFICE', unit:'BOTTLE', pack:1, reorder:10, min:5, max:35, supplier:'SUP-OFFICE' },
+    { sku:'PRD-0001', barcode:'6291041500213', source:'MANUFACTURER', nameEn:'Arabic Coffee Powder 250g', nameAr:'بن عربي مطحون ٢٥٠غ', cat:'CAT-HOTBEV', unit:'BOX', pack:1, reorder:20, min:10, max:80, supplier:'SUP-BEV', cost:14.50 },
+    { sku:'PRD-0002', barcode:'6291041500220', source:'MANUFACTURER', nameEn:'Instant Coffee 200g Jar', nameAr:'قهوة سريعة التحضير ٢٠٠غ', cat:'CAT-HOTBEV', unit:'BOX', pack:1, reorder:15, min:8, max:60, supplier:'SUP-BEV', cost:22.90 },
+    { sku:'PRD-0003', barcode:'7622210991027', source:'MANUFACTURER', nameEn:'Cardamom Whole 100g', nameAr:'هيل حبوب ١٠٠غ', cat:'CAT-HOTBEV', unit:'BOX', pack:1, reorder:10, min:5, max:30, supplier:'SUP-BEV', cost:18.75 },
+    { sku:'PRD-0004', barcode:'6291041500244', source:'MANUFACTURER', nameEn:'Black Tea Bags (100s)', nameAr:'أكياس شاي أسود (١٠٠)', cat:'CAT-HOTBEV', unit:'BOX', pack:1, reorder:25, min:12, max:90, supplier:'SUP-BEV', cost:11.20 },
+    { sku:'PRD-0005', barcode:'6291041500251', source:'MANUFACTURER', nameEn:'Green Tea Bags (100s)', nameAr:'أكياس شاي أخضر (١٠٠)', cat:'CAT-HOTBEV', unit:'BOX', pack:1, reorder:15, min:8, max:50, supplier:'SUP-BEV', cost:13.40 },
+    { sku:'PRD-0006', barcode:'6291041500268', source:'MANUFACTURER', nameEn:'Hot Chocolate Powder 1kg', nameAr:'مسحوق شوكولاتة ساخنة ١كغ', cat:'CAT-HOTBEV', unit:'BOX', pack:1, reorder:10, min:5, max:40, supplier:'SUP-BEV', cost:26.80 },
+    { sku:'PRD-0007', barcode:'6281006000112', source:'MANUFACTURER', nameEn:'Coffee Mate Creamer 450g', nameAr:'مبيّض القهوة ٤٥٠غ', cat:'CAT-DAIRY', unit:'BOX', pack:1, reorder:20, min:10, max:70, supplier:'SUP-PANTRY', cost:16.30 },
+    { sku:'PRD-0008', barcode:'6281006000129', source:'MANUFACTURER', nameEn:'Evaporated Milk 410g Tin', nameAr:'حليب مبخر ٤١٠غ', cat:'CAT-DAIRY', unit:'CARTON', pack:24, reorder:30, min:15, max:120, supplier:'SUP-PANTRY', cost:42.00 },
+    { sku:'PRD-0009', barcode:'6281006000136', source:'MANUFACTURER', nameEn:'Full Cream Milk Powder 900g', nameAr:'حليب كامل الدسم بودرة ٩٠٠غ', cat:'CAT-DAIRY', unit:'BOX', pack:1, reorder:18, min:9, max:60, supplier:'SUP-PANTRY', cost:24.50 },
+    { sku:'PRD-0010', barcode:'6281006000143', source:'MANUFACTURER', nameEn:'UHT Milk 1L', nameAr:'حليب طويل الأمد ١ لتر', cat:'CAT-DAIRY', unit:'CARTON', pack:12, reorder:40, min:20, max:150, supplier:'SUP-PANTRY', cost:38.90 },
+    { sku:'PRD-0011', barcode:'6291100000117', source:'MANUFACTURER', nameEn:'White Sugar 1kg', nameAr:'سكر أبيض ١كغ', cat:'CAT-SWEET', unit:'CARTON', pack:10, reorder:35, min:18, max:140, supplier:'SUP-PANTRY', cost:21.00 },
+    { sku:'PRD-0012', barcode:'6291100000124', source:'MANUFACTURER', nameEn:'Sugar Sticks (1000s)', nameAr:'أعواد سكر (١٠٠٠)', cat:'CAT-SWEET', unit:'BOX', pack:1, reorder:20, min:10, max:60, supplier:'SUP-PANTRY', cost:15.60 },
+    { sku:'PRD-0013', barcode:'6291100000131', source:'MANUFACTURER', nameEn:'Sweetener Tablets (500s)', nameAr:'أقراص التحلية (٥٠٠)', cat:'CAT-SWEET', unit:'BOX', pack:1, reorder:12, min:6, max:40, supplier:'SUP-PANTRY', cost:12.80 },
+    { sku:'PRD-0014', barcode:'6291100000148', source:'MANUFACTURER', nameEn:'Assorted Biscuits 500g', nameAr:'بسكويت متنوع ٥٠٠غ', cat:'CAT-SWEET', unit:'BOX', pack:1, reorder:25, min:12, max:90, supplier:'SUP-PANTRY', cost:17.90 },
+    { sku:'PRD-0015', barcode:'6291100000155', source:'MANUFACTURER', nameEn:'Dark Chocolate Bars (24s)', nameAr:'ألواح شوكولاتة داكنة (٢٤)', cat:'CAT-SWEET', unit:'BOX', pack:24, reorder:15, min:8, max:60, supplier:'SUP-PANTRY', cost:48.50 },
+    { sku:'PRD-0016', barcode:'6291100000162', source:'MANUFACTURER', nameEn:'Dates 500g Pack', nameAr:'تمر ٥٠٠غ', cat:'CAT-SWEET', unit:'BOX', pack:1, reorder:20, min:10, max:80, supplier:'SUP-PANTRY', cost:20.40 },
+    { sku:'PRD-0017', barcode:'6291100000179', source:'MANUFACTURER', nameEn:'Mixed Nuts 250g', nameAr:'مكسّرات مشكّلة ٢٥٠غ', cat:'CAT-SWEET', unit:'BOX', pack:1, reorder:15, min:8, max:50, supplier:'SUP-PANTRY', cost:27.30 },
+    { sku:'PRD-0018', barcode:'6291200000114', source:'MANUFACTURER', nameEn:'Bottled Water 500ml (24s)', nameAr:'مياه معبأة ٥٠٠مل (٢٤)', cat:'CAT-COLDBEV', unit:'CARTON', pack:24, reorder:60, min:30, max:240, supplier:'SUP-WATER', cost:9.80 },
+    { sku:'PRD-0019', barcode:'6291200000121', source:'MANUFACTURER', nameEn:'Bottled Water 1.5L (6s)', nameAr:'مياه معبأة ١.٥ لتر (٦)', cat:'CAT-COLDBEV', unit:'CARTON', pack:6, reorder:40, min:20, max:160, supplier:'SUP-WATER', cost:11.50 },
+    { sku:'PRD-0020', barcode:'6291200000138', source:'MANUFACTURER', nameEn:'Orange Juice 1L', nameAr:'عصير برتقال ١ لتر', cat:'CAT-COLDBEV', unit:'CARTON', pack:12, reorder:20, min:10, max:80, supplier:'SUP-WATER', cost:34.00 },
+    { sku:'PRD-0021', barcode:'6291200000145', source:'MANUFACTURER', nameEn:'Laban Up 180ml (18s)', nameAr:'لبن أب ١٨٠مل (١٨)', cat:'CAT-COLDBEV', unit:'CARTON', pack:18, reorder:15, min:8, max:60, supplier:'SUP-WATER', cost:28.60 },
+    { sku:'PRD-0022', barcode:'6291300000111', source:'MANUFACTURER', nameEn:'Facial Tissue Box (100s)', nameAr:'محارم وجه (١٠٠)', cat:'CAT-DISPOSE', unit:'CARTON', pack:30, reorder:40, min:20, max:150, supplier:'SUP-CLEAN', cost:45.00 },
+    { sku:'PRD-0023', barcode:'6291300000128', source:'MANUFACTURER', nameEn:'Toilet Roll (12s)', nameAr:'لفائف حمام (١٢)', cat:'CAT-DISPOSE', unit:'CARTON', pack:8, reorder:50, min:25, max:200, supplier:'SUP-CLEAN', cost:24.90 },
+    { sku:'PRD-0024', barcode:'6291300000135', source:'MANUFACTURER', nameEn:'Kitchen Towel Roll (6s)', nameAr:'مناشف مطبخ (٦)', cat:'CAT-DISPOSE', unit:'CARTON', pack:8, reorder:30, min:15, max:120, supplier:'SUP-CLEAN', cost:22.30 },
+    { sku:'PRD-0025', barcode:'6291300000142', source:'MANUFACTURER', nameEn:'Paper Cups 8oz (50s)', nameAr:'أكواب ورقية ٨أونصة (٥٠)', cat:'CAT-DISPOSE', unit:'PACK', pack:1, reorder:45, min:22, max:180, supplier:'SUP-CLEAN', cost:8.40 },
+    { sku:'PRD-0026', barcode:'6291300000159', source:'MANUFACTURER', nameEn:'Paper Cups 4oz Arabic (50s)', nameAr:'أكواب ورقية ٤أونصة (٥٠)', cat:'CAT-DISPOSE', unit:'PACK', pack:1, reorder:40, min:20, max:160, supplier:'SUP-CLEAN', cost:7.60 },
+    { sku:'PRD-0027', barcode:'6291300000166', source:'MANUFACTURER', nameEn:'Plastic Stirrers (1000s)', nameAr:'محرّكات بلاستيكية (١٠٠٠)', cat:'CAT-DISPOSE', unit:'BOX', pack:1, reorder:15, min:8, max:50, supplier:'SUP-CLEAN', cost:6.20 },
+    { sku:'PRD-0028', barcode:'6291300000173', source:'MANUFACTURER', nameEn:'Plastic Teaspoons (100s)', nameAr:'ملاعق بلاستيكية (١٠٠)', cat:'CAT-DISPOSE', unit:'PACK', pack:1, reorder:20, min:10, max:70, supplier:'SUP-CLEAN', cost:5.90 },
+    { sku:'PRD-0029', barcode:'6291300000180', source:'MANUFACTURER', nameEn:'Napkins Dinner (100s)', nameAr:'مناديل سفرة (١٠٠)', cat:'CAT-DISPOSE', unit:'PACK', pack:1, reorder:35, min:18, max:140, supplier:'SUP-CLEAN', cost:9.10 },
+    { sku:'PRD-0030', barcode:'6291400000118', source:'MANUFACTURER', nameEn:'Dishwashing Liquid 1L', nameAr:'سائل غسيل الصحون ١ لتر', cat:'CAT-CLEAN', unit:'BOTTLE', pack:1, reorder:20, min:10, max:70, supplier:'SUP-CLEAN', cost:8.90 },
+    { sku:'PRD-0031', barcode:'6291400000125', source:'MANUFACTURER', nameEn:'Multi-Surface Cleaner 750ml', nameAr:'منظف متعدد الأسطح ٧٥٠مل', cat:'CAT-CLEAN', unit:'BOTTLE', pack:1, reorder:18, min:9, max:60, supplier:'SUP-CLEAN', cost:10.40 },
+    { sku:'PRD-0032', barcode:'6291400000132', source:'MANUFACTURER', nameEn:'Hand Soap Refill 1L', nameAr:'صابون يدين لإعادة التعبئة ١ لتر', cat:'CAT-CLEAN', unit:'BOTTLE', pack:1, reorder:25, min:12, max:90, supplier:'SUP-CLEAN', cost:9.70 },
+    { sku:'PRD-0033', barcode:'6291400000149', source:'MANUFACTURER', nameEn:'Hand Sanitizer 500ml', nameAr:'معقّم اليدين ٥٠٠مل', cat:'CAT-CLEAN', unit:'BOTTLE', pack:1, reorder:30, min:15, max:110, supplier:'SUP-CLEAN', cost:14.20 },
+    { sku:'PRD-0034', barcode:'6291400000156', source:'MANUFACTURER', nameEn:'Disinfectant Wipes (80s)', nameAr:'مناديل مطهّرة (٨٠)', cat:'CAT-CLEAN', unit:'BOX', pack:1, reorder:25, min:12, max:90, supplier:'SUP-CLEAN', cost:13.50 },
+    { sku:'PRD-0035', barcode:'6291400000163', source:'MANUFACTURER', nameEn:'Garbage Bags Large (50s)', nameAr:'أكياس قمامة كبيرة (٥٠)', cat:'CAT-CLEAN', unit:'ROLL', pack:1, reorder:30, min:15, max:120, supplier:'SUP-CLEAN', cost:16.80 },
+    { sku:'PRD-0036', barcode:'6291400000170', source:'MANUFACTURER', nameEn:'Glass Cleaner 500ml', nameAr:'منظف زجاج ٥٠٠مل', cat:'CAT-CLEAN', unit:'BOTTLE', pack:1, reorder:12, min:6, max:40, supplier:'SUP-CLEAN', cost:7.90 },
+    { sku:'PRD-0037', barcode:'6291400000187', source:'MANUFACTURER', nameEn:'Floor Cleaner 5L', nameAr:'منظف أرضيات ٥ لتر', cat:'CAT-CLEAN', unit:'BOTTLE', pack:1, reorder:10, min:5, max:35, supplier:'SUP-CLEAN', cost:32.50 },
+    { sku:'PRD-0038', barcode:'6291400000194', source:'MANUFACTURER', nameEn:'Air Freshener Spray 300ml', nameAr:'معطّر جو بخّاخ ٣٠٠مل', cat:'CAT-CLEAN', unit:'BOTTLE', pack:1, reorder:20, min:10, max:70, supplier:'SUP-CLEAN', cost:11.90 },
+    { sku:'PRD-0039', barcode:'6291500000115', source:'MANUFACTURER', nameEn:'A4 Paper Ream 80gsm', nameAr:'ورق A4 ٨٠غ', cat:'CAT-OFFICE', unit:'CARTON', pack:5, reorder:40, min:20, max:160, supplier:'SUP-OFFICE', cost:62.00 },
+    { sku:'PRD-0040', barcode:'6291500000122', source:'MANUFACTURER', nameEn:'Ballpoint Pens Blue (50s)', nameAr:'أقلام حبر زرقاء (٥٠)', cat:'CAT-OFFICE', unit:'BOX', pack:1, reorder:25, min:12, max:90, supplier:'SUP-OFFICE', cost:18.30 },
+    { sku:'PRD-0041', barcode:'6291500000139', source:'MANUFACTURER', nameEn:'Whiteboard Marker Set (4s)', nameAr:'أقلام سبورة (٤)', cat:'CAT-OFFICE', unit:'PACK', pack:1, reorder:20, min:10, max:70, supplier:'SUP-OFFICE', cost:12.60 },
+    { sku:'PRD-0042', barcode:'6291500000146', source:'MANUFACTURER', nameEn:'Stapler Pins (5000s)', nameAr:'دبابيس تدبيس (٥٠٠٠)', cat:'CAT-OFFICE', unit:'BOX', pack:1, reorder:15, min:8, max:50, supplier:'SUP-OFFICE', cost:9.40 },
+    { sku:'PRD-0043', barcode:'6291500000153', source:'MANUFACTURER', nameEn:'Sticky Notes 3x3 (12s)', nameAr:'أوراق لاصقة ٣×٣ (١٢)', cat:'CAT-OFFICE', unit:'PACK', pack:1, reorder:20, min:10, max:70, supplier:'SUP-OFFICE', cost:14.90 },
+    { sku:'PRD-0044', barcode:'6291500000160', source:'MANUFACTURER', nameEn:'File Folders A4 (25s)', nameAr:'مجلدات ملفات A4 (٢٥)', cat:'CAT-OFFICE', unit:'PACK', pack:1, reorder:18, min:9, max:60, supplier:'SUP-OFFICE', cost:21.70 },
+    { sku:'PRD-0045', barcode:'6291500000177', source:'MANUFACTURER', nameEn:'Printer Toner Black', nameAr:'حبر طابعة أسود', cat:'CAT-OFFICE', unit:'UNIT', pack:1, reorder:8, min:4, max:24, supplier:'SUP-OFFICE', cost:168.00 },
+    { sku:'PRD-0046', barcode:'6291500000184', source:'MANUFACTURER', nameEn:'Highlighters Assorted (6s)', nameAr:'أقلام تحديد متنوعة (٦)', cat:'CAT-OFFICE', unit:'PACK', pack:1, reorder:15, min:8, max:50, supplier:'SUP-OFFICE', cost:11.30 },
+    { sku:'PRD-0047', barcode:'INT-000047001', source:'INTERNAL', nameEn:'Arabic Coffee Blend (Repacked) 500g', nameAr:'خلطة قهوة عربية (معبأة) ٥٠٠غ', cat:'CAT-HOTBEV', unit:'BOX', pack:1, reorder:15, min:8, max:50, supplier:'SUP-BEV', cost:19.60 },
+    { sku:'PRD-0048', barcode:'INT-000048001', source:'INTERNAL', nameEn:'Assorted Dates Gift Box (Repacked)', nameAr:'علبة تمور هدايا (معبأة)', cat:'CAT-SWEET', unit:'BOX', pack:1, reorder:10, min:5, max:40, supplier:'SUP-PANTRY', cost:32.00 },
+    { sku:'PRD-0049', barcode:'INT-000049001', source:'INTERNAL', nameEn:'Majlis Incense Bakhoor 50g', nameAr:'بخور مجلس ٥٠غ', cat:'CAT-OFFICE', unit:'BOX', pack:1, reorder:8, min:4, max:30, supplier:'SUP-OFFICE', cost:29.50 },
+    { sku:'PRD-0050', barcode:'INT-000050001', source:'INTERNAL', nameEn:'Rose Water Spray 250ml', nameAr:'ماء ورد بخّاخ ٢٥٠مل', cat:'CAT-OFFICE', unit:'BOTTLE', pack:1, reorder:10, min:5, max:35, supplier:'SUP-OFFICE', cost:16.90 },
   ];
   for (const p of productSeed) {
     const created = await prisma.product.create({
@@ -163,6 +171,7 @@ async function main() {
         organizationId, sku: p.sku, barcode: p.barcode, barcodeSource: p.source as BarcodeSource,
         nameEn: p.nameEn, nameAr: p.nameAr, categoryId: catByCode[p.cat], baseUnitId: unitByCode[p.unit],
         packSize: p.pack, reorderPoint: p.reorder, minLevel: p.min, maxLevel: p.max, supplierId: supByCode[p.supplier],
+        unitCost: p.cost,
       },
     });
     productIdBySku[p.sku] = created.id;
@@ -204,42 +213,73 @@ async function main() {
     if (u.role === Role.STORE_KEEPER) keeperUserId = created.id;
   }
 
-  // ---- 30 days of movement history per product ----
-  // The AI Store Manager's reorder calculator (§8.2) uses trailing-30-day GOODS_OUT
-  // volume to compute dailyUsage. Without movement history every product falls back
-  // to "no recent usage recorded" and the reorder point alone decides — real history
-  // here gives genuine consumption rates, so recommendations and their reasoning
-  // (§8.3) reflect real numbers instead of a placeholder.
+  // ---- ~120 days of daily movement history per product ----
+  // The AI Store Manager's reorder calculator (§8.2) uses a trailing-30-day
+  // GOODS_OUT average as its plain input. The Stage-2 forecaster
+  // (ai-service/src/demand_forecasting) needs more: forecast_models.py requires
+  // >= 30 days of history before it will forecast at all, and
+  // seasonal_analyser.py requires >= 90 days before it will even consider a
+  // seasonal signal. ~120 real days clears both with room to spare, so
+  // forecast lines and days-until-stockout have genuine signal instead of
+  // falling back to "insufficient history".
   const DAY = 24 * 60 * 60 * 1000;
   const now = Date.now();
+  const HISTORY_DAYS = 120;
   const firstLocBySku: Record<string, string> = {};
   for (const s of stockSeed) if (!firstLocBySku[s.sku]) firstLocBySku[s.sku] = s.loc;
+
+  // A handful of products get a deliberate recent upward usage trend rather
+  // than a flat rate — real depletion pressure, not a fabricated smooth curve.
+  // All five already sit at/below their reorder point in `stockSeed`, so the
+  // accelerating recent usage genuinely pushes their forecast days-to-stockout
+  // into roughly the 7-14 day range instead of that being hard-coded. Every
+  // other product stays flat (weekday/weekend + noise only, no trend) — most
+  // of the catalogue, by design, so "several healthy" stays true.
+  const ACCELERATING: Record<string, number> = {
+    'PRD-0006': 1.0, 'PRD-0013': 0.75, 'PRD-0031': 0.85, 'PRD-0043': 0.9, 'PRD-0049': 0.6,
+  };
+
+  const movementRows: Prisma.StockMovementCreateManyInput[] = [];
   const dailyUsageBySku: Record<string, number> = {};
-  let movementCount = 0;
 
   for (const p of productSeed) {
     const binId = nodeIdByDesignator[firstLocBySku[p.sku]];
 
-    // An initial restock near the start of the window.
-    await prisma.stockMovement.create({
-      data: { clientId: `seed-${randomUUID()}`, type: MovementType.GOODS_IN, productId: productIdBySku[p.sku], quantity: Math.max(1, Math.round(p.max * 0.4)), toLocationNodeId: binId, userId: keeperUserId, createdAt: new Date(now - 29 * DAY) },
-    });
-    movementCount++;
+    // Two restocks across the window (opening + a mid-window top-up) so the
+    // movement-trend view shows real goods-in activity too, not just outflow.
+    movementRows.push({ clientId: `seed-${randomUUID()}`, type: MovementType.GOODS_IN, productId: productIdBySku[p.sku], quantity: Math.max(1, Math.round(p.max * 0.35)), toLocationNodeId: binId, userId: keeperUserId, createdAt: new Date(now - (HISTORY_DAYS - 1) * DAY) });
+    movementRows.push({ clientId: `seed-${randomUUID()}`, type: MovementType.GOODS_IN, productId: productIdBySku[p.sku], quantity: Math.max(1, Math.round(p.max * 0.25)), toLocationNodeId: binId, userId: keeperUserId, createdAt: new Date(now - 58 * DAY) });
 
-    // A handful of goods-out issues spread across the month, scaled to the
-    // product's reorder point so the resulting daily usage is realistic.
-    const issues = 4 + Math.floor(rnd() * 6); // 4-9 issues over 30 days
-    let totalOut = 0;
-    for (let k = 0; k < issues; k++) {
-      const q = 1 + Math.floor(rnd() * Math.max(2, Math.round(p.reorder / 6)));
-      totalOut += q;
-      await prisma.stockMovement.create({
-        data: { clientId: `seed-${randomUUID()}`, type: MovementType.GOODS_OUT, productId: productIdBySku[p.sku], quantity: q, fromLocationNodeId: binId, userId: keeperUserId, createdAt: new Date(now - (1 + Math.floor(rnd() * 28)) * DAY) },
-      });
-      movementCount++;
+    const accelBase = ACCELERATING[p.sku];
+    const baseDailyUsage = accelBase ?? p.reorder / 22;
+
+    let totalOutTrailing30 = 0;
+    for (let d = HISTORY_DAYS - 1; d >= 0; d--) {
+      const date = new Date(now - d * DAY);
+      // UAE's work week has run Mon-Fri (weekend Sat/Sun) since Jan 2022 — a
+      // store room sees markedly less activity on non-working days.
+      const dow = date.getUTCDay(); // 0 = Sun, 6 = Sat
+      const weekdayFactor = dow === 0 || dow === 6 ? 0.45 : 1.0;
+      const trendFactor = accelBase ? 0.7 + ((HISTORY_DAYS - 1 - d) / (HISTORY_DAYS - 1)) * 1.2 : 1.0;
+      const noise = 0.55 + rnd() * 0.9; // keeps every day from looking identical
+      const qty = Math.round(baseDailyUsage * weekdayFactor * trendFactor * noise);
+      if (qty <= 0) continue; // a quiet day for a slow mover — realistic, not every day has an issue
+      movementRows.push({ clientId: `seed-${randomUUID()}`, type: MovementType.GOODS_OUT, productId: productIdBySku[p.sku], quantity: qty, fromLocationNodeId: binId, userId: keeperUserId, createdAt: date });
+      if (d < 30) totalOutTrailing30 += qty;
     }
-    dailyUsageBySku[p.sku] = totalOut / 30;
+    // The SAME trailing-30-day average a live "Run now" would compute today —
+    // not an average over the full 120-day window — so the pre-seeded
+    // recommendations below match what a fresh manual run produces (§8.2).
+    dailyUsageBySku[p.sku] = totalOutTrailing30 / 30;
   }
+
+  // Batched insert (a few thousand rows from ~120 days x 50 products),
+  // chunked to stay comfortably under Postgres's per-statement parameter limit.
+  const CHUNK = 500;
+  for (let i = 0; i < movementRows.length; i += CHUNK) {
+    await prisma.stockMovement.createMany({ data: movementRows.slice(i, i + CHUNK) });
+  }
+  const movementCount = movementRows.length;
 
   // ---- Pre-seed recommendations using the SAME deterministic engine the daily job
   // uses, so the Replenishment screen is accurate and populated on first login,
@@ -258,7 +298,7 @@ async function main() {
     recCount++;
   }
 
-  console.log(`Seed complete: 1 org, 3 location types, ${locationSeed.length} nodes (60 shelves), 7 categories, 7 units, 5 suppliers, ${productSeed.length} products, ${stockSeed.length} stock rows, ${movementCount} movements (30-day history), ${recCount} pre-seeded recommendations, ${DEMO_USERS.length} users.`);
+  console.log(`Seed complete: 1 org, 3 location types, ${locationSeed.length} nodes (60 shelves), 7 categories, 7 units, 5 suppliers, ${productSeed.length} products (all with unitCost), ${stockSeed.length} stock rows, ${movementCount} movements (${HISTORY_DAYS}-day history), ${recCount} pre-seeded recommendations, ${DEMO_USERS.length} users.`);
   console.log('Demo logins:');
   for (const u of DEMO_USERS) console.log(`  ${u.role.padEnd(12)}  ${u.email}  /  ${u.password}`);
 }

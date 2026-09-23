@@ -550,3 +550,81 @@ Claude/ChatGPT's tone.
   soon," "requires immediate reordering") — a real improvement, not a one-off. Regression-checked
   unaffected: "should I reorder" (still uses the deterministic recommendation reasoning, already
   had this tone via §8.3's templates) and plain stock-level questions (correctly stayed neutral).
+
+### 2026-09-23 — Unit cost + 120-day movement history (seed only — no dashboard UI exists yet)
+Requested so a "Predictive Analytics Dashboard / Projected Spend panel" shows real numbers at a
+demo. **That dashboard does not exist in this codebase** (grepped everywhere, confirmed against
+this file's own history) — see `OPEN-QUESTIONS.md` #13. Scope was schema + seed data only, per
+the request's own numbered sections; no UI was invented to fill the gap.
+
+**Schema** (`backend/prisma/schema.prisma`, migration `20260923062617_add_product_unit_cost_and_org_currency`)
+- `Product.unitCost` — nullable `Decimal(10,2)`, cost per base unit as tracked (per box/carton/
+  bottle, matching how `StockPosition`/movement quantities already count). Nullable so nothing
+  existing breaks.
+- `Organization.currency` — `String @default("AED")`. Seed data gets it for free (schema default);
+  didn't wire it into the editable Organization Settings form — not asked, and that's separate
+  UI-scope work.
+- Surfaced both through the API (previously would've been silently invisible): `unitCost` added to
+  `products.service.ts`'s `list()`/`getById()` mappings (explicit field lists, not spreads — had to
+  be added by hand; converted from Prisma's `Decimal` to a plain `Number` so it doesn't silently
+  serialise as a string), `currency` added to `organization.service.ts`'s `pick()` (read-only via
+  `GET /organization`; not added to the `PATCH` DTO).
+
+**Seed data** (`backend/prisma/seed.ts`)
+- All 50 products got a hand-assigned AED `unitCost` (not a flat per-category rate) — realistic
+  wholesale/institutional figures, deliberately non-round, ranging AED 5.90 (plastic teaspoons) to
+  AED 168.00 (Printer Toner Black — the one equipment-adjacent consumable, priced as the deliberate
+  outlier per "equipment/asset items higher").
+- Movement history extended from ~30 to **120 days**, daily-ish rather than a handful of sparse
+  events, because the ai-service Stage-2 forecaster needs real depth:
+  `forecast_models.MIN_HISTORY_DAYS_FOR_FORECAST = 30`, `seasonal_analyser.MIN_HISTORY_DAYS_FOR_SEASONALITY
+  = 90`. 120 real days clears both. Each product's daily quantity = `baseDailyUsage × weekdayFactor
+  × trendFactor × noise`: a UAE Sat/Sun weekend factor (0.45×, work-week since Jan 2022), a
+  multiplicative noise band (0.55-1.45×) so no two days look alike, and — for 5 specific SKUs
+  already sitting at/below their reorder point in the existing stock seed (PRD-0006, -0013, -0031,
+  -0043, -0049) — a trend factor ramping 0.7× to 1.9× across the window, a genuine recent
+  acceleration rather than a label bolted on afterward. Every other product (the large majority)
+  stays flat: weekday/weekend + noise only, no trend — this is what keeps most of the catalogue
+  reading as healthy, same as before. Two `GOODS_IN` restocks per product (opening + mid-window)
+  keep the movement-trend view showing real inbound activity too. Inserted via chunked
+  `stockMovement.createMany` (500/batch) instead of the old per-row `create` loop — 4,502 rows in
+  under 6 seconds.
+- `dailyUsageBySku` (feeds the pre-seeded recommendations, same deterministic engine as a live "Run
+  now", §8.2) now sums only the **trailing 30 days** of the new 120-day history, not the full-window
+  average — matches exactly what a fresh manual run would compute today, so the pre-seeded
+  recommendations stay honest, not inflated by the older window.
+- `backend/prisma/entity-seed.ts` (the `-Sample` provisioner) got the same two treatments at its
+  smaller scale: `unitCost` on all 12 sample products, and its movement generation extended from
+  ~28 to ~120 days (weekday/weekend + noise, no trend group — proportionate for a lighter demo
+  catalogue). Verified by provisioning a real throwaway `mizan_scratch_verify` database end to end
+  (`ENTITY_SAMPLE=true`) and dropping it after — seed completed cleanly, 12/12 products carry
+  `unitCost`, movement span 119 days.
+
+**Verified** (against the real re-seeded `mizan_inventory` dev DB, not assumed):
+- `unitCost`: 50/50 active products, 0 missing.
+- Projected-spend proxy (`dailyUsage(30d) × unitCost × 30`, computed directly from the DB — there's
+  no panel to read it from): **AED 29,702.50/month total**, varying genuinely by supplier (AED
+  2,472-8,876) and by category (AED 2,472-6,983) — not flat, not uniform.
+- Days-to-stockout (`currentStock / dailyUsage(30d)`): the 5 accelerating SKUs land at 7-10 days
+  (Sweetener Tablets 7, Hot Chocolate 8, Bakhoor 8, Sticky Notes 9, Multi-Surface Cleaner 10) — the
+  requested 7-14-day "trending toward stockout" band, arrived at from real usage math, not
+  hand-set. 40 products sit healthy (>30 days). 0 products have no usage at all.
+- Ran the **actual** `ai-service` forecasting code (not a re-implementation) against real exported
+  movement rows for 3 products: `forecast_daily_usage()` returned real floats for all three (never
+  `None` — the 30-day-minimum gate is cleared with margin). `detect_seasonal_uplift()` returned
+  `True` only for PRD-0006 (the accelerating group) and `False` for the two flat products — the
+  seasonal signal is genuinely present in the data, not asserted.
+- History depth: every product's `GOODS_OUT` span is 106-119 days; 0 products fall below either the
+  30-day or 90-day thresholds.
+- **Known, documented gap** (`OPEN-QUESTIONS.md` #14): `StockMovement` is append-only and the seed
+  has never deleted it (by design), but `Product` rows get fresh IDs every re-seed — so old
+  movement generations become orphaned, unreachable rows rather than being cleaned up. Already true
+  before this session; deeper history made the accumulation bigger (this run added 4,502 rows) and
+  matter more, since 397 stale rows from earlier in this DB's life now sit alongside the fresh ones
+  (confirmed via direct count, not estimated). Left alone deliberately — cannot delete without
+  violating DESC control #10, and a full database drop/recreate is a bigger, more destructive step
+  than this task asked for.
+
+**Not done** (out of this task's stated scope, not silently skipped): no Projected Spend UI, no
+forecast-vs-actual chart, no days-until-stockout ranking screen — see the "doesn't exist" note
+above. No changes to the Organization Settings screen to make `currency` editable.

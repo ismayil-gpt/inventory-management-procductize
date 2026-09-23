@@ -66,6 +66,7 @@ model Organization {
   nameAr          String
   timezone        String   @default("Asia/Dubai")
   defaultLanguage String   @default("en")
+  currency        String   @default("AED") // ISO 4217 code; drives cost/spend displays
   logoObjectKey   String?
   isActive        Boolean  @default(true)
   createdAt       DateTime @default(now())
@@ -167,6 +168,7 @@ model Product {
   reorderPoint     Int
   minLevel         Int
   maxLevel         Int
+  unitCost         Decimal?      @db.Decimal(10, 2) // cost per base unit, in Organization.currency; null = not set
   supplierId       String?
   customAttributes Json?         // validated against ProductAttributeDefinition
   isActive         Boolean       @default(true)

@@ -10,7 +10,7 @@ export interface UpdateOrganizationDto {
 
 type OrganizationRow = {
   id: string; code: string; nameEn: string; nameAr: string;
-  defaultLanguage: string; timezone: string; logoObjectKey: string | null;
+  defaultLanguage: string; timezone: string; currency: string; logoObjectKey: string | null;
 };
 
 @Injectable()
@@ -26,7 +26,8 @@ export class OrganizationService {
   private pick(org: OrganizationRow) {
     return {
       id: org.id, code: org.code, nameEn: org.nameEn, nameAr: org.nameAr,
-      defaultLanguage: org.defaultLanguage, timezone: org.timezone, logoObjectKey: org.logoObjectKey,
+      defaultLanguage: org.defaultLanguage, timezone: org.timezone, currency: org.currency,
+      logoObjectKey: org.logoObjectKey,
     };
   }
 

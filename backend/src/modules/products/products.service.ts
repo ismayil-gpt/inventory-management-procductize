@@ -81,6 +81,7 @@ export class ProductsService {
           reorderPoint: p.reorderPoint,
           minLevel: p.minLevel,
           maxLevel: p.maxLevel,
+          unitCost: p.unitCost !== null ? Number(p.unitCost) : null,
           totalStock,
           status: computeStatus(totalStock, p.minLevel, p.reorderPoint),
         };
@@ -125,6 +126,7 @@ export class ProductsService {
       reorderPoint: product.reorderPoint,
       minLevel: product.minLevel,
       maxLevel: product.maxLevel,
+      unitCost: product.unitCost !== null ? Number(product.unitCost) : null,
       isActive: product.isActive,
       totalStock,
       status: computeStatus(totalStock, product.minLevel, product.reorderPoint),
