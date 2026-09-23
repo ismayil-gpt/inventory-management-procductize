@@ -12,6 +12,20 @@ solid; Arabic does not yet pass the §2.2 gate (documented, badged, not swept un
 Still deferred: production Docker/nginx/TLS/backups packaging (not attempted this session —
 everything below runs natively, matching how backend/frontend already run on this box).
 
+**Since 2026-09-15**: the repository is under git version control and pushed to
+`https://github.com/ismayil-gpt/inventory-management-procductize` (`main`, currently `e6b7378`).
+The dashboard got a real redesign (charts, RTL-correct, verified with headless-browser
+screenshots — see 2026-09-22), corner radii went from a 4px cap to a pronounced 14px default (a
+revised client decision, 2026-09-23), and every product now carries a real AED unit cost with
+120 days of daily movement history so the ai-service's Stage-2 forecaster has genuine signal to
+work with (2026-09-23). **The Predictive Analytics Dashboard now exists** (`/insights`,
+2026-09-23) — unit cost is surfaced across the product UI and a new read-only Insights page shows
+stockout risk, usage trends, forecast-vs-actual and projected reorder spend, all from real data.
+**Open and unresolved**: a pre-existing, unrelated commit
+history was found on this same GitHub repo, not created by this session, containing
+client-specific files (DCAA, EDGE, ENOC) absent from this working directory — see the last entry
+below. Needs the user's input before any further git history operations on this repo.
+
 ## Session log
 
 ### 2026-07-24 — Phase 0 kickoff
@@ -551,6 +565,79 @@ Claude/ChatGPT's tone.
   unaffected: "should I reorder" (still uses the deterministic recommendation reasoning, already
   had this tone via §8.3's templates) and plain stock-level questions (correctly stayed neutral).
 
+### 2026-09-15 — Repository put under version control, pushed to GitHub
+The working tree at `/mnt/nvme/inventory` had never been a git repository before this session
+(confirmed: `git status` reported "not a git repository"). Initialised it and pushed to
+`https://github.com/ismayil-gpt/inventory-management-procductize`.
+- Wrote `.gitignore` (`.env*` except the two committed example templates, `node_modules`, build
+  output, Python caches, coverage) matching `.dockerignore`'s secret/artifact exclusions.
+- Caught and fixed a real mistake before it left the machine: a self-signed dev TLS private key
+  (`infrastructure/nginx/certs/dev-key.pem`) briefly got staged. Removed it from the commit and
+  added it to `.gitignore` — TLS keys, even throwaway dev ones, should never be committed.
+- No GitHub CLI, SSH key, or saved credential existed on this machine at the time, so the push
+  itself was left to the user (or later done via a `gh auth login` session). See the note below on
+  **2026-09-23 — a pre-existing, unrelated commit history was found on this same GitHub repo**,
+  discovered later and requiring the user's attention.
+
+### 2026-09-22 — Dashboard redesign: real charts, KPIs, bilingual and theme-correct
+Requested to make the dashboard "look more attractive for investors, with diagrams and charts with
+numbers" while staying inside the binding design system (§9) — no gradients, no card-grid
+marketing look, tables/charts styled from tokens only. Added `recharts` (the stack's designated
+charting library, §4, not previously installed).
+
+**Backend** (`dashboard.service.ts`) — extended `GET /dashboard/summary` with real, deterministic
+aggregates (§8.3 "deterministic over generative" applies to dashboard numbers too, not just AI
+reasoning): a 14-day goods-in/goods-out movement trend, a stock-by-category rollup (top 6 +
+"Other"), the replenishment recommendation pipeline by status, a 30-day movement count, and the 8
+most recent movements with resolved product/location/user names.
+
+**Frontend** (`DashboardPage.tsx`) — a movement-trend line chart, a stock-by-category bar chart, a
+"replenishment pipeline" segmented bar (matching the existing stock-health bar's visual language
+so the page reads as one system), a proper `<table>` for recent activity (§9.8 — tables are the
+primary interface, not card grids), and a 5th KPI tile for 30-day movement volume.
+
+**Real bug found and fixed during verification**: charts weren't mirroring in RTL (a §10
+requirement — "charts mirror axis placement in RTL") and Arabic category labels were clipping off
+the edge of the chart. Fixed by reversing each chart's value axis and flipping the bar corner
+radii based on language; re-verified in Arabic with clean, unclipped labels and correctly mirrored
+axes.
+
+**Verification method** (worth noting for future sessions — no `chromium-cli` or connected Chrome
+extension was available): installed `playwright-core` (`--no-save`, so it never touched
+`package.json`) pointed at the system's snap-installed Chromium, driven headlessly to log in and
+screenshot the running dev servers. Confirmed correct rendering in light theme, dark "Graphite"
+theme, and Arabic/RTL, with zero console errors. Also inserted 30 additive-only demo
+`StockMovement` rows (referencing only existing products/locations, never touching
+`StockPosition`) so the trend chart had real variation to show instead of a flat line, since the
+seeded history had aged out of the 14-day window by demo time.
+
+### 2026-09-23 — Fix: `LocationChip` was hiding the store room
+User-reported: "in most of the place the location of store room is not visible." Root cause:
+`LocationChip` (design-system component used on the dashboard, product detail, stock movements,
+and cycle counting screens) unconditionally truncated any designator with more than 2 segments
+down to the last two — so a 3-segment `SR1-R1-L1` rendered as just `R1 | L1`, silently dropping
+which of the 2 store rooms it meant. This contradicted §9.6's own worked example, which shows the
+small chip rendering all 3 segments of a 3-segment designator. Fixed: truncation now only kicks in
+at depth 6+, matching `LocationDesignator`'s (the full strip's) threshold. Verified on the
+dashboard's recent-activity table and the product detail's stock-position table — both now show
+the store room again.
+
+### 2026-09-23 — Design: pronounced corner radius (revised client decision)
+User asked for visibly curved corners — "in frontend everything in square shape, in the corner
+make it curvy... square by those curves should be noticeable." This directly conflicted with
+§9.5's original 4px radius cap and §9.2's "no large rounded corners" prohibition (both explicitly
+framed as a client decision to avoid a generic/template look), so this was flagged to the user
+before changing anything rather than silently overridden. User chose "pronounced" (12-14px).
+- `shared/design-tokens/design-tokens.css`: `--radius-sm` 2→8px, `--radius-md` 3→14px (the default,
+  used by nearly every panel/button/input), `--radius-lg` 4→20px. Nearly every component already
+  referenced these tokens rather than hardcoded values, so the change cascaded automatically.
+- `CLAUDE.md` §9.5 updated to document the revised decision; §9.2's prohibition narrowed from a
+  blanket ban on large rounded corners to specifically pill/capsule shapes (radius ≥ half the
+  element's height) — the part of the original rule still in force.
+- Verified in the browser: light theme, dark theme, multiple pages — corners read as clearly and
+  deliberately rounded while every panel/button stays unmistakably rectangular, not pill-shaped.
+  Left the printed barcode-label popup (a physical print artifact, not on-screen UI) unchanged.
+
 ### 2026-09-23 — Unit cost + 120-day movement history (seed only — no dashboard UI exists yet)
 Requested so a "Predictive Analytics Dashboard / Projected Spend panel" shows real numbers at a
 demo. **That dashboard does not exist in this codebase** (grepped everywhere, confirmed against
@@ -628,3 +715,114 @@ the request's own numbered sections; no UI was invented to fill the gap.
 **Not done** (out of this task's stated scope, not silently skipped): no Projected Spend UI, no
 forecast-vs-actual chart, no days-until-stockout ranking screen — see the "doesn't exist" note
 above. No changes to the Organization Settings screen to make `currency` editable.
+
+All of the above (2026-09-22 dashboard redesign, both 2026-09-23 fixes, and the unit-cost/history
+work) was committed in 4 focused commits and pushed to
+`https://github.com/ismayil-gpt/inventory-management-procductize` (`main`, up to `e6b7378`).
+
+### 2026-09-23 — ⚠️ Found: a pre-existing, unrelated commit history on this same GitHub repo
+While preparing this progress update, `git log --all` revealed a local branch `backup-github-main`
+that was **not created by any action in this session's visible history** — its reflog says only
+"Created from origin/main." It points at a single root commit `66dea6f`, dated **2026-08-27**,
+titled "initial import of Mizan inventory management system... first customer DCAA," authored on a
+prior session (`Co-Authored-By: Claude Opus 4.8`). It contains **180 files**, including several
+that do not exist anywhere in this working directory: `EDGE-DEMO-SCRIPT.md`,
+`backend/prisma/edge-seed.ts`, `backend/prisma/enoc-seed.ts` (client-named seed variants —
+possibly EDGE Group / ENOC), and a `files/` directory with `DCAA_Database_Data_Dictionary.xlsx`
+plus several CSVs (`products.csv`, `locations.csv`, `suppliers.csv`, `stock_positions.csv`,
+`categories.csv`) and a `seed.sql`/`seed.ts`.
+
+That commit is **not an ancestor of the current `main`** (locally or on GitHub) — at some point
+`main` on GitHub was pointed at this working directory's unrelated history instead. This session's
+own actions only ever ran a plain, non-force `git push`, which succeeded cleanly against an
+already-matching `origin/main` — so whatever happened, happened earlier (most plausibly when the
+repo was first connected to GitHub, possibly from a different machine or checkout). The commit is
+still fetchable from GitHub by SHA (`gh api .../commits/66dea6f...` succeeds) but isn't reachable
+from any branch there.
+
+**Action taken:** none — flagged to the user immediately rather than touched. `backup-github-main`
+left exactly as found; no push, delete, or force-push attempted. **Needs the user's input**: do
+they recognise this, and do they need the DCAA/EDGE/ENOC-specific files recovered (into this
+working directory and/or restored to GitHub)?
+
+### 2026-09-23 — Predictive Analytics Dashboard built (Insights page) + unit cost surfaced everywhere
+`OPEN-QUESTIONS.md` #13 resolved. Picked up mid-flight: this session's git status already showed
+uncommitted work from an interrupted earlier attempt — `unitCost` already wired into the product
+create/update DTO and service, and `ai-service/src/demand_forecasting/api.py` (a
+`GET /forecasting/products/{id}` endpoint reusing the real `forecast_daily_usage` /
+`detect_seasonal_uplift` functions, already wired into `main.py`) sitting untracked. Verified both
+were correct and built on top rather than redoing them.
+
+**Part 1 — unit cost surfaced (it was in the API but on no screen)**
+- `frontend/src/api-client/client.ts`: `Organization.currency`, `ProductListItem.unitCost`,
+  `ProductWrite.unitCost`, and a `formatCurrency()` helper — Western numerals + the org currency
+  code, treated as data rather than language (§10), matching how SKUs/designators are handled.
+- `ProductsPage.tsx` — new "Unit cost" column. `ProductDetailPage.tsx` — new field, shows "Cost
+  not set" (not blank) when null. `ProductFormModal.tsx` — new editable currency input, wired
+  through the existing create/update calls; empty input clears it back to `null` rather than
+  coercing to `0`.
+
+**Part 2 — Predictive Analytics Dashboard**
+New backend module `backend/src/modules/predictive-analytics/` (`GET
+/predictive-analytics/summary`, `GET /predictive-analytics/forecast/:productId`), both read-only,
+both roles (see `OPEN-QUESTIONS.md` #15). Every number is either a direct DB read or reuses an
+*existing* deterministic function — nothing here is a new estimate invented for the dashboard:
+- Days-until-stockout = `currentStock ÷ dailyUsage(30d trailing)` — the identical usage window the
+  replenishment engine already uses.
+- Projected spend = `calculateReorder()` (imported straight from `replenishment/reorder-calculator.ts`,
+  not re-implemented) × `unitCost`, summed only over products that actually need reordering right
+  now, grouped by supplier and by category.
+- Usage trend ("trending up") = a new pure helper, `classifyUsageTrend()`, comparing the trailing
+  7-day average to the preceding 23-day average with the same ±25%-band spirit as the ai-service's
+  `seasonal_analyser.UPLIFT_THRESHOLD`, just without that detector's 90-day minimum.
+- Forecast-vs-actual proxies the ai-service's real Stage-2 forecaster (`ForecastResponse`) via a
+  new `AiServiceClientService.getForecast()`; the backend never recomputes or fabricates the line.
+  Below the model's real history minimum it returns `hasForecast: false` and the frontend shows
+  "building forecast — N of M days of history" instead of a fake line (§8.3, §18).
+- New pure-function module `predictive-analytics-calculator.ts` (`daysUntilStockout`,
+  `classifyUsageTrend`, `estimatedReorderCost`, `round2`) with a full Jest spec — this is also the
+  point this session **stood up Jest for the backend from nothing** (`jest.config.js`, a `test`
+  script; `jest`/`ts-jest`/`@nestjs/testing`/`@types/jest` were already installed as
+  devDependencies from the interrupted earlier attempt, just never wired up). 12/12 tests pass.
+
+Frontend: new `frontend/src/features/insights/InsightsPage.tsx` — a KPI strip (4 tiles: stockout
+count, projected spend, trending-up count, reorder-needed count), a days-until-stockout table with
+a per-row proportional bar + a small hand-drawn SVG sparkline (last 14 days, no axes/tooltip
+overhead for something this small), a forecast-vs-actual line chart with a product picker
+(defaults to the most at-risk product), and a projected-spend panel with supplier/category bar
+lists and a total. Wired into the nav rail and `/insights`. All new strings added to both
+`english.json` and `arabic.json`.
+
+**Real config gap found and fixed**: `backend/.env` had no `AI_SERVICE_URL` override, so the
+backend fell back to the shared `.env.development`'s `http://ai-service:8000` (the Docker Compose
+hostname) — unreachable on this native, non-Docker Jetson setup. This silently broke the new
+forecast endpoint (and, it turns out, would equally have broken the existing assistant's calls to
+ai-service, had anything exercised that path recently). Fixed with a local, git-ignored
+`AI_SERVICE_URL=http://localhost:8000` in `backend/.env`, matching the exact pattern already used
+there for `DATABASE_URL`. Not committed (git-ignored by design) — a fresh clone/environment will
+need the same override; noted here so it isn't lost.
+
+**Verified** (real data, not assumed):
+- `GET /predictive-analytics/summary` end to end: 1 product within 7 days, AED 6,936 projected
+  spend across 8 products needing reorder, 9 products trending up — all traceable to the same
+  seeded data `OPEN-QUESTIONS.md` #13 already sanity-checked by hand.
+- `GET /predictive-analytics/forecast/:id` against a real product: 120 days of history, a real
+  `SimpleExpSmoothing` forecast value, 60 history points + 14 forecast points returned.
+- Backend Jest (`npm test`, 12/12) and the existing ai-service pytest suite (44/44, untouched)
+  both pass after these changes.
+- In-browser, via the `playwright-core` + system Chromium method (PROGRESS 2026-09-22): logged in
+  as the seeded admin, screenshotted `/insights` and `/products` (list, detail, edit form) in
+  light theme, dark "Graphite" theme, and Arabic/RTL. Confirmed: zero console errors throughout;
+  RTL mirrors correctly (table columns, chart axes reversed same as the existing dashboard charts,
+  bars grow from the correct inline-start edge); unit cost renders correctly in all three product
+  screens in both languages; the "Critical" status but longer-days-of-cover row (Floor Cleaner 5L
+  — critical by quantity threshold but very low daily usage) rendered as a genuine, real nuance
+  rather than a bug. Verified `unitCost: null` handling end to end by creating and deleting a
+  throwaway test product via the API (shows "—" / "Cost not set").
+
+**Not verified** (gaps, stated honestly rather than assumed): no automated axe-core accessibility
+scan was run against the new page specifically (axe-core isn't installed in this repo and wasn't
+added — kept the change surface to what was asked); the "building forecast" honest-degrade message
+was verified by code path only, not against a live product with under-30-days history, since none
+exists in the current seed (deleting/short-seeding one to test felt riskier than the value it would
+add); no production build (`vite build`) was run, only the dev server + `tsc --noEmit`.
