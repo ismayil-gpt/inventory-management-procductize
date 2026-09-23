@@ -9,6 +9,7 @@ import { ProductDetailPage } from './features/product-catalogue/ProductDetailPag
 import { LocationsPage } from './features/storage-locations/LocationsPage';
 import { StockMovementsPage } from './features/stock-movements/StockMovementsPage';
 import { ReplenishmentPage } from './features/replenishment/ReplenishmentPage';
+import { InsightsPage } from './features/insights/InsightsPage';
 import { SuppliersPage } from './features/suppliers/SuppliersPage';
 import { CycleCountPage } from './features/cycle-counting/CycleCountPage';
 import { ReportsPage } from './features/reports/ReportsPage';
@@ -34,6 +35,7 @@ export function App() {
         <Route path="/stock" element={<StockMovementsPage />} />
         <Route path="/cycle-counting" element={<CycleCountPage />} />
         <Route path="/replenishment" element={<ReplenishmentPage />} />
+        <Route path="/insights" element={<InsightsPage />} />
         <Route path="/suppliers" element={<SuppliersPage />} />
         <Route path="/reports" element={<ReportsPage />} />
         <Route path="/audit-log" element={<AuditLogPage />} />

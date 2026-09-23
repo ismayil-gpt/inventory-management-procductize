@@ -95,7 +95,8 @@
       "barcodeHint": "Leave blank to auto-generate",
       "minLevel": "Min level",
       "maxLevel": "Max level",
-      "unitEditNote": "Existing stock is unaffected by edits."
+      "unitEditNote": "Existing stock is unaffected by edits.",
+      "unitCostHint": "e.g. 12.50"
     },
     "import": {
       "title": "Import products from Excel",
@@ -108,7 +109,9 @@
       "row": "Row",
       "commit": "Import {{count}} products",
       "done": "Imported {{count}} products."
-    }
+    },
+    "unitCost": "Unit cost",
+    "unitCostNotSet": "Cost not set"
   },
   "barcode": {
     "manualMode": "Manual entry",
@@ -165,7 +168,14 @@
     "rejectReason": "Reason for rejection",
     "orderQty": "Order quantity",
     "approvedQty": "Approved",
-    "status": { "PENDING": "Pending", "APPROVED": "Approved", "AMENDED": "Amended", "REJECTED": "Rejected", "ORDERED": "Ordered", "RECEIVED": "Received" }
+    "status": {
+      "PENDING": "Pending",
+      "APPROVED": "Approved",
+      "AMENDED": "Amended",
+      "REJECTED": "Rejected",
+      "ORDERED": "Ordered",
+      "RECEIVED": "Received"
+    }
   },
   "purchaseOrders": {
     "number": "PO number",
@@ -174,7 +184,11 @@
     "status": "Status",
     "viewPdf": "View PDF",
     "empty": "No purchase orders yet.",
-    "statusLabel": { "DRAFT": "Draft", "SENT": "Sent", "RECEIVED": "Received" }
+    "statusLabel": {
+      "DRAFT": "Draft",
+      "SENT": "Sent",
+      "RECEIVED": "Received"
+    }
   },
   "suppliers": {
     "add": "Add supplier",
@@ -243,7 +257,10 @@
     "closeOnly": "Close (no changes)",
     "closeApply": "Close & apply variances",
     "applied": "{{count}} adjustment(s) applied",
-    "status": { "OPEN": "Open", "CLOSED": "Closed" }
+    "status": {
+      "OPEN": "Open",
+      "CLOSED": "Closed"
+    }
   },
   "common": {
     "save": "Save",
@@ -276,7 +293,8 @@
     "reports": "Reports",
     "auditLog": "Audit Log",
     "userManagement": "Users",
-    "settings": "Settings"
+    "settings": "Settings",
+    "insights": "Insights"
   },
   "settings": {
     "title": "Organization settings",
@@ -350,5 +368,38 @@
   "errors": {
     "generic": "Something went wrong. Please try again.",
     "network": "No connection. Your work is saved and will sync when you are back online."
+  },
+  "insights": {
+    "title": "Predictive Analytics",
+    "subtitle": "Data-driven forecasts of stockouts, usage trends and reorder spend — every figure traces back to real stock and movement records.",
+    "kpiStockout7": "will run out within 7 days",
+    "kpiSpend": "Projected reorder spend",
+    "kpiSpendSub": "Recommended quantities x unit cost, for products needing reorder now",
+    "kpiTrendingUp": "trending up in usage",
+    "kpiReorderNeeded": "need reordering now",
+    "stockoutPanelTitle": "Days until stockout",
+    "stockoutPanelSub": "Most at-risk products, ranked by days of cover left (30-day average usage)",
+    "stockoutEmpty": "No products have enough recent usage to estimate days until stockout.",
+    "colProduct": "Product",
+    "colDaysLeft": "Days left",
+    "colDailyUsage": "Daily usage",
+    "colRecentUsage": "Last 14 days",
+    "daysCount": "{{count}} days",
+    "forecastPanelTitle": "Forecast vs. actual",
+    "forecastPanelSub": "Historical daily usage against the demand forecast for the selected product",
+    "forecastSelectProduct": "Product",
+    "forecastActual": "Actual (recorded)",
+    "forecastForecast": "Forecast (projected)",
+    "forecastBuilding": "Building forecast — {{days}} of {{min}} days of history needed",
+    "forecastEmpty": "No usage history recorded yet for this product.",
+    "forecastUnavailable": "The forecasting service is temporarily unavailable.",
+    "spendPanelTitle": "Projected reorder spend",
+    "spendPanelSub": "Recommended order quantity x unit cost, for every product currently at or below its reorder point",
+    "spendTotal": "Total projected spend",
+    "spendBySupplier": "By supplier",
+    "spendByCategory": "By category",
+    "spendEmpty": "Nothing needs reordering right now — no projected spend.",
+    "noSupplier": "No supplier assigned",
+    "noCategory": "Uncategorised"
   }
 }

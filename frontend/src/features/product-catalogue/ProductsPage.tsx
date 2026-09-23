@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { Plus, Upload, Printer } from 'lucide-react';
-import { useProducts, useProductCategories, resolveProductByBarcode, fetchLabelsBatch, ApiError } from '../../api-client/client';
+import { useProducts, useProductCategories, useOrganization, resolveProductByBarcode, fetchLabelsBatch, formatCurrency, ApiError } from '../../api-client/client';
 import { usePreferences } from '../../application-shell/preferences.store';
 import { useAuthStore } from '../authentication/auth.store';
 import { StockStatusIndicator } from '../../design-system/stock-status-indicator/StockStatusIndicator';
@@ -39,6 +39,8 @@ export function ProductsPage() {
 
   const products = useProducts({ search, categoryId: categoryId || undefined, lowStock });
   const categories = useProductCategories();
+  const organization = useOrganization();
+  const currency = organization.data?.currency ?? 'AED';
   const isAdmin = useAuthStore((s) => s.user?.role === 'ADMIN');
   const [showForm, setShowForm] = useState(false);
   const [showImport, setShowImport] = useState(false);
@@ -128,6 +130,7 @@ export function ProductsPage() {
               <th style={thStyle}>{t('products.category')}</th>
               <th style={{ ...thStyle, textAlign: 'end' }}>{t('products.onHand')}</th>
               <th style={{ ...thStyle, textAlign: 'end' }}>{t('products.reorderPoint')}</th>
+              <th style={{ ...thStyle, textAlign: 'end' }}>{t('products.unitCost')}</th>
               <th style={thStyle}>{t('products.status')}</th>
             </tr>
           </thead>
@@ -145,6 +148,7 @@ export function ProductsPage() {
                 <td style={{ ...tdStyle, color: 'var(--ink-muted)' }}>{name(p.categoryNameEn ?? '—', p.categoryNameAr ?? '—')}</td>
                 <td style={{ ...tdStyle, textAlign: 'end' }} className="tabular">{p.totalStock} {p.baseUnitCode ?? ''}</td>
                 <td style={{ ...tdStyle, textAlign: 'end', color: 'var(--ink-muted)' }} className="tabular">{p.reorderPoint}</td>
+                <td style={{ ...tdStyle, textAlign: 'end', color: p.unitCost === null ? 'var(--ink-faint)' : 'var(--ink)' }} className="tabular" dir="ltr">{formatCurrency(p.unitCost, currency)}</td>
                 <td style={tdStyle}><StockStatusIndicator status={p.status} /></td>
               </tr>
             ))}

@@ -3,7 +3,7 @@ import { useTranslation } from 'react-i18next';
 import { useQueryClient } from '@tanstack/react-query';
 import { Modal } from '../../design-system/modal/Modal';
 import {
-  useProductCategories, useUnits, useSuppliers,
+  useProductCategories, useUnits, useSuppliers, useOrganization,
   createProduct, updateProduct, ApiError, type ProductDetail,
 } from '../../api-client/client';
 import { usePreferences } from '../../application-shell/preferences.store';
@@ -28,6 +28,8 @@ export function ProductFormModal({ existing, onClose, onSaved }: Props) {
   const categories = useProductCategories();
   const units = useUnits();
   const suppliers = useSuppliers();
+  const organization = useOrganization();
+  const currency = organization.data?.currency ?? 'AED';
   const name = (en: string, ar: string) => (language === 'ar' ? ar : en);
 
   const [form, setForm] = useState({
@@ -42,11 +44,13 @@ export function ProductFormModal({ existing, onClose, onSaved }: Props) {
     minLevel: existing?.minLevel ?? 0,
     maxLevel: existing?.maxLevel ?? 1,
     supplierId: existing?.supplierId ?? '',
+    unitCost: existing?.unitCost ?? null as number | null,
   });
   const [error, setError] = useState<string | null>(null);
   const [saving, setSaving] = useState(false);
 
   const set = (k: keyof typeof form, v: string | number) => setForm((f) => ({ ...f, [k]: v }));
+  const setUnitCost = (raw: string) => setForm((f) => ({ ...f, unitCost: raw.trim() === '' ? null : Number(raw) }));
 
   // On edit, preselect the base unit from its code (detail exposes code, not id).
   useEffect(() => {
@@ -77,6 +81,7 @@ export function ProductFormModal({ existing, onClose, onSaved }: Props) {
         minLevel: Number(form.minLevel),
         maxLevel: Number(form.maxLevel),
         supplierId: form.supplierId || null,
+        unitCost: form.unitCost,
       };
       const saved = existing ? await updateProduct(existing.id, payload) : await createProduct(payload);
       void queryClient.invalidateQueries();
@@ -119,6 +124,9 @@ export function ProductFormModal({ existing, onClose, onSaved }: Props) {
         <Field lbl={t('products.reorderPoint')}><input type="number" min={0} style={input} className="tabular" value={form.reorderPoint} onChange={(e) => set('reorderPoint', e.target.value)} /></Field>
         <Field lbl={t('products.form.minLevel')}><input type="number" min={0} style={input} className="tabular" value={form.minLevel} onChange={(e) => set('minLevel', e.target.value)} /></Field>
         <Field lbl={t('products.form.maxLevel')}><input type="number" min={1} style={input} className="tabular" value={form.maxLevel} onChange={(e) => set('maxLevel', e.target.value)} /></Field>
+        <Field lbl={`${t('products.unitCost')} (${currency})`}>
+          <input type="number" min={0} step="0.01" style={input} className="tabular" dir="ltr" placeholder={t('products.form.unitCostHint')} value={form.unitCost ?? ''} onChange={(e) => setUnitCost(e.target.value)} />
+        </Field>
       </div>
 
       {existing && <p style={{ fontSize: 'var(--text-xs)', color: 'var(--ink-faint)', marginTop: 'var(--space-3)' }}>{t('products.form.unitEditNote')}</p>}

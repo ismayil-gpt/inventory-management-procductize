@@ -3,7 +3,7 @@ import { useParams, useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { useQueryClient } from '@tanstack/react-query';
 import { ArrowLeft, Pencil, Printer, Trash2 } from 'lucide-react';
-import { useProduct, fetchProductLabel, deleteProduct } from '../../api-client/client';
+import { useProduct, useOrganization, fetchProductLabel, deleteProduct, formatCurrency } from '../../api-client/client';
 import { usePreferences } from '../../application-shell/preferences.store';
 import { useAuthStore } from '../authentication/auth.store';
 import { StockStatusIndicator } from '../../design-system/stock-status-indicator/StockStatusIndicator';
@@ -28,6 +28,8 @@ export function ProductDetailPage() {
   const queryClient = useQueryClient();
   const { id } = useParams<{ id: string }>();
   const { data: p, isLoading, isError } = useProduct(id);
+  const organization = useOrganization();
+  const currency = organization.data?.currency ?? 'AED';
   const isAdmin = useAuthStore((s) => s.user?.role === 'ADMIN');
   const [editing, setEditing] = useState(false);
   const [confirmDelete, setConfirmDelete] = useState(false);
@@ -93,6 +95,7 @@ export function ProductDetailPage() {
           <Field label={t('products.packSize')}><span className="tabular">{p.packSize}</span></Field>
           <Field label={t('products.reorderPoint')}><span className="tabular">{p.reorderPoint}</span></Field>
           <Field label={t('products.minMax')}><span className="tabular">{p.minLevel} / {p.maxLevel}</span></Field>
+          <Field label={t('products.unitCost')}><span className="tabular" dir="ltr" style={p.unitCost === null ? { color: 'var(--ink-faint)' } : undefined}>{p.unitCost === null ? t('products.unitCostNotSet') : formatCurrency(p.unitCost, currency)}</span></Field>
         </div>
       </div>
 

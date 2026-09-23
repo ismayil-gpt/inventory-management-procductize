@@ -95,7 +95,8 @@
       "barcodeHint": "اتركه فارغًا للتوليد التلقائي",
       "minLevel": "الحد الأدنى",
       "maxLevel": "الحد الأقصى",
-      "unitEditNote": "لا يتأثر المخزون الحالي بالتعديلات."
+      "unitEditNote": "لا يتأثر المخزون الحالي بالتعديلات.",
+      "unitCostHint": "مثال: 12.50"
     },
     "import": {
       "title": "استيراد المنتجات من Excel",
@@ -108,7 +109,9 @@
       "row": "صف",
       "commit": "استيراد {{count}} منتج",
       "done": "تم استيراد {{count}} منتج."
-    }
+    },
+    "unitCost": "تكلفة الوحدة",
+    "unitCostNotSet": "التكلفة غير محددة"
   },
   "barcode": {
     "manualMode": "إدخال يدوي",
@@ -165,7 +168,14 @@
     "rejectReason": "سبب الرفض",
     "orderQty": "كمية الطلب",
     "approvedQty": "المعتمد",
-    "status": { "PENDING": "قيد الانتظار", "APPROVED": "معتمد", "AMENDED": "معدّل", "REJECTED": "مرفوض", "ORDERED": "تم الطلب", "RECEIVED": "تم الاستلام" }
+    "status": {
+      "PENDING": "قيد الانتظار",
+      "APPROVED": "معتمد",
+      "AMENDED": "معدّل",
+      "REJECTED": "مرفوض",
+      "ORDERED": "تم الطلب",
+      "RECEIVED": "تم الاستلام"
+    }
   },
   "purchaseOrders": {
     "number": "رقم الأمر",
@@ -174,7 +184,11 @@
     "status": "الحالة",
     "viewPdf": "عرض PDF",
     "empty": "لا توجد أوامر شراء بعد.",
-    "statusLabel": { "DRAFT": "مسودة", "SENT": "مُرسل", "RECEIVED": "مُستلم" }
+    "statusLabel": {
+      "DRAFT": "مسودة",
+      "SENT": "مُرسل",
+      "RECEIVED": "مُستلم"
+    }
   },
   "suppliers": {
     "add": "إضافة مورّد",
@@ -243,7 +257,10 @@
     "closeOnly": "إغلاق (بدون تغييرات)",
     "closeApply": "إغلاق وتطبيق الفروقات",
     "applied": "تم تطبيق {{count}} تعديل",
-    "status": { "OPEN": "مفتوح", "CLOSED": "مغلق" }
+    "status": {
+      "OPEN": "مفتوح",
+      "CLOSED": "مغلق"
+    }
   },
   "common": {
     "save": "حفظ",
@@ -276,7 +293,8 @@
     "reports": "التقارير",
     "auditLog": "سجل التدقيق",
     "userManagement": "المستخدمون",
-    "settings": "الإعدادات"
+    "settings": "الإعدادات",
+    "insights": "التحليلات"
   },
   "settings": {
     "title": "إعدادات المؤسسة",
@@ -350,5 +368,38 @@
   "errors": {
     "generic": "حدث خطأ ما. الرجاء المحاولة مرة أخرى.",
     "network": "لا يوجد اتصال. تم حفظ عملك وستتم مزامنته عند عودة الاتصال."
+  },
+  "insights": {
+    "title": "التحليلات التنبؤية",
+    "subtitle": "توقعات مبنية على البيانات لنفاد المخزون واتجاهات الاستهلاك وإنفاق إعادة الطلب — كل رقم هنا يعود إلى سجلات مخزون وحركة حقيقية.",
+    "kpiStockout7": "سينفد خلال 7 أيام",
+    "kpiSpend": "إنفاق إعادة الطلب المتوقع",
+    "kpiSpendSub": "الكميات الموصى بها × تكلفة الوحدة، للمنتجات التي تحتاج إعادة طلب الآن",
+    "kpiTrendingUp": "في ارتفاع بالاستهلاك",
+    "kpiReorderNeeded": "تحتاج إعادة طلب الآن",
+    "stockoutPanelTitle": "الأيام المتبقية حتى نفاد المخزون",
+    "stockoutPanelSub": "المنتجات الأكثر عرضة للخطر، مرتبة حسب أيام التغطية المتبقية (متوسط الاستهلاك لـ 30 يومًا)",
+    "stockoutEmpty": "لا توجد منتجات لديها استهلاك حديث كافٍ لتقدير الأيام المتبقية حتى نفاد المخزون.",
+    "colProduct": "المنتج",
+    "colDaysLeft": "الأيام المتبقية",
+    "colDailyUsage": "الاستهلاك اليومي",
+    "colRecentUsage": "آخر 14 يومًا",
+    "daysCount": "{{count}} يوم",
+    "forecastPanelTitle": "التوقع مقابل الفعلي",
+    "forecastPanelSub": "الاستهلاك اليومي الفعلي مقابل توقع الطلب للمنتج المحدد",
+    "forecastSelectProduct": "المنتج",
+    "forecastActual": "فعلي (مسجّل)",
+    "forecastForecast": "توقع (متوقع)",
+    "forecastBuilding": "يتم بناء التوقع — {{days}} من أصل {{min}} يومًا من السجل مطلوبة",
+    "forecastEmpty": "لا يوجد سجل استهلاك لهذا المنتج بعد.",
+    "forecastUnavailable": "خدمة التنبؤ غير متاحة مؤقتًا.",
+    "spendPanelTitle": "إنفاق إعادة الطلب المتوقع",
+    "spendPanelSub": "كمية إعادة الطلب الموصى بها × تكلفة الوحدة، لكل منتج عند نقطة إعادة الطلب أو أقل منها حاليًا",
+    "spendTotal": "إجمالي الإنفاق المتوقع",
+    "spendBySupplier": "حسب المورّد",
+    "spendByCategory": "حسب الفئة",
+    "spendEmpty": "لا يوجد ما يحتاج إعادة طلب الآن — لا يوجد إنفاق متوقع.",
+    "noSupplier": "لا يوجد مورّد محدد",
+    "noCategory": "غير مصنّف"
   }
 }

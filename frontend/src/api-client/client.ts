@@ -128,7 +128,7 @@ export function useDashboardSummary() {
 // ---- Organization / white-label settings ----
 export interface Organization {
   id: string; code: string; nameEn: string; nameAr: string;
-  defaultLanguage: string; timezone: string; logoObjectKey: string | null;
+  defaultLanguage: string; timezone: string; currency: string; logoObjectKey: string | null;
 }
 export type OrganizationWrite = Partial<Pick<Organization, 'nameEn' | 'nameAr' | 'defaultLanguage' | 'timezone'>>;
 export function useOrganization() {
@@ -148,6 +148,7 @@ export interface ProductListItem {
   baseUnitCode: string | null; packSize: number;
   supplierId: string | null; supplierName: string | null;
   reorderPoint: number; minLevel: number; maxLevel: number;
+  unitCost: number | null;
   totalStock: number; status: StockStatus;
 }
 export interface ProductsResponse { total: number; items: ProductListItem[]; }
@@ -155,6 +156,13 @@ export interface ProductStockPosition { locationNodeId: string; designator: stri
 export interface ProductDetail extends ProductListItem {
   baseUnitNameEn: string | null; supplierLeadTimeDays: number | null; isActive: boolean;
   positions: ProductStockPosition[];
+}
+
+/** Currency amounts are data, not language (§10 — same treatment as SKUs and
+ * designators): Western numerals and the org's currency code, unmirrored. */
+export function formatCurrency(amount: number | null | undefined, currency: string, fractionDigits = 2): string {
+  if (amount === null || amount === undefined) return '—';
+  return `${currency} ${amount.toLocaleString('en-US', { minimumFractionDigits: fractionDigits, maximumFractionDigits: fractionDigits })}`;
 }
 export interface Category { id: string; code: string; nameEn: string; nameAr: string; parentId: string | null; }
 export interface LocationTreeNode {
@@ -318,7 +326,8 @@ export function useLocationTypes() {
 export interface ProductWrite {
   sku: string; barcode?: string | null; nameEn: string; nameAr: string;
   categoryId?: string | null; baseUnitId: string; packSize: number;
-  reorderPoint: number; minLevel: number; maxLevel: number; supplierId?: string | null; isActive?: boolean;
+  reorderPoint: number; minLevel: number; maxLevel: number; supplierId?: string | null;
+  unitCost?: number | null; isActive?: boolean;
 }
 export function createProduct(payload: ProductWrite) {
   return authFetch<ProductDetail>('/products', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) });
@@ -418,5 +427,51 @@ export function queryAssistant(text: string, language: 'en' | 'ar'): Promise<Ass
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({ text, language }),
+  });
+}
+
+// ---- Predictive Analytics Dashboard (read-only) ----
+export interface AtRiskProduct {
+  productId: string; sku: string; nameEn: string; nameAr: string;
+  currentStock: number; dailyUsage: number; daysUntilStockout: number;
+  status: StockStatus; sparkline: number[];
+}
+export interface SpendGroup { amount: number }
+export interface SpendBySupplier extends SpendGroup { supplierId: string | null; supplierName: string | null }
+export interface SpendByCategory extends SpendGroup { categoryId: string | null; nameEn: string | null; nameAr: string | null }
+export interface PredictiveAnalyticsSummary {
+  currency: string;
+  kpis: {
+    stockoutWithin7Days: number;
+    projectedSpend: number;
+    trendingUpCount: number;
+    reorderNeededCount: number;
+  };
+  daysUntilStockout: AtRiskProduct[];
+  projectedSpend: {
+    total: number;
+    bySupplier: SpendBySupplier[];
+    byCategory: SpendByCategory[];
+  };
+}
+export function usePredictiveAnalyticsSummary() {
+  return useQuery({ queryKey: ['predictive-analytics-summary'], queryFn: () => authFetch<PredictiveAnalyticsSummary>('/predictive-analytics/summary'), retry: false });
+}
+
+export interface ForecastHistoryPoint { date: string; actual: number }
+export interface ForecastPoint { date: string; value: number }
+export interface ProductForecast {
+  productId: string; sku: string; nameEn: string; nameAr: string;
+  historyDays: number; minHistoryForForecast: number; minHistoryForSeasonality: number;
+  hasForecast: boolean; hasSufficientHistoryForSeasonality: boolean; hasSeasonalSignal: boolean;
+  dailyUsageForecast: number | null;
+  history: ForecastHistoryPoint[]; forecast: ForecastPoint[];
+}
+export function useProductForecast(productId: string | undefined) {
+  return useQuery({
+    queryKey: ['product-forecast', productId],
+    enabled: Boolean(productId),
+    queryFn: () => authFetch<ProductForecast>(`/predictive-analytics/forecast/${productId}`),
+    retry: false,
   });
 }
