@@ -21,6 +21,9 @@ revised client decision, 2026-09-23), and every product now carries a real AED u
 work with (2026-09-23). **The Predictive Analytics Dashboard now exists** (`/insights`,
 2026-09-23) — unit cost is surfaced across the product UI and a new read-only Insights page shows
 stockout risk, usage trends, forecast-vs-actual and projected reorder spend, all from real data.
+The demo dataset was then widened the same day: 75 products (was 50) across 9 categories, a third
+store room (SR3, 90 shelves total), 150 days of movement history (was 120), and real cycle-count
+sessions (4 closed + 1 open) with genuine variances — cycle counting had zero rows before this.
 **Open and unresolved**: a pre-existing, unrelated commit
 history was found on this same GitHub repo, not created by this session, containing
 client-specific files (DCAA, EDGE, ENOC) absent from this working directory — see the last entry
@@ -826,3 +829,55 @@ added — kept the change surface to what was asked); the "building forecast" ho
 was verified by code path only, not against a live product with under-30-days history, since none
 exists in the current seed (deleting/short-seeding one to test felt riskier than the value it would
 add); no production build (`vite build`) was run, only the dev server + `tsc --noEmit`.
+
+### 2026-09-23 — Demo dataset widened: more products, a third store room, 150-day history, real cycle counts
+Requested: more products, a longer movement history ("at least 100 days" — the movement history
+was actually already 120 days at this point, see the previous entry above; this was most likely
+a UI-perception gap, not a real data gap — `StockMovementsPage.tsx`'s "session activity" list
+reads from the **local offline outbox** (`useOutbox`), not from `GET /stock-movements`, so a
+fresh browser genuinely shows nothing regardless of how much history the database holds. Not
+changed this session — flagged in `OPEN-QUESTIONS.md` #16 rather than guessed at, since adding a
+proper historical movements list is a real feature decision, not a data-seeding one), more store
+rooms "whatever needed", and cycle-counting data, which was genuinely empty (0 rows) before this.
+
+All in `backend/prisma/seed.ts` (still idempotent — re-running it wipes and rebuilds the same
+demo-owned tables as before; `AuditLog`/`StockMovement` stay append-only and untouched, per DESC
+control #10):
+- **Store rooms**: `SR1`/`SR2` → `SR1`/`SR2`/`SR3`. Same `STORE_ROOM > RACK > LEVEL` shape, no
+  code change — this is exactly what §5A's configurable hierarchy is for. 90 shelves total (was
+  60): confirmed `74 → 111` location nodes.
+- **Products**: 50 → 75 (`PRD-0051`..`PRD-0075`), all with a real `unitCost`, `nameEn` + `nameAr`,
+  a real supplier and category — no placeholder rows. Added two new categories (`Bakery &
+  Kitchen`, `Safety & PPE`) rather than cramming genuinely different items (cooking oil, PPE)
+  into the existing seven, and two new suppliers to match, so the Insights spend-by-supplier/
+  category panels stay meaningfully varied rather than concentrating everything on the same five.
+  The new 25 sit mostly in the new SR3 (giving it a real reason to exist, not an empty shell) with
+  flat, unaccelerated usage — the existing 5 accelerating SKUs from the earlier seeding session
+  stay the only ones trending toward stockout, so that story isn't diluted.
+- **Movement history**: `HISTORY_DAYS` 120 → 150 (comfortable margin over the "at least 100 days"
+  ask rather than sitting right at the line). Confirmed real span end to end:
+  `2026-04-27` to `2026-09-23` (149 days) across all 75 products' `GOODS_OUT` rows.
+- **Cycle counts** (`CycleCount`/`CycleCountLine` — previously never seeded, 0 rows): 5 sessions —
+  4 `CLOSED` historical ones (SR1, SR2, SR3-verification, a "critical items" spot-check, spread 5
+  to 50 days in the past) plus 1 `OPEN` in-progress one, 22 lines total. 8 lines carry a genuine
+  non-zero variance; each of those produces a real `ADJUSTMENT` `StockMovement` with
+  `quantity: variance`, the exact same signed-delta convention `CycleCountingService.close()`
+  uses — not a re-derived rule. Added `cycleCountLine.deleteMany()` / `cycleCount.deleteMany()` to
+  the seed's cleanup block (neither table is append-only, so this is safe) so re-running the seed
+  stays idempotent instead of accumulating duplicate sessions.
+
+**Verified** (real re-seeded DB, not assumed): 75 active products; 3 store rooms / 18 racks / 90
+levels; `StockMovement` span 149 days; 5 `CycleCount` rows (4 closed, 1 open), 22 lines. In-browser
+via the `playwright-core` + system Chromium method: Products page shows "75 products"; Locations
+page shows SR1/SR2/SR3 each with real item/unit rollups; Cycle Counting page lists all 5 sessions
+with correct notes/counts/status (previously showed the page's empty state); Insights page still
+renders correctly against the wider catalogue (8 products need reordering, AED 6,936 projected
+spend — unchanged, since none of the 25 new products were seeded as low-stock; 13 trending up in
+usage, up from 9, which is just more products existing to show noise-driven movement — not
+manufactured). Zero console errors throughout. Backend Jest (12/12) and ai-service pytest (44/44)
+both still pass — this was a data-only change, no application code touched.
+
+**Not done**: `backend/prisma/entity-seed.ts` (the separate `-Sample` multi-entity provisioner)
+was left untouched — this request was about the current single-organisation demo dataset, and
+that script has its own, smaller, independent product/history set (§ PROGRESS 2026-09-23 unit-cost
+entry above already documented it separately).
