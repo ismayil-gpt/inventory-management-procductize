@@ -40,6 +40,15 @@ export interface DashboardSummary {
   products: number; shelves: number; storeRooms: number; suppliers: number; totalUnits: number;
   stockStatus: { inStock: number; low: number; critical: number; outOfStock: number };
   needsReorder: number;
+  movements30d: number;
+  movementTrend: Array<{ date: string; goodsIn: number; goodsOut: number }>;
+  categoryBreakdown: Array<{ categoryId: string; nameEn: string; nameAr: string; units: number }>;
+  recommendationsPipeline: Array<{ status: string; count: number }>;
+  recentActivity: Array<{
+    id: string; type: string; quantity: number; createdAt: string;
+    sku: string; productNameEn: string; productNameAr: string;
+    designator: string | null; userDisplayName: string;
+  }>;
 }
 
 async function getPublic<T>(path: string): Promise<T> {
