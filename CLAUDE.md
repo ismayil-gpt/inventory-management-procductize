@@ -829,7 +829,7 @@ The interface is an **instrument**, not a brochure. Dense, quiet, precise. One b
 - ❌ Gradients anywhere
 - ❌ Glassmorphism, blur-behind, translucent panels
 - ❌ Emoji as icons
-- ❌ Large rounded corners, pill-shaped buttons
+- ❌ Pill-shaped or capsule buttons (radius ≥ half the element's height) — see §9.5 for the (now pronounced) corner radius itself
 - ❌ Drop shadows on resting elements
 - ❌ Card grids where a table belongs
 - ❌ Cream backgrounds with terracotta accents
@@ -930,11 +930,15 @@ Every text/background pair must meet **WCAG 2.1 AA (4.5:1)**. Verify with a cont
 ### 9.5 Geometry and space
 
 ```
---radius-sm: 2px    inputs, chips
---radius-md: 3px    buttons, panels     ← default
---radius-lg: 4px    modals
-Never exceed 4px.
+--radius-sm: 8px    inputs, chips
+--radius-md: 14px   buttons, panels     ← default
+--radius-lg: 20px   modals
 ```
+
+Revised client decision, 2026-09-23: corners are now pronounced and clearly
+visible — a deliberate departure from the original 4px cap. Every surface is
+still a rectangle; the curve is a corner treatment, never enough to read as a
+pill or capsule (§9.2 still bans that on buttons, tab pills, badges, etc.).
 
 8px grid: `4 8 12 16 24 32 48 64`.
 
