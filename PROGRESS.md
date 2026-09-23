@@ -881,3 +881,45 @@ both still pass — this was a data-only change, no application code touched.
 was left untouched — this request was about the current single-organisation demo dataset, and
 that script has its own, smaller, independent product/history set (§ PROGRESS 2026-09-23 unit-cost
 entry above already documented it separately).
+
+### 2026-09-23 — Movement history browsing screen (resolves OPEN-QUESTIONS #16)
+Requested directly, following the previous entry's finding that `StockMovementsPage.tsx` only
+ever showed the local offline outbox, never real database history.
+
+Added a **History** mode to the existing `/stock` page — a segmented control (same visual
+language as the movement-type switcher already on that page) next to "Record", so the
+scan-to-record workflow stays exactly as it was and this is additive, not a redesign.
+`frontend/src/features/stock-movements/MovementHistoryPanel.tsx` (new) reads the real
+`GET /stock-movements` endpoint, which already returned everything needed (sku, bilingual name,
+resolved location designators, resolved user name) — no backend change was needed for this part.
+
+- Filters: type, product (all 75), date range, and — ADMIN only — user. `useUsers()` gained an
+  `enabled` parameter (default `true`, so `UsersPage.tsx`'s existing call is unaffected) so the
+  STORE_KEEPER role never fires `GET /users` at all (it's ADMIN-only on the backend); a real 403
+  was caught in-browser testing as the store keeper before this fix.
+- Table matches §9.8 (hairlines, tabular figures, sticky header) and reuses the dashboard's
+  `activityTime/activityType/activityProduct/activityQty/activityLocation/activityBy` translation
+  keys rather than duplicating them, plus one new `Reason` column (cycle-count adjustments carry a
+  real reason, e.g. "Cycle count cmuduxqg adjustment" — directly traceable to the cycle-count
+  session that produced it).
+- "Load more" grows the request limit rather than true cursor pagination — simplest correct
+  approach for a capped `GET /stock-movements?limit=` the backend already supports up to 5000.
+
+**Real bug found and fixed, not just in the new screen**: `StockMovement.quantity` is a positive
+*magnitude* for `GOODS_IN`/`GOODS_OUT`/`TRANSFER` (validated `> 0` in `movement.schema.ts`) and
+only a signed *delta* for `ADJUSTMENT` — so a naive `quantity > 0 ? '+' : ''` treats every
+Goods-Out row as an increase. The new history panel showed this immediately once real
+`ADJUSTMENT` rows existed to contrast against (this session's cycle-count seed data, previous
+entry). Fixed with a `signedQty(type, quantity)` helper in the new panel, and applied the exact
+same fix to `DashboardPage.tsx`'s recent-activity table, which had the identical bug (pre-existing,
+just less visible before this session added real `ADJUSTMENT` movements to the seed). Also added
+`dir="ltr"` to both quantity cells — Arabic/RTL was rendering "-1" as "1-" (the bidi algorithm
+reordering a bare minus sign the same way it would to any text), confirmed and fixed by screenshot
+before/after.
+
+**Verified**: in-browser via `playwright-core` + system Chromium — Record tab unchanged and still
+works; History tab with type/product/date filters and "Load more", light and dark theme, Arabic/RTL
+(table fully mirrors, "-1" renders correctly left-of-digit); logged in as `storekeeper@example.com`
+specifically to confirm no 403 and no user filter shown. Zero console errors throughout, in every
+combination tested. `tsc --noEmit` clean. Backend Jest (12/12) unaffected (no backend code changed
+for this feature — the endpoint already existed and already returned the right shape).
