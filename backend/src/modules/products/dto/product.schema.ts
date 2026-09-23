@@ -14,6 +14,7 @@ export const createProductSchema = z.object({
   minLevel: z.number().int().min(0),
   maxLevel: z.number().int().min(1),
   supplierId: z.string().trim().min(1).optional().nullable(),
+  unitCost: z.number().min(0).max(999999.99).optional().nullable(),
   isActive: z.boolean().default(true),
 });
 export type CreateProductDto = z.infer<typeof createProductSchema>;

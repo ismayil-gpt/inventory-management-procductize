@@ -7,6 +7,19 @@ export interface AssistantQueryResult {
   isDevelopmentModel: boolean;
 }
 
+export interface ForecastResult {
+  productId: string;
+  historyDays: number;
+  minHistoryForForecast: number;
+  minHistoryForSeasonality: number;
+  hasForecast: boolean;
+  hasSufficientHistoryForSeasonality: boolean;
+  hasSeasonalSignal: boolean;
+  dailyUsageForecast: number | null;
+  history: Array<{ date: string; actual: number }>;
+  forecast: Array<{ date: string; value: number }>;
+}
+
 /**
  * Typed client for the internal-only ai-service (§3.2). Plain `fetch` — matches the
  * project's existing minimalism (raw `httpx` on the Python side, no wrapper library).
@@ -45,5 +58,30 @@ export class AiServiceClientService {
       });
     }
     return (await response.json()) as AssistantQueryResult;
+  }
+
+  /** Forecast vs. actual daily usage for one product (§8.2 Stage 2), from the
+   * real ai-service forecaster — never re-implemented here (§18). */
+  async getForecast(productId: string): Promise<ForecastResult> {
+    let response: Response;
+    try {
+      response = await fetch(`${this.baseUrl}/forecasting/products/${productId}`, {
+        signal: AbortSignal.timeout(30_000),
+      });
+    } catch {
+      throw new ServiceUnavailableException({
+        code: 'AI_SERVICE_UNREACHABLE',
+        messageEn: 'The forecasting service is temporarily unavailable. Please try again shortly.',
+        messageAr: 'خدمة التنبؤ غير متاحة مؤقتًا. يرجى المحاولة مرة أخرى بعد قليل.',
+      });
+    }
+    if (!response.ok) {
+      throw new ServiceUnavailableException({
+        code: 'AI_SERVICE_ERROR',
+        messageEn: 'Could not compute a forecast for this product.',
+        messageAr: 'تعذّر حساب توقع لهذا المنتج.',
+      });
+    }
+    return (await response.json()) as ForecastResult;
   }
 }

@@ -21,6 +21,7 @@ import { AuditLogModule } from './modules/audit-log/audit-log.module';
 import { ReportsModule } from './modules/reports/reports.module';
 import { CycleCountingModule } from './modules/cycle-counting/cycle-counting.module';
 import { AssistantModule } from './modules/assistant/assistant.module';
+import { PredictiveAnalyticsModule } from './modules/predictive-analytics/predictive-analytics.module';
 
 /**
  * Root module. Feature modules are added here as capabilities land (§3.2).
@@ -53,6 +54,7 @@ import { AssistantModule } from './modules/assistant/assistant.module';
     ReportsModule,
     CycleCountingModule,
     AssistantModule,
+    PredictiveAnalyticsModule,
   ],
 })
 export class AppModule {}

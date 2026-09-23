@@ -188,6 +188,7 @@ export class ProductsService {
           minLevel: dto.minLevel,
           maxLevel: dto.maxLevel,
           supplierId: dto.supplierId ?? null,
+          unitCost: dto.unitCost ?? null,
           isActive: dto.isActive,
         },
       });
@@ -219,6 +220,7 @@ export class ProductsService {
           baseUnitId: dto.baseUnitId,
           packSize: dto.packSize,
           reorderPoint: dto.reorderPoint,
+          unitCost: dto.unitCost === undefined ? undefined : dto.unitCost,
           minLevel: dto.minLevel,
           maxLevel: dto.maxLevel,
           supplierId: dto.supplierId === undefined ? undefined : dto.supplierId,
