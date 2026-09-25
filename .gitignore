@@ -51,3 +51,6 @@ database/migrations/dev.db
 
 # Misc
 *.tmp
+
+# Generated audit runs (screenshots + reports) — reproducible, not source
+/audit/
