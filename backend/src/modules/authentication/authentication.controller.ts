@@ -27,17 +27,17 @@ export class AuthenticationController {
   @HttpCode(200)
   @UsePipes(new ZodValidationPipe(refreshSchema))
   @ApiOperation({ summary: 'Exchange a refresh token for a new access token' })
-  refresh(@Body() dto: RefreshDto) {
-    return this.auth.refresh(dto.refreshToken);
+  refresh(@Body() dto: RefreshDto, @Req() req: Request) {
+    return this.auth.refresh(dto.refreshToken, req.ip);
   }
 
   @Post('logout')
   @HttpCode(200)
   @UseGuards(JwtAuthGuard)
   @ApiBearerAuth()
-  @ApiOperation({ summary: 'Sign out (client discards tokens)' })
+  @ApiOperation({ summary: 'Sign out — ends the session on the server' })
   logout(@CurrentUser() user: AuthenticatedUser, @Req() req: Request) {
-    return this.auth.logout(user.userId, req.ip);
+    return this.auth.logout(user.userId, user.sessionId, req.ip);
   }
 
   @Get('me')

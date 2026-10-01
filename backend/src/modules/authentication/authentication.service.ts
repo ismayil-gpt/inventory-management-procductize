@@ -3,8 +3,20 @@ import { JwtService } from '@nestjs/jwt';
 import { ConfigService } from '@nestjs/config';
 import { verify } from '@node-rs/argon2';
 import type { User } from '@prisma/client';
+import { randomBytes } from 'node:crypto';
 import { PrismaService } from '../../database/prisma.service';
 import { LoginDto } from './dto/login.schema';
+import { AuthSessionRepository, hashRefreshId } from './auth-session.repository';
+
+/** "15m", "7d", "3600s" → milliseconds (the JWT_*_TTL settings). */
+export function durationToMs(value: string): number {
+  const match = /^(\d+)\s*([smhd])$/.exec(value.trim());
+  if (!match) return Number(value) * 1000;
+  const unit = { s: 1_000, m: 60_000, h: 3_600_000, d: 86_400_000 }[match[2] as 's' | 'm' | 'h' | 'd'];
+  return Number(match[1]) * unit;
+}
+
+const newRefreshId = () => randomBytes(32).toString('base64url');
 
 interface TokenPair {
   accessToken: string;
@@ -19,6 +31,7 @@ export class AuthenticationService {
     private readonly prisma: PrismaService,
     private readonly jwt: JwtService,
     private readonly config: ConfigService,
+    private readonly sessions: AuthSessionRepository,
   ) {}
 
   /** DESC #4/#5 — verify credentials, enforce lockout, issue tokens, audit. */
@@ -59,37 +72,67 @@ export class AuthenticationService {
     });
     await this.writeAudit(user.id, 'LOGIN_SUCCESS', user.id, ipAddress);
 
-    const tokens = await this.issueTokens(user);
-    return { ...tokens, user: this.publicUser(user) };
+    return this.startSession(user);
   }
 
-  /** DESC #4 — exchange a valid refresh token for a fresh access token. */
-  async refresh(refreshToken: string) {
-    let payload: { sub: string };
+  /**
+   * DESC #4 — exchange a refresh token for a new token pair. The refresh token
+   * rotates: each one works once. Presenting one that was already used means
+   * it was copied, so the whole session is ended (reuse detection).
+   */
+  async refresh(refreshToken: string, ipAddress?: string) {
+    const sessionExpired = new UnauthorizedException({
+      code: 'INVALID_REFRESH_TOKEN',
+      messageEn: 'Your session has expired. Please sign in again.',
+      messageAr: 'انتهت جلستك. الرجاء تسجيل الدخول مرة أخرى.',
+    });
+    let payload: { sub: string; sid?: string; rid?: string };
     try {
       payload = await this.jwt.verifyAsync(refreshToken, {
         secret: this.config.get<string>('JWT_REFRESH_SECRET'),
       });
     } catch {
-      throw new UnauthorizedException({
-        code: 'INVALID_REFRESH_TOKEN',
-        messageEn: 'Your session has expired. Please sign in again.',
-        messageAr: 'انتهت جلستك. الرجاء تسجيل الدخول مرة أخرى.',
-      });
+      throw sessionExpired;
     }
+    // Tokens from before sessions existed carry no session id: sign in again.
+    if (!payload.sid || !payload.rid) throw sessionExpired;
+
+    const session = await this.sessions.findById(payload.sid);
+    if (!session || session.userId !== payload.sub || session.revokedAt || session.expiresAt <= new Date()) {
+      throw sessionExpired;
+    }
+    if (hashRefreshId(payload.rid) !== session.refreshTokenHash) {
+      await this.sessions.revoke(session.id, 'REFRESH_REUSE');
+      await this.writeAudit(payload.sub, 'SESSION_REFRESH_REUSE', payload.sub, ipAddress, { sessionId: session.id });
+      this.logger.warn(`Refresh token reused; session ${session.id} ended for user ${payload.sub}`);
+      throw sessionExpired;
+    }
+
     const user = await this.prisma.user.findUnique({ where: { id: payload.sub } });
     if (!user || !user.isActive) {
-      throw new UnauthorizedException({ code: 'INVALID_REFRESH_TOKEN', messageEn: 'Session invalid.', messageAr: 'الجلسة غير صالحة.' });
+      await this.sessions.revoke(session.id, 'USER_DEACTIVATED');
+      throw sessionExpired;
     }
-    const tokens = await this.issueTokens(user);
+    const refreshId = newRefreshId();
+    await this.sessions.rotate(session.id, refreshId);
+    const tokens = await this.issueTokens(user, session.id, refreshId);
     return { ...tokens, user: this.publicUser(user) };
   }
 
-  async logout(userId: string, ipAddress?: string) {
-    // NOTE: stateless JWT. Server-side revocation via a Redis denylist (DESC #4)
-    // is a documented production upgrade; the client discards its tokens now.
-    await this.writeAudit(userId, 'LOGOUT', userId, ipAddress);
+  /** DESC #4 — sign-out ends the session on the server, not only in the browser. */
+  async logout(userId: string, sessionId: string | undefined, ipAddress?: string) {
+    if (sessionId) await this.sessions.revoke(sessionId, 'SIGN_OUT');
+    await this.writeAudit(userId, 'LOGOUT', userId, ipAddress, sessionId ? { sessionId } : undefined);
     return { success: true };
+  }
+
+  /** Opens a server-side session and returns its first token pair. */
+  private async startSession(user: User) {
+    const refreshId = newRefreshId();
+    const expiresAt = new Date(Date.now() + durationToMs(this.config.get<string>('JWT_REFRESH_TTL', '7d')));
+    const session = await this.sessions.create(user.id, refreshId, expiresAt);
+    const tokens = await this.issueTokens(user, session.id, refreshId);
+    return { ...tokens, user: this.publicUser(user) };
   }
 
   async me(userId: string) {
@@ -124,16 +167,16 @@ export class AuthenticationService {
     }
   }
 
-  private async issueTokens(user: User): Promise<TokenPair> {
+  private async issueTokens(user: User, sessionId: string, refreshId: string): Promise<TokenPair> {
     const accessToken = await this.jwt.signAsync(
-      { sub: user.id, email: user.email, role: user.role },
+      { sub: user.id, email: user.email, role: user.role, sid: sessionId },
       {
         secret: this.config.get<string>('JWT_SECRET'),
         expiresIn: this.config.get<string>('JWT_ACCESS_TTL', '15m'),
       },
     );
     const refreshToken = await this.jwt.signAsync(
-      { sub: user.id, type: 'refresh' },
+      { sub: user.id, type: 'refresh', sid: sessionId, rid: refreshId },
       {
         secret: this.config.get<string>('JWT_REFRESH_SECRET'),
         expiresIn: this.config.get<string>('JWT_REFRESH_TTL', '7d'),
@@ -154,10 +197,10 @@ export class AuthenticationService {
   }
 
   /** DESC #9/#15 — audit every auth event; store the user id, never the password. */
-  private async writeAudit(actorId: string | null, action: string, entityId: string, ipAddress?: string) {
+  private async writeAudit(actorId: string | null, action: string, entityId: string, ipAddress?: string, after?: Record<string, string>) {
     try {
       await this.prisma.auditLog.create({
-        data: { actorId, action, entityType: 'User', entityId, ipAddress: ipAddress ?? null },
+        data: { actorId, action, entityType: 'User', entityId, ipAddress: ipAddress ?? null, after },
       });
     } catch (error) {
       this.logger.error(`Failed to write audit log for ${action}`);

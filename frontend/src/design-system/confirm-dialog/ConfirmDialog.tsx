@@ -62,7 +62,7 @@ export function ConfirmDialog({
       <div style={{ display: 'flex', justifyContent: 'flex-end', gap: 'var(--space-3)', marginTop: 'var(--space-6)' }}>
         <button type="button" onClick={onClose} disabled={busy} style={{ ...btn, border: '1px solid var(--hairline)', background: 'var(--surface)', color: 'var(--ink)' }}>{t('common.cancel')}</button>
         <button type="button" onClick={() => void run()} disabled={busy} style={{ ...btn, border: 'none', background: busy ? 'var(--ink-faint)' : confirmBg, color: confirmInk }}>
-          {busy ? t('common.deleting') : (confirmLabel ?? t('common.delete'))}
+          {busy ? (confirmLabel ? t('common.loading') : t('common.deleting')) : (confirmLabel ?? t('common.delete'))}
         </button>
       </div>
     </Modal>

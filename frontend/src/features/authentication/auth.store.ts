@@ -23,8 +23,13 @@ interface AuthState {
   accessToken: string | null;
   refreshToken: string | null;
   user: AuthUser | null;
+  /** A fresh sign-in: stores the session and starts the idle clock (DESC #6). */
+  startSession: (session: Session) => void;
+  /** Rotated tokens from a refresh: stores them without counting as user activity. */
   setSession: (session: Session) => void;
   clearSession: () => void;
+  /** Adopt whatever another tab last stored (rotated tokens or a sign-out). */
+  reloadFromStorage: () => void;
 }
 
 const STORAGE_KEY = 'mizan.auth';
@@ -39,16 +44,30 @@ function loadInitial(): Pick<AuthState, 'accessToken' | 'refreshToken' | 'user'>
   return { accessToken: null, refreshToken: null, user: null };
 }
 
-export const useAuthStore = create<AuthState>((set) => ({
+export const useAuthStore = create<AuthState>((set, get) => ({
   ...loadInitial(),
+  startSession: (session) => {
+    // Signing in is activity: the idle clock (DESC #6) starts now, not at the last session's end.
+    // A token refresh is not — background requests must never keep an idle user signed in.
+    writeLastActivity(Date.now());
+    get().setSession(session);
+  },
   setSession: (session) => {
     localStorage.setItem(STORAGE_KEY, JSON.stringify(session));
-    // Signing in is activity: the idle clock (DESC #6) starts now, not at the last session's end.
-    writeLastActivity(Date.now());
     set({ accessToken: session.accessToken, refreshToken: session.refreshToken, user: session.user });
   },
   clearSession: () => {
     localStorage.removeItem(STORAGE_KEY);
     set({ accessToken: null, refreshToken: null, user: null });
   },
+  reloadFromStorage: () => set(loadInitial()),
 }));
+
+// Tabs share one server-side session. When another tab rotates the tokens or
+// signs out, follow it — a tab holding a stale refresh token would otherwise
+// present it again, which the server treats as theft and ends the session.
+if (typeof window !== 'undefined') {
+  window.addEventListener('storage', (event) => {
+    if (event.key === STORAGE_KEY) useAuthStore.getState().reloadFromStorage();
+  });
+}

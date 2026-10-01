@@ -56,6 +56,23 @@ model User {
   createdAt         DateTime  @default(now())
 }
 
+// DESC #4 — one row per signed-in session (a browser or tablet). Access and
+// refresh tokens carry its id; revoking the row ends the session server-side
+// within seconds. The refresh token rotates on every use and only its SHA-256
+// hash is stored, so a database read never yields a usable token. Revoked rows
+// are kept as a record of when and why each session ended.
+model AuthSession {
+  id               String    @id @default(cuid())
+  userId           String
+  refreshTokenHash String
+  createdAt        DateTime  @default(now())
+  lastUsedAt       DateTime  @default(now())
+  expiresAt        DateTime
+  revokedAt        DateTime?
+  revokedReason    String?   // SIGN_OUT | REFRESH_REUSE | USER_DEACTIVATED | PASSWORD_CHANGED | ADMIN_ENDED | MFA_RESET
+  @@index([userId, revokedAt])
+}
+
 // One row for a single-customer deployment. Present from day one so the platform
 // can serve multiple customers later without a schema migration. Every
 // tenant-owned row below carries organizationId.

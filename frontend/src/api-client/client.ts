@@ -70,20 +70,41 @@ export async function loginRequest(email: string, password: string): Promise<Ses
   return body as Session;
 }
 
-async function tryRefresh(): Promise<boolean> {
-  const { refreshToken, setSession, clearSession } = useAuthStore.getState();
-  if (!refreshToken) return false;
-  const response = await fetch(`${API_BASE}/auth/refresh`, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ refreshToken }),
+// Refresh tokens are single-use (DESC #4): presenting one twice ends the
+// session. So refreshes never overlap — one at a time inside a tab (a shared
+// promise) and across tabs (a Web Lock) — and a tab first checks whether
+// another tab has already refreshed before spending its own token.
+let refreshInFlight: Promise<boolean> | null = null;
+
+function tryRefresh(rejectedAccessToken: string | null): Promise<boolean> {
+  refreshInFlight ??= refreshOnce(rejectedAccessToken).finally(() => {
+    refreshInFlight = null;
   });
-  if (!response.ok) {
-    clearSession();
-    return false;
-  }
-  setSession((await response.json()) as Session);
-  return true;
+  return refreshInFlight;
+}
+
+async function refreshOnce(rejectedAccessToken: string | null): Promise<boolean> {
+  const run = async (): Promise<boolean> => {
+    useAuthStore.getState().reloadFromStorage();
+    const { accessToken, refreshToken, setSession, clearSession } = useAuthStore.getState();
+    // Another tab already refreshed: use its tokens rather than reusing ours.
+    if (accessToken && accessToken !== rejectedAccessToken) return true;
+    if (!refreshToken) return false;
+    const response = await fetch(`${API_BASE}/auth/refresh`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ refreshToken }),
+    });
+    if (!response.ok) {
+      clearSession();
+      return false;
+    }
+    setSession((await response.json()) as Session);
+    return true;
+  };
+  return typeof navigator !== 'undefined' && navigator.locks
+    ? navigator.locks.request('mizan-token-refresh', run)
+    : run();
 }
 
 /** Authenticated request with one automatic refresh-and-retry on 401. */
@@ -98,7 +119,7 @@ export async function authFetch<T>(path: string, options: RequestInit = {}, allo
   const response = await fetch(`${API_BASE}${path}`, { ...options, headers });
 
   if (response.status === 401 && allowRetry) {
-    if (await tryRefresh()) return authFetch<T>(path, options, false);
+    if (await tryRefresh(accessToken)) return authFetch<T>(path, options, false);
     useAuthStore.getState().clearSession();
     throw new ApiError(401, { code: 'UNAUTHENTICATED' });
   }
@@ -206,8 +227,12 @@ export function resolveLocationByBarcode(code: string) {
 }
 
 // ---- Users (ADMIN) ----
-export interface UserRow { id: string; email: string; displayName: string; role: 'ADMIN' | 'STORE_KEEPER'; isActive: boolean; lastLoginAt: string | null; preferredLanguage: string; createdAt: string; }
+export interface UserRow { id: string; email: string; displayName: string; role: 'ADMIN' | 'STORE_KEEPER'; isActive: boolean; lastLoginAt: string | null; preferredLanguage: string; createdAt: string; openSessions: number; }
 export interface UserWrite { email: string; displayName: string; role: 'ADMIN' | 'STORE_KEEPER'; password?: string; isActive?: boolean; preferredLanguage?: string; }
+/** DESC #4 — sign a user out of every device now (ADMIN). */
+export function endUserSessions(id: string) {
+  return authFetch<{ ended: number }>(`/users/${id}/end-sessions`, { method: 'POST' });
+}
 export function useUsers(enabled = true) {
   return useQuery({ queryKey: ['users'], queryFn: () => authFetch<UserRow[]>('/users'), retry: false, enabled });
 }

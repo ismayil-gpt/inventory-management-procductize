@@ -32,7 +32,13 @@ export class UsersController {
   @Patch(':id')
   @ApiOperation({ summary: 'Update a user — role, active, password (ADMIN)' })
   update(@Param('id') id: string, @Body(new ZodValidationPipe(updateUserSchema)) dto: UpdateUserDto, @CurrentUser() user: AuthenticatedUser) {
-    return this.users.update(id, dto, user.userId);
+    return this.users.update(id, dto, user.userId, user.sessionId);
+  }
+
+  @Post(':id/end-sessions')
+  @ApiOperation({ summary: 'Sign a user out of every device now (ADMIN, DESC #4)' })
+  endSessions(@Param('id') id: string, @CurrentUser() user: AuthenticatedUser) {
+    return this.users.endSessions(id, user.userId, user.sessionId);
   }
 
   @Delete(':id')

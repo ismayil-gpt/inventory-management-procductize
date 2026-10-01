@@ -12,7 +12,7 @@ export function LoginPage() {
   const { t } = useTranslation();
   const navigate = useNavigate();
   const { toggleLanguage, language } = usePreferences();
-  const { setSession } = useAuthStore();
+  const { startSession } = useAuthStore();
   const currentUser = useAuthStore((s) => s.user);
   const info = useSystemInfo();
   const orgName = language === 'ar'
@@ -34,7 +34,7 @@ export function LoginPage() {
     setSubmitting(true);
     try {
       const session = await loginRequest(email.trim().toLowerCase(), password);
-      setSession(session);
+      startSession(session);
       navigate('/briefing');
     } catch (err) {
       if (err instanceof ApiError) {
