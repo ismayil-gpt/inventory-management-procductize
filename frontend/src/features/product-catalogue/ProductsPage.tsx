@@ -113,7 +113,7 @@ export function ProductsPage() {
           placeholder={t('products.searchPlaceholder')}
           style={{ ...control, minWidth: '260px', flex: '1 1 260px' }}
         />
-        <select value={categoryId} onChange={(e) => setCategoryId(e.target.value)} style={{ ...control, minWidth: '180px' }}>
+        <select aria-label={t('products.category')} value={categoryId} onChange={(e) => setCategoryId(e.target.value)} style={{ ...control, minWidth: '180px' }}>
           <option value="">{t('products.allCategories')}</option>
           {categories.data?.map((c) => (
             <option key={c.id} value={c.id}>{name(c.nameEn, c.nameAr)}</option>

@@ -77,7 +77,18 @@ bars, sliding rail indicator, drawer/modal entry) respects `prefers-reduced-moti
 - The split-flap and count-up components expose the final value to screen readers through
   `sr-only` text, so assistive technology never hears the intermediate characters.
 
+## Automated axe-core pass (2026-10-01)
+
+`frontend/e2e/accessibility.spec.ts` runs axe-core (WCAG 2.0/2.1 A and AA) on all 16 screens in
+English/light and Arabic/dark, plus the sign-in screen. Run with `npm run test:e2e` in `frontend/`.
+
+- First run: 2 issue types on 3 screens, identical in both modes. 5 filter dropdowns had no
+  accessible name (Movements, Products, Audit log), and 2 scrolling tables could not be reached
+  by keyboard. Both fixed (`aria-label`; scrolling region with `role="region"`, a label and `tabIndex=0`).
+- Second run: **0 violations** on every screen in both modes. No colour-contrast failures.
+
 ## Not yet done
 
-- Automated axe-core pass in Playwright (§15) — still outstanding for the full app.
-- Manual keyboard walk-through of every screen in both languages and themes.
+- Screens behind interactions (modals, drawers, the two-step sign-in step) are not yet in the axe run.
+- Manual keyboard walk-through and a screen-reader pass (NVDA / VoiceOver), which axe cannot replace.
+- Tablet widths (768 and 1024 px).
