@@ -1061,3 +1061,25 @@ duplicate, unknown barcode) with the full-screen signs; rack view highlight and 
 compliance page (20 controls, evidence expands); assistant empty state. `tsc` clean; `vite build`
 succeeds with the control matrix bundled. **Not verified**: assistant source rows with a live
 answer — the ai-service was not running this session.
+
+### 2026-10-01 (night) — DESC controls: 4 closed, nodemailer upgraded
+
+Today's design and feature work committed first (`4d6a486`, local only; not pushed, pending the
+open question about the unrelated GitHub history).
+
+| Control | Before | Now | Commit |
+|---|---|---|---|
+| 12 Rate limiting on `/auth/*` | not started | ✔ verified: `@nestjs/throttler`, 10 per 60 s per IP and endpoint, bilingual 429; spec + live run | `1ee2ab5` |
+| 15 No personal data in logs | not started | ✔ verified: Pino JSON logs, redaction of credentials, emails, IPs, query strings; spec + live capture | `1ee2ab5` |
+| 6 Idle timeout | in progress | ✔ verified: shared-tab activity, 60 s warning, audited sign-out, login notice; fast-forwarded browser clock | `2931cc8` |
+| 16 Dependency scanning | not started | ☑ `scripts/run-dependency-scan.sh` + dated reports; non-breaking fixes applied; remediation plan filed | `6fcace1` |
+| 17 Backup and recovery | not started | ☑ encrypted backups, guarded restore, tested restore PASS (17 tables, 4/4 rules) | `46ab70c` |
+
+Also: nodemailer 6 → 10 (SMTP command-injection advisory), checked by a new real SMTP round-trip
+test (`7a7257b`). Backend tests: 21/21.
+
+**Still open, in order**: 4 session revocation (needs Redis or a token table), 7 two-step sign-in
+(TOTP), 13 strict CSP, the major-version upgrades in
+`dependency-scan-reports/2026-10-01/remediation.md` (NestJS, FastAPI/Starlette, multer, exceljs,
+react-router), and the production-only controls 1, 2, 11, 19 (TLS, encrypted volumes, Docker
+network, least-privilege role), which arrive with production packaging.
