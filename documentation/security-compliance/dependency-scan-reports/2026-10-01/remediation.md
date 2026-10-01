@@ -8,7 +8,7 @@ Still open: each needs a major-version upgrade, so each is its own change with i
 
 | Finding (runtime) | Affects | Fix | Risk of the upgrade | Priority |
 |---|---|---|---|---|
-| nodemailer — SMTP command injection, mail to unintended domain | Supplier PO email (the only outbound traffic) | nodemailer 6 → current major | Low: `createTransport` / `sendMail` API is stable | **1 — do next** |
+| ~~nodemailer — SMTP command injection, mail to unintended domain~~ | Supplier PO email (the only outbound traffic) | **Done 2026-10-01:** nodemailer 6 → 10, @types/nodemailer 8 | Verified by `email.service.spec.ts` (real SMTP round trip with PDF attachment) | ✔ |
 | multer — denial of service | Excel product import upload | multer 1 → 2 (via @nestjs/platform-express) | Medium: comes with the NestJS upgrade | 2 |
 | @nestjs/core, platform-express, swagger, config — injection, body-parser DoS, js-yaml and lodash in swagger | Whole API | NestJS 10 → current major | High: framework upgrade; full regression run needed | 2 |
 | exceljs → uuid bounds check | Excel exports and import | exceljs upgrade or replace | Medium | 3 |
