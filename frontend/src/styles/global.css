@@ -20,6 +20,11 @@ body {
   text-rendering: optimizeLegibility;
 }
 
+/* Arabic leads with Plex Sans Arabic so Latin fallbacks never set the rhythm. */
+:root[dir='rtl'] body {
+  font-family: var(--font-sans-arabic);
+}
+
 /* All figures align in columns (§9.3). */
 .tabular {
   font-variant-numeric: tabular-nums;
@@ -36,4 +41,176 @@ body {
   font-family: var(--font-mono);
   letter-spacing: var(--tracking-designator);
   font-variant-numeric: tabular-nums;
+}
+
+/* ---------------------------------------------------------------------------
+ * Interaction feedback — every button answers a press.
+ * ------------------------------------------------------------------------ */
+button,
+a {
+  transition:
+    background-color var(--motion-duration) var(--motion-easing),
+    border-color var(--motion-duration) var(--motion-easing),
+    color var(--motion-duration) var(--motion-easing),
+    transform var(--motion-duration) var(--motion-easing),
+    box-shadow var(--motion-duration) var(--motion-easing);
+}
+button:not(:disabled):active {
+  transform: scale(0.97);
+}
+
+/* Rail links: inactive items warm on hover; the sliding sign marks the active one. */
+.rail-link:not(.active):hover {
+  background: var(--surface-sunken);
+}
+
+/* Table rows warm on hover rather than snapping. */
+tbody tr {
+  transition: background-color var(--motion-duration) var(--motion-easing);
+}
+
+/* ---------------------------------------------------------------------------
+ * Page entry — one orchestrated moment per navigation: the page rises into
+ * place, then its direct sections follow in a short stagger.
+ * ------------------------------------------------------------------------ */
+@keyframes mizan-rise {
+  from { opacity: 0; transform: translateY(10px); }
+  to   { opacity: 1; transform: none; }
+}
+@keyframes mizan-fade {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+.page-enter {
+  animation: mizan-rise var(--motion-medium) var(--motion-easing) both;
+}
+.page-enter > * > * {
+  animation: mizan-rise var(--motion-medium) var(--motion-easing) both;
+}
+.page-enter > * > *:nth-child(2) { animation-delay: 40ms; }
+.page-enter > * > *:nth-child(3) { animation-delay: 80ms; }
+.page-enter > * > *:nth-child(4) { animation-delay: 120ms; }
+.page-enter > * > *:nth-child(5) { animation-delay: 160ms; }
+.page-enter > * > *:nth-child(n + 6) { animation-delay: 200ms; }
+
+/* Fresh table rows (first load or a newly recorded movement) settle in. */
+@keyframes mizan-row-flash {
+  from { background-color: var(--primary-soft); }
+  to   { background-color: transparent; }
+}
+.row-fresh > td {
+  animation: mizan-row-flash 1.4s var(--motion-easing) both;
+}
+
+/* ---------------------------------------------------------------------------
+ * Signs — the one bold element (§9.6). Three types, three meanings.
+ * ------------------------------------------------------------------------ */
+.sign-location {
+  background: var(--sign);
+  color: var(--sign-legend);
+  border: 3px solid var(--sign-line);
+  border-radius: var(--radius-sign);
+  font-family: var(--font-sign);
+  font-weight: 800;
+}
+.sign-go {
+  background: var(--sign-go);
+  color: var(--sign-on-go);
+  border-radius: var(--radius-sign);
+  font-weight: 600;
+}
+.sign-stop {
+  background: var(--sign-stop);
+  color: var(--sign-on-stop);
+  border-radius: var(--radius-sign);
+  outline: 2px solid var(--sign-on-stop);
+  outline-offset: -5px;
+  font-weight: 600;
+}
+
+/* A sign that has just changed swings in from its top edge, like a panel
+   hung from a gantry settling after being swapped. */
+@keyframes mizan-sign-swing {
+  0%   { opacity: 0; transform: perspective(600px) rotateX(-70deg); }
+  70%  { opacity: 1; transform: perspective(600px) rotateX(6deg); }
+  100% { transform: none; }
+}
+.sign-enter {
+  transform-origin: top center;
+  animation: mizan-sign-swing var(--motion-medium) var(--motion-easing) both;
+}
+
+/* Split-flap cells: each character drops from the top half as it ticks. */
+@keyframes mizan-flap {
+  from { transform: perspective(300px) rotateX(-90deg); opacity: 0.4; }
+  to   { transform: none; opacity: 1; }
+}
+.flap-char {
+  display: inline-block;
+  transform-origin: center 40%;
+}
+.flap-char.is-ticking {
+  animation: mizan-flap var(--motion-flap-step) linear both;
+}
+
+/* "Listening" indicator — a square lamp that blinks like an apron beacon. */
+@keyframes mizan-beacon {
+  0%, 55%  { opacity: 1; }
+  60%, 100% { opacity: 0.2; }
+}
+.beacon {
+  width: 8px;
+  height: 8px;
+  border-radius: var(--radius-dot);
+  background: var(--sign-legend);
+  display: inline-block;
+  animation: mizan-beacon 1.6s steps(1, end) infinite;
+}
+
+/* Bars grow from their start edge when they first render. */
+@keyframes mizan-grow {
+  from { transform: scaleX(0); }
+  to   { transform: scaleX(1); }
+}
+.bar-grow {
+  transform-origin: left center;
+  animation: mizan-grow var(--motion-slow) var(--motion-easing) both;
+}
+:root[dir='rtl'] .bar-grow {
+  transform-origin: right center;
+}
+
+/* Floating layers (modals, drawers, toasts) arrive rather than appear. */
+.float-enter {
+  animation: mizan-rise var(--motion-medium) var(--motion-settle) both;
+}
+@keyframes mizan-slide-from-end {
+  from { opacity: 0; transform: translateX(32px); }
+  to   { opacity: 1; transform: none; }
+}
+@keyframes mizan-slide-from-end-rtl {
+  from { opacity: 0; transform: translateX(-32px); }
+  to   { opacity: 1; transform: none; }
+}
+.drawer-enter {
+  animation: mizan-slide-from-end var(--motion-medium) var(--motion-settle) both;
+}
+:root[dir='rtl'] .drawer-enter {
+  animation-name: mizan-slide-from-end-rtl;
+}
+.backdrop-enter {
+  animation: mizan-fade var(--motion-medium) var(--motion-easing) both;
+}
+
+/* Reduced motion: keep the end state, drop the journey. */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0ms !important;
+    animation-delay: 0ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0ms !important;
+  }
+  .beacon { opacity: 1; }
 }

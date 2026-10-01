@@ -4,6 +4,8 @@ import { useTranslation } from 'react-i18next';
 import { usePreferences } from '../../application-shell/preferences.store';
 import { useAuthStore } from './auth.store';
 import { loginRequest, useSystemInfo, ApiError } from '../../api-client/client';
+import { MizanMark } from '../../design-system/brand-mark/MizanMark';
+import { SplitFlapText } from '../../design-system/airfield-signs/SplitFlapText';
 
 // Real JWT login (§11 #3-5). argon2id verification + lockout are enforced server-side.
 export function LoginPage() {
@@ -22,7 +24,7 @@ export function LoginPage() {
   const [error, setError] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState(false);
 
-  if (currentUser) return <Navigate to="/dashboard" replace />;
+  if (currentUser) return <Navigate to="/briefing" replace />;
 
   const onSubmit = async (event: FormEvent) => {
     event.preventDefault();
@@ -31,7 +33,7 @@ export function LoginPage() {
     try {
       const session = await loginRequest(email.trim().toLowerCase(), password);
       setSession(session);
-      navigate('/dashboard');
+      navigate('/briefing');
     } catch (err) {
       if (err instanceof ApiError) {
         if (err.body.code === 'ACCOUNT_LOCKED') {
@@ -57,16 +59,22 @@ export function LoginPage() {
 
   return (
     <div style={{ minHeight: '100vh', display: 'grid', placeItems: 'center', background: 'var(--canvas)', padding: 'var(--space-6)' }}>
-      <div style={{ width: '360px', background: 'var(--surface)', border: '1px solid var(--hairline)', borderRadius: 'var(--radius-lg)', padding: 'var(--space-8)' }}>
-        <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '10px', marginBottom: 'var(--space-6)' }}>
-          <img src="/logo/mizan-mark.svg" alt="Mizan" width={48} height={48} />
-          <div style={{ fontFamily: 'var(--font-mono)', fontWeight: 600, letterSpacing: '0.1em', fontSize: 'var(--text-xl)', color: 'var(--primary)' }}>MIZAN</div>
-          <div style={{ height: '2px', width: '64px', background: 'var(--gold)' }} />
-          <div style={{ fontSize: 'var(--text-2xs)', letterSpacing: 'var(--tracking-label)', textTransform: 'uppercase', color: 'var(--ink-muted)' }}>{t('app.tagline')}</div>
-          {orgName && (
-            <div style={{ marginTop: '2px', fontSize: 'var(--text-sm)', fontWeight: 600, color: 'var(--ink)', textAlign: 'center' }}>{orgName}</div>
-          )}
+      <div className="float-enter" style={{ width: '380px', maxWidth: '100%', display: 'flex', flexDirection: 'column', gap: 'var(--space-4)' }}>
+        {/* Arrival gantry: the mark beside a location sign whose legend flaps into place. */}
+        <div style={{ background: 'var(--gantry)', border: '1px solid var(--gantry-line)', borderRadius: 'var(--radius-lg)', padding: 'var(--space-4)', display: 'flex', flexDirection: 'column', gap: 'var(--space-3)' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 'var(--space-3)' }}>
+            <MizanMark size={60} title="Mizan" />
+            <div dir="ltr" className="sign-location sign-enter" style={{ flex: 1, fontSize: '36px', lineHeight: 1, padding: '12px 16px 8px', textAlign: 'center', letterSpacing: 'var(--tracking-designator)' }}>
+              <SplitFlapText text="MIZAN" startDelayMs={180} />
+            </div>
+          </div>
+          <div style={{ borderTop: '1px solid var(--gantry-line)', paddingTop: 'var(--space-3)', display: 'flex', justifyContent: 'space-between', gap: 'var(--space-3)', fontSize: 'var(--text-xs)', color: 'var(--gantry-muted)' }}>
+            <span>{t('app.tagline')}</span>
+            {orgName && <span style={{ color: 'var(--gantry-ink)', fontWeight: 600, textAlign: 'end' }}>{orgName}</span>}
+          </div>
         </div>
+
+        <div style={{ background: 'var(--surface)', border: '1px solid var(--hairline)', borderRadius: 'var(--radius-lg)', padding: 'var(--space-6)' }}>
 
         <form onSubmit={onSubmit}>
           <div style={{ marginBottom: 'var(--space-4)' }}>
@@ -79,15 +87,15 @@ export function LoginPage() {
           </div>
 
           {error && (
-            <div role="alert" style={{ marginBottom: 'var(--space-4)', padding: '9px 12px', borderRadius: 'var(--radius-md)', background: 'var(--critical-soft)', color: 'var(--critical)', fontSize: 'var(--text-xs)' }}>
+            <div role="alert" className="sign-enter" style={{ marginBottom: 'var(--space-4)', padding: '9px 12px', borderRadius: 'var(--radius-md)', background: 'var(--critical-soft)', color: 'var(--critical)', fontSize: 'var(--text-xs)' }}>
               {error}
             </div>
           )}
 
           <button type="submit" disabled={submitting} style={{
-            width: '100%', height: '40px', borderRadius: 'var(--radius-md)', border: 'none',
+            width: '100%', height: '44px', fontWeight: 600, borderRadius: 'var(--radius-md)', border: 'none',
             background: submitting ? 'var(--ink-faint)' : 'var(--primary)', color: 'var(--on-primary)',
-            fontWeight: 500, fontSize: 'var(--text-sm)', cursor: submitting ? 'default' : 'pointer',
+            fontSize: 'var(--text-sm)', cursor: submitting ? 'default' : 'pointer',
           }}>
             {submitting ? t('common.loading') : t('auth.signIn')}
           </button>
@@ -96,6 +104,7 @@ export function LoginPage() {
         <button type="button" onClick={toggleLanguage} style={{ marginTop: 'var(--space-3)', background: 'none', border: 'none', color: 'var(--ink-muted)', fontSize: 'var(--text-xs)', cursor: 'pointer', width: '100%' }}>
           {language === 'ar' ? 'English' : 'العربية'}
         </button>
+        </div>
       </div>
     </div>
   );

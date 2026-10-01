@@ -2,6 +2,9 @@ import { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useHealth, useSystemInfo } from '../api-client/client';
 import { useOutbox } from '../offline-queue/outbox.store';
+import { Link } from 'react-router-dom';
+import { Building2 } from 'lucide-react';
+import { useAuthStore } from '../features/authentication/auth.store';
 
 // Persistent 32px status strip (§9.7). Never hidden — it is how the store keeper
 // trusts scans are saving. Here it also proves the frontend<->backend link.
@@ -10,6 +13,7 @@ export function StatusStrip() {
   const health = useHealth();
   const system = useSystemInfo();
   const pendingCount = useOutbox((s) => s.pendingCount);
+  const isAdmin = useAuthStore((s) => s.user?.role === 'ADMIN');
   const [clock, setClock] = useState('');
 
   useEffect(() => {
@@ -60,7 +64,7 @@ export function StatusStrip() {
       }}
     >
       <span style={cell}>
-        <span style={{ width: '8px', height: '8px', borderRadius: '50%', background: connectionColor }} />
+        <span aria-hidden style={{ width: '8px', height: '8px', borderRadius: 'var(--radius-dot)', background: connectionColor }} />
         {connectionLabel}
       </span>
       <span style={cell}>
@@ -79,6 +83,16 @@ export function StatusStrip() {
         {t('status.queueDepth', { count: pendingCount })}
       </span>
       <span style={cell}>{system.data?.organizationCode ?? 'DEMO'}</span>
+      {/* The on-premise promise (DESC control 18), always in view. Admins can open the evidence. */}
+      {isAdmin ? (
+        <Link to="/compliance" style={{ ...cell, color: 'var(--ok)', fontWeight: 600, textDecoration: 'none' }} title={t('compliance.badgeTitle')}>
+          <Building2 size={13} strokeWidth={1.75} aria-hidden /> {t('compliance.badge')}
+        </Link>
+      ) : (
+        <span style={{ ...cell, color: 'var(--ok)', fontWeight: 600 }} title={t('compliance.badgeTitle')}>
+          <Building2 size={13} strokeWidth={1.75} aria-hidden /> {t('compliance.badge')}
+        </span>
+      )}
       <span style={{ ...cell, marginInlineStart: 'auto', borderInlineEnd: 'none' }} className="tabular">
         {clock} GST
       </span>

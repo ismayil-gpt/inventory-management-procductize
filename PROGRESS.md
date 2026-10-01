@@ -923,3 +923,141 @@ works; History tab with type/product/date filters and "Load more", light and dar
 specifically to confirm no 403 and no user filter shown. Zero console errors throughout, in every
 combination tested. `tsc --noEmit` clean. Backend Jest (12/12) unaffected (no backend code changed
 for this feature — the endpoint already existed and already returned the right shape).
+
+### 2026-10-01 — "Airfield" design edition: new visual identity, motion and logo
+
+The client reviewed two clickable HTML demos and approved the airfield-signage direction for
+the whole product, asking for rounder small squares, more animation and a new logo. Recorded as a
+revised client decision in CLAUDE.md §9.1, §9.3–§9.6, §9.8 and §9.9. Branch
+`feature/design-airfield-edition`.
+
+**Design system**
+- `shared/design-tokens/design-tokens.css`: new palette (concrete-grey ground, sign yellow accent,
+  warm-grey night theme). Token *names* are unchanged, so every screen re-skinned without editing
+  feature code. New sign tokens (`--sign`, `--sign-legend`, `--sign-go`, `--sign-stop`, …), new
+  radii (`--radius-dot` 2px, `--radius-chip` 6px, `--radius-sign` 10px) and motion tokens.
+- Type: Overpass / Overpass Mono / IBM Plex Sans Arabic via `@fontsource`. **Fonts were not
+  actually self-hosted before this** — `frontend/public/fonts` never existed and Plex fell back to
+  system faces. They are now bundled into `dist/assets` (31 woff2 files), no CDN.
+- New `design-system/airfield-signs/`: `SplitFlapText` (departure-board legend) and
+  `CountUpNumber`. New `design-system/brand-mark/MizanMark.tsx`.
+- `LocationDesignator` is now a gantry of location signs whose legends split-flap into place;
+  `LocationChip`, `StockStatusIndicator` take the new radii.
+
+**Motion** (`frontend/src/styles/global.css`): page entry with a short section stagger, sliding
+active sign in the navigation rail, page title sign that swings in, count-up dashboard figures,
+growing bars (dashboard and Insights), modal rise, drawer slide from the reading-end edge, button
+press feedback, scanning beacon. All of it is off under `prefers-reduced-motion`, and JS-driven
+motion gives screen readers only the final value.
+
+**Signs as meaning**: approve and "review recommendations" use the yellow direction sign; confirm
+reject uses the red mandatory sign; the assistant launcher became a sign tile (was a round bubble)
+and moved above the status strip, which it used to overlap.
+
+**Logo**: a balance scale (mīzān) drawn as a location sign — `brand/` and `frontend/public/logo/`
+(mark, mono mark, lockup; also the favicon). PO and report PDFs and printed shelf labels now carry
+the sign header and the new colours.
+
+**Bug fixed along the way**: the purchase-order PDF always had a blank second page holding only
+the footer (it was drawn below the bottom margin). Now one page.
+
+**Evidence**: `documentation/security-compliance/accessibility-conformance-report.md` (new) — all
+31 text/background and sign pairs pass WCAG AA (tightest: `ink-faint` on `canvas`, 4.58:1).
+
+**Verified**: `tsc --noEmit` clean for app code (the three `vite.config.ts` errors pre-date this
+work: missing `@types/node`). `vite build` succeeds. In-browser via `playwright-core` + system
+Chromium: login, dashboard, locations with a scanned shelf (flap captured mid-animation and
+settled), replenishment, products in Arabic + dark — zero console errors. PO and stock-on-hand
+PDFs generated from the running backend and inspected.
+
+**Not done**: axe-core pass, tablet-width check, manual keyboard walk-through of every screen.
+Note: `npm install` prunes `playwright-core` because it is not in `package.json`; reinstall with
+`npm install --no-save playwright-core` before taking screenshots.
+
+### 2026-10-01 (later) — Navigation matches the approved demo; Purchase orders page restored
+
+- **Rail** (`NavigationRail.tsx`) now uses the demo's grouping and wording: Operate (Dashboard,
+  Scan and move, Movements, Cycle counts) · Stock (Products, Storage locations) · Purchasing
+  (Replenishment with a yellow pending-approval count, Purchase orders, Suppliers) · Analyse
+  (Insights, Reports, Assistant — opens the assistant drawer) · Administer (Audit log, Users,
+  Settings). Footer row: collapse, demo logins (development only), sign out. Collapse is
+  remembered in localStorage and forced at ≤1024px (§9.7 tablet rule).
+- **Store keepers** no longer see Audit log, Users or Settings — the first two are ADMIN-only APIs
+  (they used to show a 403) and Settings is admin editing. Everything else stays visible because the
+  backend allows those reads.
+- **Scan and move / Movements** share `/stock`; the tab now lives in the URL (`?view=history`), so
+  the rail can link straight to the history.
+- **Top bar**: page sign, catalogue search (lands on `/products?search=…`, which Products now
+  reads), name and role, language, theme. Sign out moved to the rail.
+- **Purchase orders page restored** (`features/purchase-orders/PurchaseOrdersPage.tsx`, route
+  `/purchase-orders`) at the client's request. This reverses the 2026-08-03 removal. It is a read-only list
+  (PO number, supplier, created, lines, total qty, status sign, emailed time, View PDF) on the
+  existing `GET /purchase-orders` and `/:id/pdf` endpoints. Generation stays in Replenishment.
+
+**Verified** in-browser on a fresh Vite instance: every rail link, Movements opening the History
+tab, top-bar search ("coffee" → 5 products), collapse/expand, Assistant opening, Arabic + dark,
+store-keeper rail (0 admin links), zero console errors. At 1440×900 the full admin rail fits
+without scrolling.
+
+**Gotcha (fixed later the same day)**: the long-running Vite dev server did not pick up edits to
+`shared/` (it sits outside `frontend/`), so new strings and colours were served stale. `vite.config.ts`
+now adds `../shared` to the dev-server watcher, so those edits reload like any other file.
+
+### 2026-10-01 (later still) — Palette option A: no black blocks in light mode, new dark grey
+
+The client found the black sign panels heavy in light mode and wanted a clearer dark grey. Three
+combinations were shown side by side (artifact "Mizan Colour Options": A direction sign, B taxiway
+blue, C control-tower teal); the client chose **A**.
+
+- Light: yellow buttons, active rail item, page-title sign and location signs with a dark legend,
+  sitting on a pale yellow gantry. Dark: cool blue-grey night (`#0F141A` / `#161D25`) with
+  black-and-yellow signs.
+- New tokens: `--primary-ink` (the accent as text, icons and underlines, since yellow fails on
+  white), `--chart-primary` (chart lines and bars), `--sign-line`, `--gantry`, `--gantry-line`,
+  `--gantry-ink`, `--gantry-muted`. `--sign-white`, `--sign-meta` and `--sign-rule` are gone.
+  Every `color: var(--primary)` use moved to `--primary-ink` and every chart use to `--chart-primary`.
+- Danger confirm buttons now use the stop-sign pair (they would otherwise have shown dark text on red).
+- Sent purchase orders use a quiet outlined tag; only drafts wear the yellow sign.
+- CLAUDE.md §9.1, §9.4, §9.6 and the accessibility report updated. All 36 pairs pass WCAG AA.
+- Not changed: the logo files and PDF headers keep the black-and-yellow sign. They are printed or
+  favicon artwork, not themed UI.
+
+### 2026-10-01 (evening) — Differentiators: morning briefing, rack view, scan signals, on-site promise, assistant sources
+
+Built from the "what makes Mizan different" list the client approved ("add everything").
+Two items were deliberately not built and recorded instead (OPEN-QUESTIONS #17–#19).
+
+- **Morning briefing** (`features/morning-briefing/MorningBriefingPage.tsx`, `/briefing`) — now
+  the landing page after sign-in. One count of "things that need you today" on the gantry, then:
+  approvals with the template reasoning and an in-place Approve (ADMIN only, same governed API
+  as Replenishment), products running out within 7 days that are not yet awaiting approval
+  (from the predictive summary), open cycle counts, and queued offline scans. The store keeper
+  sees everything except approvals.
+- **Rack view** (`features/storage-locations/ShelfView.tsx`) — selecting a rack, or any shelf in
+  it, draws the rack floor-up with each level's products as chips coloured by stock state; the
+  scanned shelf is highlighted. Depth-agnostic: it draws whatever stock-holding children the
+  parent has. The location tree now also expands to whatever is selected or scanned.
+- **Scanner and scan signals** — the §6 keyboard-wedge listener now exists
+  (`barcode-scanning/barcode-scanner-listener.hook.ts`: <30 ms key gaps, 100 ms idle flush,
+  1.5 s duplicate window, no focused field needed). Its "Scan" tab was a placeholder until now. Only one barcode field
+  holds the scanner at a time. Every lookup and recorded movement raises a full-screen sign
+  (`design-system/scan-signal/`): yellow "Accepted", red "Not accepted", location-sign "Already
+  scanned", each with its own sound and vibration pattern.
+- **On-site promise** — "On-site" badge in the status strip, and a new ADMIN page **Security and
+  data** (`features/security-compliance/`, `/compliance`): the three on-premise facts, then all
+  20 DESC controls with status and evidence parsed at build time from
+  `documentation/security-compliance/control-implementation-matrix.md`, so the page can never
+  claim more than the evidence file.
+- **Assistant** — answers now show the records they were built from (the API always returned
+  them; the panel never displayed them), plus a "answers come only from your stock data" note and
+  three suggested questions.
+- Fixes found on the way: `--space-5` was used by the drawer and assistant but never defined
+  (both rendered with no padding); the duplicate-scan memory reset whenever a lookup paused the
+  listener; the rail footer is now pinned so Sign out stays reachable as the list grows.
+
+**Verified** in-browser on the main dev server: briefing as admin (7 items) and store keeper
+(1 item, no approve buttons), English light and Arabic dark; simulated hardware scans (accepted,
+duplicate, unknown barcode) with the full-screen signs; rack view highlight and tree expansion;
+compliance page (20 controls, evidence expands); assistant empty state. `tsc` clean; `vite build`
+succeeds with the control matrix bundled. **Not verified**: assistant source rows with a live
+answer — the ai-service was not running this session.

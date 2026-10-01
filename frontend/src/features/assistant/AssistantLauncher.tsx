@@ -20,16 +20,18 @@ export function AssistantLauncher() {
       onClick={open}
       aria-label={t('assistant.title')}
       title={t('assistant.title')}
+      className="float-enter"
       style={{
         position: 'fixed',
-        insetBlockEnd: 'var(--space-6)',
+        insetBlockEnd: 'calc(var(--status-strip-height) + var(--space-4))',
         insetInlineEnd: 'var(--space-6)',
         width: '52px',
         height: '52px',
-        borderRadius: '50%',
-        border: 'none',
-        background: 'var(--primary)',
-        color: 'var(--on-primary)',
+        // A location sign tile, not a round bubble (§9.2 — no capsule shapes).
+        borderRadius: 'var(--radius-md)',
+        border: '2px solid var(--sign-line)',
+        background: 'var(--sign)',
+        color: 'var(--sign-legend)',
         display: 'inline-flex',
         alignItems: 'center',
         justifyContent: 'center',

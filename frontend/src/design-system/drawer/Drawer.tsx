@@ -8,6 +8,7 @@ export function Drawer({ title, onClose, children, width = 380 }: { title: strin
   return (
     <div
       onClick={onClose}
+      className="backdrop-enter"
       style={{ position: 'fixed', inset: 0, background: 'rgb(0 0 0 / 0.4)', zIndex: 50 }}
     >
       <div
@@ -15,6 +16,7 @@ export function Drawer({ title, onClose, children, width = 380 }: { title: strin
         role="dialog"
         aria-modal="true"
         aria-label={title}
+        className="drawer-enter"
         style={{
           position: 'fixed',
           insetBlock: 0,

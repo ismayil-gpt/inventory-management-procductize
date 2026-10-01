@@ -43,12 +43,13 @@ export function ConfirmDialog({
   };
 
   const btn: React.CSSProperties = { height: '36px', padding: '0 18px', borderRadius: 'var(--radius-md)', fontSize: 'var(--text-sm)', fontWeight: 500, cursor: 'pointer' };
-  const confirmBg = danger ? 'var(--critical)' : 'var(--primary)';
+  const confirmBg = danger ? 'var(--sign-stop)' : 'var(--primary)';
+  const confirmInk = danger ? 'var(--sign-on-stop)' : 'var(--on-primary)';
 
   return (
     <Modal title={title} onClose={busy ? () => undefined : onClose} width={420}>
       <div style={{ display: 'flex', gap: 'var(--space-3)', alignItems: 'flex-start' }}>
-        <span style={{ color: danger ? 'var(--critical)' : 'var(--primary)', marginTop: '1px', flexShrink: 0 }}><AlertTriangle size={20} strokeWidth={1.75} /></span>
+        <span style={{ color: danger ? 'var(--critical)' : 'var(--primary-ink)', marginTop: '1px', flexShrink: 0 }}><AlertTriangle size={20} strokeWidth={1.75} /></span>
         <div style={{ fontSize: 'var(--text-sm)', color: 'var(--ink)', lineHeight: 1.6 }}>{message}</div>
       </div>
 
@@ -60,7 +61,7 @@ export function ConfirmDialog({
 
       <div style={{ display: 'flex', justifyContent: 'flex-end', gap: 'var(--space-3)', marginTop: 'var(--space-6)' }}>
         <button type="button" onClick={onClose} disabled={busy} style={{ ...btn, border: '1px solid var(--hairline)', background: 'var(--surface)', color: 'var(--ink)' }}>{t('common.cancel')}</button>
-        <button type="button" onClick={() => void run()} disabled={busy} style={{ ...btn, border: 'none', background: busy ? 'var(--ink-faint)' : confirmBg, color: 'var(--on-primary)' }}>
+        <button type="button" onClick={() => void run()} disabled={busy} style={{ ...btn, border: 'none', background: busy ? 'var(--ink-faint)' : confirmBg, color: confirmInk }}>
           {busy ? t('common.deleting') : (confirmLabel ?? t('common.delete'))}
         </button>
       </div>

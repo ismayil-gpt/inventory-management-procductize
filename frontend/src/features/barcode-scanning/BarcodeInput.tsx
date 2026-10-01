@@ -1,12 +1,13 @@
-import { FormEvent, useState } from 'react';
+import { FormEvent, useEffect, useId, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { ScanLine, Keyboard, Search } from 'lucide-react';
+import { claimScanner, releaseScanner, useBarcodeScannerListener, useHoldsScanner } from './barcode-scanner-listener.hook';
+import { signalScan } from '../../design-system/scan-signal/scan-signal-bus';
 
 // Two ways to provide a barcode (§6):
-//   1. "Scan"   — placeholder until the wireless HID scanner is bought. When the
-//                 device arrives it types into a global listener; no code change
-//                 to this component's contract is expected.
-//   2. "Manual" — a text field, always available (damaged label / no device).
+//   1. "Scan"   — listens for the wireless keyboard-wedge scanner anywhere on the
+//                 page; no field needs focus. One field holds the scanner at a time.
+//   2. "Manual" — a text field, always available (damaged label / flat battery).
 type Mode = 'scan' | 'manual';
 
 interface BarcodeInputProps {
@@ -20,6 +21,21 @@ export function BarcodeInput({ onSubmit, busy = false, error = null, label }: Ba
   const { t } = useTranslation();
   const [mode, setMode] = useState<Mode>('manual');
   const [value, setValue] = useState('');
+  const fieldId = useId();
+  const holdsScanner = useHoldsScanner(fieldId);
+
+  const chooseMode = (next: Mode) => {
+    setMode(next);
+    if (next === 'scan') claimScanner(fieldId);
+    else releaseScanner(fieldId);
+  };
+  useEffect(() => () => releaseScanner(fieldId), [fieldId]);
+
+  useBarcodeScannerListener({
+    isEnabled: mode === 'scan' && holdsScanner && !busy,
+    onScan: onSubmit,
+    onDuplicate: (code) => signalScan('duplicate', code, t('scanSignal.duplicateDetail')),
+  });
 
   const submit = (event: FormEvent) => {
     event.preventDefault();
@@ -30,13 +46,13 @@ export function BarcodeInput({ onSubmit, busy = false, error = null, label }: Ba
   const tab = (m: Mode, icon: React.ReactNode, text: string) => (
     <button
       type="button"
-      onClick={() => setMode(m)}
+      onClick={() => chooseMode(m)}
       style={{
         display: 'inline-flex', alignItems: 'center', gap: '6px',
         padding: '7px 12px', fontSize: 'var(--text-xs)', fontWeight: 500, cursor: 'pointer',
         border: 'none', background: mode === m ? 'var(--surface)' : 'transparent',
-        color: mode === m ? 'var(--primary)' : 'var(--ink-muted)',
-        borderBottom: mode === m ? '2px solid var(--primary)' : '2px solid transparent',
+        color: mode === m ? 'var(--primary-ink)' : 'var(--ink-muted)',
+        borderBottom: mode === m ? '2px solid var(--primary-ink)' : '2px solid transparent',
       }}
     >
       {icon}
@@ -87,19 +103,29 @@ export function BarcodeInput({ onSubmit, busy = false, error = null, label }: Ba
             </button>
           </form>
         ) : (
-          // Scan mode — deliberately inert until the device is purchased.
-          <div style={{
-            display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '8px',
-            padding: 'var(--space-6)', border: '1px dashed var(--hairline-strong)', borderRadius: 'var(--radius-md)',
-            textAlign: 'center', color: 'var(--ink-muted)',
-          }}>
-            <ScanLine size={28} strokeWidth={1.25} />
-            <div style={{ fontSize: 'var(--text-sm)', fontWeight: 500, color: 'var(--ink)' }}>{t('barcode.scanUnavailableTitle')}</div>
-            <div style={{ fontSize: 'var(--text-xs)', maxWidth: '380px' }}>{t('barcode.scanUnavailableBody')}</div>
-            <span style={{ marginTop: '2px', fontSize: 'var(--text-2xs)', letterSpacing: 'var(--tracking-label)', textTransform: 'uppercase', color: 'var(--warn)', background: 'var(--warn-soft)', padding: '2px 8px', borderRadius: 'var(--radius-sm)' }}>
-              {t('barcode.deviceComingSoon')}
+          // Scan mode — the listener above is live; this panel says whether this
+          // field holds the scanner, and tapping it takes the scanner over.
+          <button
+            type="button"
+            onClick={() => claimScanner(fieldId)}
+            aria-pressed={holdsScanner}
+            style={{
+              width: '100%', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '8px',
+              padding: 'var(--space-6)', borderRadius: 'var(--radius-md)', textAlign: 'center', cursor: 'pointer',
+              border: holdsScanner ? '2px solid var(--sign-line)' : '1px dashed var(--hairline-strong)',
+              background: holdsScanner ? 'var(--gantry)' : 'transparent',
+              color: holdsScanner ? 'var(--gantry-ink)' : 'var(--ink-muted)',
+            }}
+          >
+            <ScanLine size={28} strokeWidth={1.25} aria-hidden />
+            <span style={{ fontSize: 'var(--text-sm)', fontWeight: 600 }}>
+              {holdsScanner ? (busy ? t('common.loading') : t('barcode.scanReadyTitle')) : t('barcode.scanTakeOverTitle')}
             </span>
-          </div>
+            <span style={{ display: 'inline-flex', alignItems: 'center', gap: '8px', fontSize: 'var(--text-xs)', maxWidth: '380px' }}>
+              {holdsScanner && <span className="beacon" aria-hidden />}
+              {holdsScanner ? t('barcode.scanReadyBody') : t('barcode.scanTakeOverBody')}
+            </span>
+          </button>
         )}
 
         {error && <div role="alert" style={{ marginTop: 'var(--space-3)', fontSize: 'var(--text-xs)', color: 'var(--critical)' }}>{error}</div>}

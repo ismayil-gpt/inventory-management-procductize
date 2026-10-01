@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useQueryClient } from '@tanstack/react-query';
 import { ChevronRight, ChevronDown, Package, Plus, Printer, Trash2 } from 'lucide-react';
@@ -6,6 +6,7 @@ import {
   useLocationsTree, useLocation, resolveLocationByBarcode, fetchLocationLabels, deleteLocation, ApiError,
   type LocationTreeNode,
 } from '../../api-client/client';
+import { signalScan } from '../../design-system/scan-signal/scan-signal-bus';
 import { usePreferences } from '../../application-shell/preferences.store';
 import { useAuthStore } from '../authentication/auth.store';
 import { LocationDesignator } from '../../design-system/location-designator/LocationDesignator';
@@ -13,6 +14,17 @@ import { ConfirmDialog } from '../../design-system/confirm-dialog/ConfirmDialog'
 import { BarcodeInput } from '../../features/barcode-scanning/BarcodeInput';
 import { printLabels } from '../../features/barcode-scanning/print-labels';
 import { BulkCreateModal } from './BulkCreateModal';
+import { ShelfView } from './ShelfView';
+
+/** Finds a node and its parent in the loaded tree (the tree is small and already in memory). */
+function findWithParent(nodes: LocationTreeNode[], id: string, parent: LocationTreeNode | null = null): { node: LocationTreeNode; parent: LocationTreeNode | null } | null {
+  for (const node of nodes) {
+    if (node.id === id) return { node, parent };
+    const found = findWithParent(node.children, id, node);
+    if (found) return found;
+  }
+  return null;
+}
 
 export function LocationsPage() {
   const { t } = useTranslation();
@@ -38,6 +50,30 @@ export function LocationsPage() {
 
   const name = (en: string, ar: string) => (language === 'ar' ? ar : en);
 
+  // Draw the rack when a rack is selected (its children hold stock) or when one
+  // of its shelves is — the operator sees where they stand on the whole rack.
+  const selectedInTree = selectedId && tree.data ? findWithParent(tree.data, selectedId) : null;
+  // Open the tree down to whatever was selected — a scan lands on a shelf deep in the tree.
+  useEffect(() => {
+    if (!selectedId || !tree.data) return;
+    const path: string[] = [];
+    const walk = (nodes: LocationTreeNode[]): boolean => nodes.some((n) => {
+      if (n.id === selectedId) return true;
+      path.push(n.id);
+      if (walk(n.children)) return true;
+      path.pop();
+      return false;
+    });
+    if (walk(tree.data)) setExpanded((prev) => new Set([...prev, ...path]));
+  }, [selectedId, tree.data]);
+  const shelfParent = !selectedInTree
+    ? null
+    : selectedInTree.node.children.some((c) => c.canHoldStock)
+      ? selectedInTree.node
+      : selectedInTree.node.canHoldStock && selectedInTree.parent?.children.every((c) => c.canHoldStock)
+        ? selectedInTree.parent
+        : null;
+
   const toggle = (id: string) =>
     setExpanded((prev) => {
       const next = new Set(prev);
@@ -51,8 +87,11 @@ export function LocationsPage() {
     try {
       const loc = await resolveLocationByBarcode(code);
       setSelectedId(loc.id);
+      signalScan('accepted', loc.designator, name(loc.typeNameEn, loc.typeNameAr));
     } catch (err) {
-      setBarcodeError(err instanceof ApiError && err.status === 404 ? t('barcode.notFound') : t('errors.generic'));
+      const message = err instanceof ApiError && err.status === 404 ? t('barcode.notFound') : t('errors.generic');
+      setBarcodeError(message);
+      signalScan('rejected', code, message);
     } finally {
       setBarcodeBusy(false);
     }
@@ -73,7 +112,7 @@ export function LocationsPage() {
             display: 'flex', alignItems: 'center', gap: '8px', height: '36px', cursor: 'pointer',
             paddingInlineStart: `${8 + depth * 18}px`, paddingInlineEnd: '12px',
             background: isSelected ? 'var(--primary-soft)' : 'transparent',
-            borderInlineStart: isSelected ? '2px solid var(--primary)' : '2px solid transparent',
+            borderInlineStart: isSelected ? '2px solid var(--primary-ink)' : '2px solid transparent',
           }}
           onMouseEnter={(e) => { if (!isSelected) e.currentTarget.style.background = 'var(--surface-sunken)'; }}
           onMouseLeave={(e) => { if (!isSelected) e.currentTarget.style.background = 'transparent'; }}
@@ -169,6 +208,7 @@ export function LocationsPage() {
                 itemCount={loc.itemCount}
                 scanning
               />
+              {shelfParent && <ShelfView parent={shelfParent} highlightedId={selectedId} onSelect={setSelectedId} />}
               <div style={{ background: 'var(--surface)', border: '1px solid var(--hairline)', borderRadius: 'var(--radius-md)', overflow: 'hidden' }}>
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '8px 16px', borderBottom: '1px solid var(--hairline)' }}>
                   <span style={{ fontSize: 'var(--text-2xs)', letterSpacing: 'var(--tracking-label)', textTransform: 'uppercase', color: 'var(--ink-muted)' }}>{t('locations.stockHere')}</span>

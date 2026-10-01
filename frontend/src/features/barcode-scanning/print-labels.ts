@@ -22,15 +22,15 @@ export function printLabels(labels: Label[], heading = 'Mizan — Labels'): void
   win.document.write(`<!doctype html><html><head><meta charset="utf-8"><title>${escapeHtml(heading)}</title>
     <style>
       * { box-sizing: border-box; }
-      body { font-family: 'IBM Plex Sans', system-ui, sans-serif; margin: 14px; color: #0D1B22; }
+      body { font-family: 'Overpass', 'IBM Plex Sans Arabic', system-ui, sans-serif; margin: 14px; color: #141815; }
       h1 { font-size: 14px; font-weight: 600; margin: 0 0 12px; }
       .sheet { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; }
-      .label { border: 1px solid #B9C6CC; border-radius: 3px; padding: 8px; text-align: center; page-break-inside: avoid; }
+      .label { border: 1px solid #A9B0AA; border-radius: 8px; padding: 8px; text-align: center; page-break-inside: avoid; }
       .label img { max-width: 100%; height: auto; }
-      .title { font-family: 'IBM Plex Mono', ui-monospace, monospace; font-weight: 600; font-size: 13px; margin-top: 4px; letter-spacing: 0.04em; }
-      .subtitle { font-size: 11px; color: #566A75; margin-top: 2px; }
+      .title { font-family: 'Overpass Mono', ui-monospace, monospace; font-weight: 600; font-size: 13px; margin-top: 4px; letter-spacing: 0.04em; }
+      .subtitle { font-size: 11px; color: #4C554F; margin-top: 2px; }
       .toolbar { margin-bottom: 10px; }
-      button { font: inherit; padding: 6px 14px; border: 1px solid #0B4F5E; background: #0B4F5E; color: #fff; border-radius: 3px; cursor: pointer; }
+      button { font: inherit; padding: 6px 14px; border: 2px solid #F2C230; background: #121412; color: #F2C230; font-weight: 600; border-radius: 10px; cursor: pointer; }
       @media print { .toolbar { display: none; } body { margin: 0; } }
     </style></head><body>
     <div class="toolbar"><button onclick="window.print()">Print</button> &nbsp; ${labels.length} label(s)</div>

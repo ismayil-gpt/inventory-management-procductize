@@ -107,7 +107,7 @@ function CycleCountSession({ report, setReport, onExit }: { report: CycleCountRe
           {!loc ? <BarcodeInput label={t('cycleCount.scanLocation')} onSubmit={resolveLoc} /> : (
             <div style={{ background: 'var(--surface)', border: '1px solid var(--hairline)', borderRadius: 'var(--radius-md)', padding: 'var(--space-4)', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
               <LocationChip designator={loc.designator} />
-              <button type="button" onClick={() => setLoc(null)} style={{ background: 'none', border: 'none', color: 'var(--primary)', fontSize: 'var(--text-xs)', cursor: 'pointer' }}>{t('movements.changeLocation')}</button>
+              <button type="button" onClick={() => setLoc(null)} style={{ background: 'none', border: 'none', color: 'var(--primary-ink)', fontSize: 'var(--text-xs)', cursor: 'pointer' }}>{t('movements.changeLocation')}</button>
             </div>
           )}
           {loc && (product ? (

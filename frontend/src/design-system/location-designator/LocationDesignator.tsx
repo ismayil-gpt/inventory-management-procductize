@@ -1,15 +1,20 @@
 import { useTranslation } from 'react-i18next';
+import { SplitFlapText } from '../airfield-signs/SplitFlapText';
 
-// The signature element (CLAUDE.md §9.6). Takes an ARRAY of segments — never
-// three fixed values — so it renders any hierarchy depth (§5A.2). Codes are
-// never translated or mirrored; in RTL the segment order reverses but each
-// code stays LTR.
+// The signature element (CLAUDE.md §9.6): a gantry of airfield location signs,
+// one panel per segment. Takes an ARRAY of segments — never three fixed
+// values — so it renders any hierarchy depth (§5A.2). Codes are never
+// translated or mirrored; in RTL the panel order reverses (flex follows the
+// document direction) but each code stays LTR.
 interface LocationDesignatorProps {
   segments: string[];
   contextLabel?: string;
   itemCount?: number;
   scanning?: boolean;
 }
+
+// Each panel starts its flap a beat after the one before it.
+const PANEL_STAGGER_MS = 90;
 
 export function LocationDesignator({
   segments,
@@ -19,49 +24,64 @@ export function LocationDesignator({
 }: LocationDesignatorProps) {
   const { t } = useTranslation();
   const hasScan = segments.length > 0;
-  const cells = hasScan ? segments : ['———', '———', '———'];
+  const fullPath = segments.join('-');
 
-  // 5+ segments shrink; 2–4 render full size (§9.6).
-  const fontSize = cells.length >= 5 ? '28px' : 'var(--text-designator)';
+  // 6+ segments: first, an ellipsis, then the final three — the leaf is what
+  // the operator is standing in front of (§9.6).
+  const cells = !hasScan
+    ? ['———', '———', '———']
+    : segments.length >= 6
+      ? [segments[0], '⋯', ...segments.slice(-3)]
+      : segments;
+  const fontSize = segments.length >= 5 ? '30px' : 'var(--text-designator)';
 
   return (
     <section
-      aria-label="Active location"
+      aria-label={hasScan ? `${t('locations.activeLocation')} ${fullPath}` : t('locations.activeLocation')}
       style={{
-        background: 'var(--surface)',
-        border: '1px solid var(--hairline)',
+        background: 'var(--gantry)',
+        border: '1px solid var(--gantry-line)',
         borderRadius: 'var(--radius-md)',
-        padding: 'var(--space-4) var(--space-6)',
+        padding: 'var(--space-4)',
+        display: 'flex',
+        flexDirection: 'column',
+        gap: 'var(--space-3)',
       }}
     >
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
-        <div
-          className="designator"
-          dir="ltr"
-          style={{ display: 'flex', alignItems: 'stretch', color: hasScan ? 'var(--ink)' : 'var(--ink-faint)' }}
-        >
-          {cells.map((segment, index) => (
+      <div style={{ display: 'flex', flexWrap: 'wrap', gap: 'var(--space-2)', alignItems: 'center' }}>
+        {cells.map((segment, index) => {
+          const isEllipsis = segment === '⋯';
+          return (
             <div
-              key={`${segment}-${index}`}
+              key={`${index}-${fullPath}`}
+              dir="ltr"
+              className="sign-location sign-enter"
+              title={isEllipsis ? fullPath : undefined}
+              tabIndex={isEllipsis ? 0 : undefined}
               style={{
                 fontSize,
-                fontWeight: 500,
-                padding: '2px 18px',
-                borderInlineStart: index === 0 ? 'none' : '1px solid var(--hairline-strong)',
+                lineHeight: 1,
+                letterSpacing: 'var(--tracking-designator)',
+                padding: '12px 18px 8px',
+                minWidth: '2.2ch',
+                textAlign: 'center',
                 whiteSpace: 'nowrap',
+                opacity: hasScan ? 1 : 0.4,
+                cursor: isEllipsis ? 'help' : undefined,
+                animationDelay: `${index * PANEL_STAGGER_MS}ms`,
               }}
             >
-              {segment}
+              <SplitFlapText text={segment} startDelayMs={index * PANEL_STAGGER_MS} isAnimated={hasScan && !isEllipsis} />
             </div>
-          ))}
-        </div>
+          );
+        })}
         {contextLabel && (
           <span
             style={{
-              fontSize: 'var(--text-2xs)',
-              letterSpacing: 'var(--tracking-label)',
-              textTransform: 'uppercase',
-              color: 'var(--ink-muted)',
+              marginInlineStart: 'auto',
+              fontSize: 'var(--text-sm)',
+              fontWeight: 600,
+              color: 'var(--gantry-ink)',
               maxWidth: '40%',
               textAlign: 'end',
             }}
@@ -71,31 +91,27 @@ export function LocationDesignator({
         )}
       </div>
 
-      {/* 2px gold rule beneath the segment row only (§9.6). */}
-      <div style={{ height: '2px', background: 'var(--gold)', marginTop: 'var(--space-3)' }} />
-
       <div
         style={{
           display: 'flex',
           justifyContent: 'space-between',
-          marginTop: 'var(--space-3)',
+          gap: 'var(--space-4)',
+          paddingTop: 'var(--space-3)',
+          borderTop: '1px solid var(--gantry-line)',
           fontSize: 'var(--text-xs)',
-          color: 'var(--ink-muted)',
+          color: 'var(--gantry-muted)',
         }}
       >
         <span className="tabular">
           {typeof itemCount === 'number' ? t('locations.itemsOnShelf', { count: itemCount }) : ''}
         </span>
-        <span style={{ display: 'inline-flex', alignItems: 'center', gap: '6px' }}>
+        <span style={{ display: 'inline-flex', alignItems: 'center', gap: '8px' }}>
           {t('locations.scanningActive')}
-          <span
-            style={{
-              width: '8px',
-              height: '8px',
-              borderRadius: '50%',
-              background: scanning ? 'var(--ok)' : 'var(--ink-faint)',
-            }}
-          />
+          {scanning ? (
+            <span className="beacon" aria-hidden />
+          ) : (
+            <span aria-hidden style={{ width: '8px', height: '8px', borderRadius: 'var(--radius-dot)', border: '1px solid var(--gantry-muted)' }} />
+          )}
         </span>
       </div>
     </section>

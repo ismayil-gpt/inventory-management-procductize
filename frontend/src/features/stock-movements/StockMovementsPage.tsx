@@ -1,4 +1,5 @@
 import { useMemo, useState } from 'react';
+import { useSearchParams } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { useQueryClient } from '@tanstack/react-query';
 import { Check, Clock, AlertTriangle, X } from 'lucide-react';
@@ -6,6 +7,7 @@ import {
   resolveLocationByBarcode, resolveProductByBarcode, ApiError,
   type MovementType, type ProductDetail, type LocationResolved,
 } from '../../api-client/client';
+import { signalScan } from '../../design-system/scan-signal/scan-signal-bus';
 import { usePreferences } from '../../application-shell/preferences.store';
 import { useOutbox, clearSyncedOutbox, type OutboxItem } from '../../offline-queue/outbox.store';
 import { BarcodeInput } from '../barcode-scanning/BarcodeInput';
@@ -28,7 +30,10 @@ export function StockMovementsPage() {
   const outboxItems = useOutbox((s) => s.items);
   const enqueue = useOutbox((s) => s.enqueue);
 
-  const [mode, setMode] = useState<'record' | 'history'>('record');
+  // The tab lives in the URL so the rail can link straight to "Movements" (?view=history).
+  const [searchParams, setSearchParams] = useSearchParams();
+  const mode: 'record' | 'history' = searchParams.get('view') === 'history' ? 'history' : 'record';
+  const setMode = (next: 'record' | 'history') => setSearchParams(next === 'history' ? { view: 'history' } : {}, { replace: true });
   const [type, setType] = useState<MovementType>('GOODS_IN');
   const [fromLoc, setFromLoc] = useState<Loc | null>(null);
   const [toLoc, setToLoc] = useState<Loc | null>(null);
@@ -65,18 +70,25 @@ export function StockMovementsPage() {
       const loc = await resolveLocationByBarcode(code);
       const value: Loc = { id: loc.id, designator: loc.designator, typeNameEn: loc.typeNameEn, typeNameAr: loc.typeNameAr };
       slot === 'from' ? setFromLoc(value) : setToLoc(value);
+      signalScan('accepted', loc.designator, name(loc.typeNameEn, loc.typeNameAr));
     } catch (err) {
-      setLocError(err instanceof ApiError && err.status === 404 ? t('barcode.notFound') : t('errors.generic'));
+      const message = err instanceof ApiError && err.status === 404 ? t('barcode.notFound') : t('errors.generic');
+      setLocError(message);
+      signalScan('rejected', code, message);
     } finally { setLocBusy(false); }
   };
 
   const resolveProduct = async (code: string) => {
     setProdBusy(true); setProdError(null);
     try {
-      setProduct(await resolveProductByBarcode(code));
+      const found = await resolveProductByBarcode(code);
+      setProduct(found);
       setQuantity(''); setReason(''); setFormError(null);
+      signalScan('accepted', found.sku, name(found.nameEn, found.nameAr));
     } catch (err) {
-      setProdError(err instanceof ApiError && err.status === 404 ? t('barcode.notFound') : t('errors.generic'));
+      const message = err instanceof ApiError && err.status === 404 ? t('barcode.notFound') : t('errors.generic');
+      setProdError(message);
+      signalScan('rejected', code, message);
     } finally { setProdBusy(false); }
   };
 
@@ -94,7 +106,10 @@ export function StockMovementsPage() {
     } else {
       if (entered <= 0) { setFormError(t('errors.generic')); return; }
       if ((type === 'GOODS_OUT' || type === 'TRANSFER') && entered > currentHere) {
-        setFormError(t('movements.insufficient', { count: currentHere })); return;
+        const message = t('movements.insufficient', { count: currentHere });
+        setFormError(message);
+        signalScan('rejected', product.sku, message);
+        return;
       }
     }
 
@@ -121,6 +136,9 @@ export function StockMovementsPage() {
     setRecording(true);
     try {
       await enqueue(item);
+      // Goods out is a decrease even though the stored quantity is a positive magnitude.
+      const shownQty = type === 'GOODS_OUT' ? `−${movementQty}` : type === 'TRANSFER' ? `${movementQty}` : movementQty > 0 ? `+${movementQty}` : `−${Math.abs(movementQty)}`;
+      signalScan('accepted', `${shownQty} × ${product.sku}`, t('scanSignal.recorded', { type: t(cfg.labelKey) }));
       // Refresh anything showing stock now that it changed.
       void queryClient.invalidateQueries();
       setProduct(null); setQuantity(''); setReason('');
@@ -139,7 +157,7 @@ export function StockMovementsPage() {
             padding: '8px 18px', fontSize: 'var(--text-sm)', fontWeight: 500, cursor: 'pointer',
             border: 'none', borderRadius: 'var(--radius-sm)',
             background: mode === m ? 'var(--surface)' : 'transparent',
-            color: mode === m ? 'var(--primary)' : 'var(--ink-muted)',
+            color: mode === m ? 'var(--primary-ink)' : 'var(--ink-muted)',
             boxShadow: mode === m ? 'var(--shadow-floating)' : 'none',
           }}>
             {t(m === 'record' ? 'movements.tabRecord' : 'movements.tabHistory')}
@@ -157,7 +175,7 @@ export function StockMovementsPage() {
                 flex: 1, padding: '8px', fontSize: 'var(--text-sm)', fontWeight: 500, cursor: 'pointer',
                 border: 'none', borderRadius: 'var(--radius-sm)',
                 background: type === k ? 'var(--surface)' : 'transparent',
-                color: type === k ? 'var(--primary)' : 'var(--ink-muted)',
+                color: type === k ? 'var(--primary-ink)' : 'var(--ink-muted)',
                 boxShadow: type === k ? 'var(--shadow-floating)' : 'none',
               }}>
                 {t(TYPE_CONFIG[k].labelKey)}
@@ -176,7 +194,7 @@ export function StockMovementsPage() {
                   <LocationChip designator={value.designator} />
                   <span style={{ fontSize: 'var(--text-xs)', color: 'var(--ink-muted)' }}>{name(value.typeNameEn, value.typeNameAr)}</span>
                 </div>
-                <button type="button" onClick={() => (slot === 'from' ? setFromLoc(null) : setToLoc(null))} style={{ background: 'none', border: 'none', color: 'var(--primary)', fontSize: 'var(--text-xs)', cursor: 'pointer' }}>{t('movements.changeLocation')}</button>
+                <button type="button" onClick={() => (slot === 'from' ? setFromLoc(null) : setToLoc(null))} style={{ background: 'none', border: 'none', color: 'var(--primary-ink)', fontSize: 'var(--text-xs)', cursor: 'pointer' }}>{t('movements.changeLocation')}</button>
               </div>
             ) : (
               <BarcodeInput key={slot} label={t(labelKey)} onSubmit={resolveLocation(slot)} busy={locBusy} error={locError} />
@@ -195,7 +213,7 @@ export function StockMovementsPage() {
                   <div style={{ fontSize: 'var(--text-base)', fontWeight: 600, color: 'var(--ink)' }}>{name(product.nameEn, product.nameAr)}</div>
                   <div style={{ fontFamily: 'var(--font-mono)', fontSize: 'var(--text-xs)', color: 'var(--ink-muted)' }} dir="ltr">{product.sku} · {product.barcode}</div>
                 </div>
-                <button type="button" onClick={() => { setProduct(null); setFormError(null); }} style={{ background: 'none', border: 'none', color: 'var(--primary)', fontSize: 'var(--text-xs)', cursor: 'pointer' }}>{t('movements.changeProduct')}</button>
+                <button type="button" onClick={() => { setProduct(null); setFormError(null); }} style={{ background: 'none', border: 'none', color: 'var(--primary-ink)', fontSize: 'var(--text-xs)', cursor: 'pointer' }}>{t('movements.changeProduct')}</button>
               </div>
 
               <div style={{ display: 'flex', gap: '20px', fontSize: 'var(--text-xs)', color: 'var(--ink-muted)' }}>

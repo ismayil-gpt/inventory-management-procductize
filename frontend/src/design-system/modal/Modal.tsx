@@ -6,12 +6,14 @@ export function Modal({ title, onClose, children, width = 520 }: { title: string
   return (
     <div
       onClick={onClose}
+      className="backdrop-enter"
       style={{ position: 'fixed', inset: 0, background: 'rgb(0 0 0 / 0.4)', display: 'grid', placeItems: 'center', zIndex: 50, padding: 'var(--space-4)' }}
     >
       <div
         onClick={(e) => e.stopPropagation()}
         role="dialog"
         aria-modal="true"
+        className="float-enter"
         style={{ width, maxWidth: '100%', maxHeight: '90vh', overflow: 'auto', background: 'var(--surface)', border: '1px solid var(--hairline)', borderRadius: 'var(--radius-lg)', boxShadow: 'var(--shadow-floating)' }}
       >
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: 'var(--space-4) var(--space-6)', borderBottom: '1px solid var(--hairline)', position: 'sticky', top: 0, background: 'var(--surface)' }}>

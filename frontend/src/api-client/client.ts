@@ -289,8 +289,24 @@ export function rejectRecommendation(id: string, reason: string) {
 }
 
 // ---- Purchase orders ----
-// Approving recommendations still generates + emails POs to suppliers; there is
-// no in-app PO viewer (removed by design).
+// Approving recommendations generates + emails POs to suppliers. The in-app
+// list was removed on 2026-08-03 and restored on 2026-10-01 at the client's
+// request, to match the approved "Airfield" navigation.
+export interface PurchaseOrderSummary {
+  id: string; poNumber: string; supplierName: string; status: 'DRAFT' | 'SENT' | 'RECEIVED';
+  lineCount: number; totalQty: number; sentAt: string | null; createdAt: string;
+}
+export function usePurchaseOrders() {
+  return useQuery({ queryKey: ['purchase-orders'], queryFn: () => authFetch<PurchaseOrderSummary[]>('/purchase-orders'), retry: false });
+}
+export async function openPurchaseOrderPdf(id: string): Promise<void> {
+  const { accessToken } = useAuthStore.getState();
+  const res = await fetch(`${API_BASE}/purchase-orders/${id}/pdf`, { headers: accessToken ? { Authorization: `Bearer ${accessToken}` } : {} });
+  if (!res.ok) throw new Error(`PDF request failed (${res.status})`);
+  const url = URL.createObjectURL(await res.blob());
+  window.open(url, '_blank');
+  setTimeout(() => URL.revokeObjectURL(url), 10000);
+}
 export function generatePurchaseOrders() {
   return authFetch<{ created: Array<{ poNumber: string; supplierName: string; lineCount: number; emailed: boolean }>; skippedNoSupplier: number }>('/purchase-orders/generate', { method: 'POST' });
 }

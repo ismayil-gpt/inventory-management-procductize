@@ -185,7 +185,7 @@ mizan-inventory-system/
 ```
 frontend/
 ├── public/
-│   └── fonts/                         self-hosted IBM Plex (no external CDN)
+│   └── logo/                          brand mark and lockup (fonts are bundled via @fontsource)
 └── src/
     ├── main.tsx
     ├── application-shell/             navigation rail, top bar, status strip
@@ -301,7 +301,7 @@ Locked. Do not substitute without recording the reason in `OPEN-QUESTIONS.md`.
 | Charts | Recharts |
 | Icons | Lucide React, 1.5px stroke, 18px default |
 | Offline storage | Dexie (IndexedDB) |
-| Fonts | IBM Plex Sans / Sans Arabic / Mono, self-hosted |
+| Fonts | Overpass / Overpass Mono / IBM Plex Sans Arabic, self-hosted via @fontsource (§9.3) |
 
 ### Backend
 
@@ -819,9 +819,22 @@ Natural-language queries over stock. Architecture: classify intent → run a str
 
 ### 9.1 Design thesis
 
-The subject is an aviation authority's store room. The most characteristic artifact in that world is the **position designator** — `SR1-R1-L1`. Aviation runs on coded positions: gates, stands, runways. That is where this interface takes its identity — not decorative aircraft imagery, but the *typographic discipline of aviation wayfinding*: segmented codes, monospaced figures, high contrast, unambiguous at arm's length.
+> **Revised client decision, 2026-10-01 — "Airfield" edition.** The client approved the
+> airfield-signage direction (demo artifact) over the original teal-and-Plex instrument look.
+> It replaces §9.3–§9.6 and §9.9 below. Code: `shared/design-tokens/design-tokens.css`,
+> `frontend/src/design-system/airfield-signs/`, `frontend/src/design-system/brand-mark/`.
 
-The interface is an **instrument**, not a brochure. Dense, quiet, precise. One bold element; everything else disciplined.
+The subject is an aviation authority's store room. The most characteristic artifact in that world is the **position designator** — `SR1-R1-L1`. Aviation runs on coded positions: gates, stands, runways. That is where this interface takes its identity — not decorative aircraft imagery, but **airfield signage**: the signs that tell a pilot where they are, where to go, and where to stop.
+
+Three sign types, three meanings, used for nothing else:
+
+| Sign | Look | Meaning in Mizan |
+|---|---|---|
+| Location sign | by day: yellow panel, dark legend, amber border; by night: black panel, yellow legend | where you are — the designator, the active rail item, the page title |
+| Direction sign | yellow field, black legend | go ahead — approve, review recommendations, confirmations |
+| Mandatory sign | red field, white legend, inset white outline | stop — reject, rejected scan, blocked action |
+
+The interface is an **instrument**, not a brochure. Dense, quiet, precise. The signs are the one bold element; everything else (concrete-grey ground, hairlines, tables) stays disciplined.
 
 ### 9.2 Prohibited — these make work look machine-generated
 
@@ -840,15 +853,15 @@ The interface is an **instrument**, not a brochure. Dense, quiet, precise. One b
 
 ### 9.3 Typography
 
-Self-hosted in `frontend/public/fonts`. No external font CDN.
+Self-hosted through `@fontsource` packages bundled by Vite. No external font CDN.
 
 | Role | Family | Weights |
 |---|---|---|
-| Interface, Latin | **IBM Plex Sans** | 400, 500, 600 |
-| Interface, Arabic | **IBM Plex Sans Arabic** | 400, 500, 600 |
-| Data and designators | **IBM Plex Mono** | 400, 500 |
+| Interface, Latin, sign legends | **Overpass** | 400, 600, 800 |
+| Interface, Arabic | **IBM Plex Sans Arabic** | 400, 600 |
+| Data, SKUs, barcodes | **Overpass Mono** | 400, 600 |
 
-Chosen because Plex is institutional rather than fashionable, and Plex Sans Arabic is drawn by the same foundry — switching language keeps colour, weight and rhythm consistent. Most pairings collapse in Arabic; this one does not.
+Overpass descends from Highway Gothic, the lettering of road and airfield signs, so the sign legends are set in the face the signs themselves use. Plex Sans Arabic carries Arabic at a matching weight and is the first family when the document is RTL.
 
 ```
 --text-2xs    11px / 16px   uppercase labels, letter-spacing 0.06em
@@ -858,82 +871,102 @@ Chosen because Plex is institutional rather than fashionable, and Plex Sans Arab
 --text-lg     18px / 26px   section headings
 --text-xl     22px / 30px   page titles
 --text-2xl    28px / 36px   dashboard figures
---designator  34px / 1.0    designator strip (mono, 500)
+--designator  40px / 1.0    designator sign legend (Overpass 800)
 ```
 
 **All numerals use `font-variant-numeric: tabular-nums`.** Quantities in a column must align.
 
 ### 9.4 Colour
 
-Institutional deep teal — aviation instrumentation and government authority, distinct from the blue every admin template uses. Muted gold appears only on the designator and genuine emphasis. Semantic colours carry stock state, which is functional.
+A concrete-apron ground with a slight green-grey bias, and the sign colours. Sign yellow is the accent; semantic colours carry stock state, which is functional. Token names are unchanged from the original palette so feature code did not change — only values.
 
 Defined once in `shared/design-tokens/`, consumed as CSS custom properties.
 
-**Light theme**
+**Palette option A, "Direction sign"** — chosen by the client 2026-10-01 from three options
+(the other two were taxiway blue and control-tower teal). Light mode has no large black
+blocks; dark mode is a cool blue-grey night.
+
+**Light theme** — primary actions and signs are yellow with a dark legend.
 
 ```css
---canvas:          #F4F6F7;
+--canvas:          #F1F2EE;
 --surface:         #FFFFFF;
---surface-sunken:  #EDF1F2;
---hairline:        #D6DEE2;
---hairline-strong: #B9C6CC;
+--surface-sunken:  #E8EAE4;
+--hairline:        #D3D7CF;
+--hairline-strong: #B4BAB0;
 
---ink:             #0D1B22;
---ink-muted:       #566A75;
---ink-faint:       #8497A0;
+--ink:             #1A1D18;
+--ink-muted:       #50574D;
+--ink-faint:       #656C62;
 
---primary:         #0B4F5E;
---primary-hover:   #08404C;
---primary-soft:    #E1EDF0;
---on-primary:      #FFFFFF;
+--primary:         #F2C230;   /* fills only — yellow fails as text on white */
+--primary-hover:   #E3B21F;
+--primary-soft:    #FBF3D6;
+--on-primary:      #1A1D18;
+--primary-ink:     #6E5100;   /* the accent as text, underline or icon */
+--chart-primary:   #A07800;   /* the accent as a chart line or bar */
 
---gold:            #A67C1A;
---gold-soft:       #F7EFDC;
+--gold:            #C99A0E;   --gold-soft: #FBF3D6;
 
---ok:              #1E6B45;   --ok-soft:       #E3F1E9;
---warn:            #8A5A00;   --warn-soft:     #FAF0DC;
---critical:        #9B2226;   --critical-soft: #F9E5E5;
---info:            #0B4F5E;   --info-soft:     #E1EDF0;
---focus:           #0B4F5E;
+--ok:              #2E6A3E;   --ok-soft:       #DFEDE2;
+--warn:            #7E5400;   --warn-soft:     #F6ECD6;
+--critical:        #A8241C;   --critical-soft: #F6E0DE;
+--info:            #6E5100;   --info-soft:     #FBF3D6;
+--focus:           #1A1D18;
+
+--sign:   #F2C230;  --sign-legend: #1A1D18;  --sign-line: #C99A0E;
+--gantry: #FBF3D6;  --gantry-line: #EBD48A;  --gantry-ink: #4A3D0F;  --gantry-muted: #6B5A1C;
 ```
 
-**Dark theme** — "Graphite": neutral warm-grey panels with a teal-cyan accent, *not* black. Instrument panel at night. (Selected by the client over the original teal-slate; the two are interchangeable — only these token values differ.)
+**Dark theme** — "Night apron": cool blue-grey, *not* black; signs take the night look.
 
 ```css
---canvas:          #141518;
---surface:         #1C1E22;
---surface-sunken:  #0F1013;
---hairline:        #2E3138;
---hairline-strong: #43474F;
+--canvas:          #0F141A;
+--surface:         #161D25;
+--surface-sunken:  #0B1015;
+--hairline:        #26313D;
+--hairline-strong: #3A4655;
 
---ink:             #E8E9EC;
---ink-muted:       #9CA0A8;
---ink-faint:       #6E727B;
+--ink:             #E4E9EE;
+--ink-muted:       #9AA6B2;
+--ink-faint:       #8592A0;
 
---primary:         #46A9BE;
---primary-hover:   #59BCCF;
---primary-soft:    #12292F;
---on-primary:      #06171B;
+--primary:         #F2C230;
+--primary-hover:   #F7D25E;
+--primary-soft:    #2A2416;
+--on-primary:      #121619;
+--primary-ink:     #F2C230;
+--chart-primary:   #F2C230;
 
---gold:            #D9AC4B;
---gold-soft:       #2A2315;
+--gold:            #F2C230;   --gold-soft: #2A2416;
 
---ok:              #52AC7E;   --ok-soft:       #142A21;
---warn:            #D4A23E;   --warn-soft:     #2A2315;
---critical:        #E06A6E;   --critical-soft: #2E1719;
---info:            #46A9BE;   --info-soft:     #12292F;
---focus:           #6FC6D8;
+--ok:              #72C189;   --ok-soft:       #14271E;
+--warn:            #E3B24D;   --warn-soft:     #2A2416;
+--critical:        #F2847D;   --critical-soft: #2E1A1C;
+--info:            #F2C230;   --info-soft:     #2A2416;
+--focus:           #F2C230;
+
+--sign:   #0B1015;  --sign-legend: #F2C230;  --sign-line: #F2C230;
+--gantry: #0B1015;  --gantry-line: #26313D;  --gantry-ink: #E4E9EE;  --gantry-muted: #9AA6B2;
 ```
 
-Every text/background pair must meet **WCAG 2.1 AA (4.5:1)**. Verify with a contrast checker — government accessibility requirement, and DESC evidence.
+**Both themes**: `--sign-go #F2C230` / `--sign-on-go`, `--sign-stop #B3261E` (`#C9362C` at night) / `--sign-on-stop #FFFFFF`.
+
+Every text/background pair must meet **WCAG 2.1 AA (4.5:1)**. Verify with a contrast checker — government accessibility requirement, and DESC evidence. Current results: `documentation/security-compliance/accessibility-conformance-report.md` (all pairs pass).
 
 ### 9.5 Geometry and space
 
 ```
---radius-sm: 8px    inputs, chips
---radius-md: 14px   buttons, panels     ← default
---radius-lg: 20px   modals
+--radius-dot:   2px    6px status squares
+--radius-chip:  6px    location chips, tags
+--radius-sm:    8px    inputs
+--radius-sign: 10px    sign panels and designator segments
+--radius-md:   14px    buttons, panels     ← default
+--radius-lg:   20px    modals
 ```
+
+Revised client decision, 2026-10-01: the small squares (sign panels, chips, status
+squares, the rail's active sign) were rounded further. Still rectangles — never pills.
 
 Revised client decision, 2026-09-23: corners are now pronounced and clearly
 visible — a deliberate departure from the original 4px cap. Every surface is
@@ -948,31 +981,30 @@ pill or capsule (§9.2 still bans that on buttons, tab pills, badges, etc.).
 
 **The one bold move. Everything else stays quiet.**
 
-When a Store Keeper scans a location, it renders full-width as a segmented designator styled after gate signage — large monospace, each segment in its own cell divided by hairlines, gold rule beneath.
+When a Store Keeper scans a location, it renders full-width as a gantry of airfield location signs — one panel per segment. By day the panels are yellow with a dark legend on a pale yellow gantry; by night they are black with a yellow legend.
 
 ```
 ┌──────────────────────────────────────────────────────────┐
-│                                                          │
-│    SR1   │   R1   │   L1          COFFEE STORE · ROOM 1  │
-│  ────────────────────────────────────────────────────    │  ← 2px gold rule
-│                                                          │
-│  47 items on this shelf              Scanning: active ●  │
+│ ╔═════╗ ╔════╗ ╔════╗                                    │
+│ ║ SR1 ║ ║ R1 ║ ║ L1 ║                     Pantry store   │  ← black gantry, yellow signs
+│ ╚═════╝ ╚════╝ ╚════╝                                    │
+│ ──────────────────────────────────────────────────────── │  ← --sign-rule hairline
+│ 47 items on this shelf               Scanning: active ■  │  ← --sign-meta, blinking beacon
 └──────────────────────────────────────────────────────────┘
 ```
 
-- Segments in IBM Plex Mono 500, `--designator` size, `letter-spacing: 0.04em`
-- Vertical hairline dividers in `--hairline-strong`
-- 2px `--gold` rule beneath the segment row only
-- Room name right-aligned, `--text-2xs`, uppercase, tracked, `--ink-muted`
-- Before any scan: cells show `———` in `--ink-faint`
-- On scan: 120 ms fade. No slide, no bounce. Respect `prefers-reduced-motion`.
+- Segments in Overpass 800, `--designator` size, `letter-spacing: 0.03em`, `--radius-sign`
+- Panel: `--sign` field, 3px `--sign-line` border, `--sign-legend` text, on a `--gantry` background
+- Context name at the end, `--text-sm`, `--gantry-ink`; meta row in `--gantry-muted`
+- Before any scan: panels show `———` at 40% opacity
+- On scan: each panel swings in from its top edge, then its legend **split-flaps** into place like a departure board, panels staggered 90 ms apart. Respect `prefers-reduced-motion` (final legend at once).
 - In RTL the segment **order reverses** (`L1 │ R1 │ SR1`) but each segment's text stays LTR — codes are never translated
 
 **Variable depth — the component takes an array of segments, never three fixed values.**
 Hierarchies range from two levels to six (§5A.2). Rendering rules:
 
 - 2–4 segments: show all, full `--designator` size
-- 5 segments: show all, drop to 28px
+- 5 segments: show all, drop to 30px
 - 6 or more: show the first segment, an ellipsis cell `⋯`, then the final three. The leaf is
   always visible — it is what the operator is standing in front of. Hovering or tapping the
   ellipsis reveals the full path.
@@ -983,7 +1015,7 @@ The same designator at small size is the location chip used throughout tables:
 
 ```
 ┌─────┬────┬────┐
-│ SR1 │ R1 │ L1 │    mono, --text-xs, 2px radius
+│ SR1 │ R1 │ L1 │    mono, --text-xs, --radius-chip
 └─────┴────┴────┘
 ```
 
@@ -1020,7 +1052,7 @@ The same designator at small size is the location chip used throughout tables:
 - Hover `--surface-sunken`; selected `--primary-soft` with a 2px inline-start `--primary` border
 - Empty state: one line of instruction plus the primary action. No illustration.
 
-**Buttons** — 32/36/44px, `--radius-md`, weight 500, `--text-sm`. Primary filled, secondary outlined, ghost transparent, destructive `--critical`. No icon-only buttons without `aria-label` and tooltip.
+**Buttons** — 32/36/44px, `--radius-md`, weight 500–600, `--text-sm`. Primary filled (`--primary` / `--on-primary`), secondary outlined, ghost transparent. Go-ahead decisions (approve, review recommendations) use the direction sign (`--sign-go`); stop decisions (confirm reject) use the mandatory sign (`--sign-stop`). No icon-only buttons without `aria-label` and tooltip.
 
 **Stock status** — a 6px square plus a text label. Never colour alone.
 
@@ -1034,7 +1066,29 @@ The same designator at small size is the location chip used throughout tables:
 
 ### 9.9 Motion
 
-120–180 ms, `cubic-bezier(0.2, 0, 0.2, 1)`. Permitted: designator fade, row hover, focus ring, toast, skeleton. Not permitted: page transitions, parallax, scroll reveals, animated counters, bouncing. Respect `prefers-reduced-motion`.
+Revised client decision, 2026-10-01: the client asked for more motion. Motion still
+answers a change of place or state; it is never decoration on a resting screen.
+
+| Token | Value | Use |
+|---|---|---|
+| `--motion-duration` | 140 ms | hover, focus, button press (scale 0.97) |
+| `--motion-medium` | 260 ms | page entry, sign swing, rail indicator, drawer/modal entry |
+| `--motion-slow` | 480 ms | bars growing, figures counting up |
+| `--motion-flap-step` | 38 ms | one split-flap character tick |
+| `--motion-easing` | `cubic-bezier(0.2, 0, 0.2, 1)` | default |
+| `--motion-settle` | `cubic-bezier(0.3, 1.25, 0.5, 1)` | slight settle on floating layers and the rail sign, never a bounce |
+
+Permitted: page entry (rise 10px with a short stagger of the page's sections), split-flap
+designator and login legend, sign swing on change, the rail's sliding active sign, count-up
+dashboard figures, growing bars, drawer slide from the reading-end edge, modal rise, row
+flash on a fresh record, the scanning beacon, hover and press feedback.
+
+Not permitted: parallax, scroll-triggered reveals, looping decoration, bouncing, anything
+that delays reading the final value.
+
+**Respect `prefers-reduced-motion`** — durations drop to 0 and JS-driven motion
+(`SplitFlapText`, `CountUpNumber`) renders the final value at once. Screen readers always
+receive the final value, never the intermediate frames.
 
 ---
 

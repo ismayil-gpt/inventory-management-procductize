@@ -8,7 +8,7 @@
 > (self-signed cert, unencrypted host volume, local backups) — see §11.2. The gap is recorded,
 > the control is **never removed**.
 
-Last updated: **2026-09-02** (Stage 2: AI assistant + demand forecasting on the Jetson)
+Last updated: **2026-10-01** (accessibility evidence for the "Airfield" design; in-app Security and data page reads this file)
 
 | # | Control | Status | Where / evidence |
 |---|---------|:---:|------------------|
@@ -40,6 +40,6 @@ Last updated: **2026-09-02** (Stage 2: AI assistant + demand forecasting on the 
 - [ ] `audit-logging-specification.md`
 - [ ] `backup-and-recovery-procedure.md`
 - [ ] `dependency-scan-reports/` (dated)
-- [ ] `accessibility-conformance-report.md` (WCAG 2.1 AA)
+- [x] `accessibility-conformance-report.md` (WCAG 2.1 AA — colour contrast and reduced motion; axe pass still outstanding)
 - [x] `language-model-validation.md` (§2.2 Arabic quality gate — **result: does not yet pass**, see file)
 - [x] `control-implementation-matrix.md` (this file)

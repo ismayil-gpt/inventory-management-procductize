@@ -11,6 +11,9 @@ import { StockMovementsPage } from './features/stock-movements/StockMovementsPag
 import { ReplenishmentPage } from './features/replenishment/ReplenishmentPage';
 import { InsightsPage } from './features/insights/InsightsPage';
 import { SuppliersPage } from './features/suppliers/SuppliersPage';
+import { PurchaseOrdersPage } from './features/purchase-orders/PurchaseOrdersPage';
+import { MorningBriefingPage } from './features/morning-briefing/MorningBriefingPage';
+import { SecurityCompliancePage } from './features/security-compliance/SecurityCompliancePage';
 import { CycleCountPage } from './features/cycle-counting/CycleCountPage';
 import { ReportsPage } from './features/reports/ReportsPage';
 import { AuditLogPage } from './features/audit-log/AuditLogPage';
@@ -28,7 +31,9 @@ export function App() {
           </RequireAuth>
         }
       >
+        <Route path="/briefing" element={<MorningBriefingPage />} />
         <Route path="/dashboard" element={<DashboardPage />} />
+        <Route path="/compliance" element={<SecurityCompliancePage />} />
         <Route path="/products" element={<ProductsPage />} />
         <Route path="/products/:id" element={<ProductDetailPage />} />
         <Route path="/locations" element={<LocationsPage />} />
@@ -36,14 +41,16 @@ export function App() {
         <Route path="/cycle-counting" element={<CycleCountPage />} />
         <Route path="/replenishment" element={<ReplenishmentPage />} />
         <Route path="/insights" element={<InsightsPage />} />
+        <Route path="/purchase-orders" element={<PurchaseOrdersPage />} />
         <Route path="/suppliers" element={<SuppliersPage />} />
         <Route path="/reports" element={<ReportsPage />} />
         <Route path="/audit-log" element={<AuditLogPage />} />
         <Route path="/users" element={<UsersPage />} />
         <Route path="/settings" element={<OrganizationSettingsPage />} />
       </Route>
-      <Route path="/" element={<Navigate to="/dashboard" replace />} />
-      <Route path="*" element={<Navigate to="/dashboard" replace />} />
+      {/* The day starts on the AI Store Manager's briefing. */}
+      <Route path="/" element={<Navigate to="/briefing" replace />} />
+      <Route path="*" element={<Navigate to="/briefing" replace />} />
     </Routes>
   );
 }
