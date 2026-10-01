@@ -10,7 +10,7 @@ class Configuration(BaseSettings):
     backend_base_url: str = "http://backend:3000/api/v1"
 
     # Service account used only to trigger the scheduled review.
-    service_account_email: str = "admin@example.com"
+    service_account_email: str = "ai-service@example.com"
     service_account_password: str = ""
 
     # Daily review time (Gulf Standard Time). Ref: §8.1.

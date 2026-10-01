@@ -30,7 +30,7 @@ services:
     build:
       context: .
       dockerfile: infrastructure/docker/frontend.Dockerfile
-    expose: ["80"]
+    expose: ["8080"]
     networks: [mizan-internal]
 
   backend:
@@ -40,6 +40,8 @@ services:
     depends_on: [postgres, redis, minio]
     expose: ["3000"]
     env_file: [.env.development]
+    # Development keeps one database user, so the API applies migrations itself on start.
+    command: ["sh", "-c", "sh ./migrate.sh && node dist/src/main.js"]
     healthcheck:
       test: ["CMD", "wget", "-qO-", "http://localhost:3000/api/v1/health"]
       interval: 30s
