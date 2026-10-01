@@ -255,14 +255,14 @@ export class AuthenticationService {
       { sub: user.id, email: user.email, role: user.role, sid: sessionId },
       {
         secret: this.config.get<string>('JWT_SECRET'),
-        expiresIn: this.config.get<string>('JWT_ACCESS_TTL', '15m'),
+        expiresIn: Math.floor(durationToMs(this.config.get<string>('JWT_ACCESS_TTL', '15m')) / 1000),
       },
     );
     const refreshToken = await this.jwt.signAsync(
       { sub: user.id, type: 'refresh', sid: sessionId, rid: refreshId },
       {
         secret: this.config.get<string>('JWT_REFRESH_SECRET'),
-        expiresIn: this.config.get<string>('JWT_REFRESH_TTL', '7d'),
+        expiresIn: Math.floor(durationToMs(this.config.get<string>('JWT_REFRESH_TTL', '7d')) / 1000),
       },
     );
     return { accessToken, refreshToken };
