@@ -28,7 +28,7 @@ Last updated: **2026-10-01** (accessibility evidence for the "Airfield" design; 
 | 14 | Secrets management (env only, `.env*` git-ignored) | ☑ | `.env.example` committed; real `.env*` git-ignored (`.gitignore` pending) |
 | 15 | Log hygiene (no PII; user IDs only) | ✔ | Pino JSON logs via `nestjs-pino` (`security/log-hygiene/`). Request logs keep only id, method, path (query string dropped), status, response time and `userId`. `redact` scrubs passwords, password hashes, MFA secrets, tokens, emails, IP addresses and auth/cookie headers at any depth; a log hook masks email-shaped text inside messages (e.g. SMTP errors quoting a recipient). Email service no longer logs recipient addresses. Evidence: `log-redaction.spec.ts` (4 tests) and a live capture on 2026-10-01: an authenticated request logged with `userId` only, no token, no search text. The audit log (control 9) remains the place that records actor and IP |
 | 16 | Dependency scanning (`pnpm audit`, `pip-audit` in pipeline) | ☑ | `scripts/run-dependency-scan.sh`: `npm audit` (the project uses npm, not pnpm) for frontend and backend, full and runtime-only, plus `pip-audit` on `ai-service/requirements.txt`. Writes dated JSON and `summary.md` to `dependency-scan-reports/<date>/`, exits non-zero on runtime high/critical or any Python advisory, ready to gate a build. First run 2026-10-01: non-breaking fixes applied; open findings and their order in `dependency-scan-reports/2026-10-01/remediation.md`. Not yet in a CI pipeline, because none exists; run it before each release |
-| 17 | Backup & recovery (automated encrypted backups, tested restore) | ☐ | `backup-and-recovery-procedure.md` (pending); local-only in dev (§11.2) |
+| 17 | Backup & recovery (automated encrypted backups, tested restore) | ☑ | `scripts/backup-database.sh` (pg_dump → AES-256 with a key file, checksum, retention), `restore-database.sh` (checksum first, refuses to overwrite live without confirmation), `verify-backup-restore.sh` (restore into a throwaway database, compare all row counts, confirm append-only rules, dated record). Procedure, key handling and schedule: `backup-and-recovery-procedure.md`. Tested restore: `restore-test-records/2026-10-01-restore-test.md` (PASS). Dev gap (§11.2): not yet scheduled, no off-site copy; both belong to the production server |
 | 18 | Data residency (all data on-premise) | ☑ | No cloud services; only outbound is SMTP (`CLAUDE.md` §1, §16) |
 | 19 | Least privilege (runtime DB role, no superuser) | ◐ | App connects as dedicated `mizan` role (not `postgres`), verified live; CREATEDB still granted for dev shadow DB — tighten for production |
 | 20 | Input validation (Zod at every boundary; Prisma parameterised) | ☑ | `ZodValidationPipe` on auth endpoints; Prisma (parameterised) live. Shared `data-contracts/` package still to be extracted |
@@ -38,7 +38,7 @@ Last updated: **2026-10-01** (accessibility evidence for the "Airfield" design; 
 - [ ] `encryption-configuration.md`
 - [ ] `access-control-model.md`
 - [ ] `audit-logging-specification.md`
-- [ ] `backup-and-recovery-procedure.md`
+- [x] `backup-and-recovery-procedure.md` (with tested restore record)
 - [x] `dependency-scan-reports/` (dated; first: 2026-10-01)
 - [x] `accessibility-conformance-report.md` (WCAG 2.1 AA — colour contrast and reduced motion; axe pass still outstanding)
 - [x] `language-model-validation.md` (§2.2 Arabic quality gate — **result: does not yet pass**, see file)
