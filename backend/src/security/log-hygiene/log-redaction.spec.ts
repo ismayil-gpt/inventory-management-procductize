@@ -21,14 +21,14 @@ describe('log redaction (DESC control 15)', () => {
     const { logger, output } = captureLogger();
     logger.info({
       email: 'aisha.rahman@demo.example',
-      password: 'Admin@Mizan2026',
+      password: 'Not-A-Real-Password-1',
       refreshToken: 'eyJ.secret.token',
       ipAddress: '10.20.4.31',
       user: { email: 'omar@demo.example', passwordHash: '$argon2id$abc', userId: 'cmuser123' },
     }, 'user updated');
     const text = output();
     expect(text).not.toMatch(/demo\.example/);
-    expect(text).not.toContain('Admin@Mizan2026');
+    expect(text).not.toContain('Not-A-Real-Password-1');
     expect(text).not.toContain('eyJ.secret.token');
     expect(text).not.toContain('10.20.4.31');
     expect(text).not.toContain('$argon2id$abc');
