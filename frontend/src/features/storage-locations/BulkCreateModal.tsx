@@ -120,7 +120,7 @@ export function BulkCreateModal({ parent, onClose, onCreated }: { parent: { id: 
 
       {/* Live preview — updates as you type */}
       <div style={{ marginTop: 'var(--space-4)', padding: 'var(--space-3) var(--space-4)', background: 'var(--primary-soft)', borderRadius: 'var(--radius-md)' }}>
-        <div style={{ fontSize: 'var(--text-sm)', fontWeight: 600, color: 'var(--primary)' }}>{t('locations.willCreate', { count: preview.count })}</div>
+        <div style={{ fontSize: 'var(--text-sm)', fontWeight: 600, color: 'var(--primary-ink)' }}>{t('locations.willCreate', { count: preview.count })}</div>
         {preview.sample.length > 0 && (
           <div dir="ltr" style={{ fontFamily: 'var(--font-mono)', fontSize: 'var(--text-2xs)', color: 'var(--ink-muted)', marginTop: '6px', lineHeight: 1.7, maxHeight: '92px', overflow: 'auto' }}>
             {preview.sample.join('  ·  ')}{preview.count > preview.sample.length ? '  …' : ''}

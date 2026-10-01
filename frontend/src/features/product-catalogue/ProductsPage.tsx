@@ -1,8 +1,9 @@
 import { useEffect, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useSearchParams } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { Plus, Upload, Printer } from 'lucide-react';
 import { useProducts, useProductCategories, useOrganization, resolveProductByBarcode, fetchLabelsBatch, formatCurrency, ApiError } from '../../api-client/client';
+import { signalScan } from '../../design-system/scan-signal/scan-signal-bus';
 import { usePreferences } from '../../application-shell/preferences.store';
 import { useAuthStore } from '../authentication/auth.store';
 import { StockStatusIndicator } from '../../design-system/stock-status-indicator/StockStatusIndicator';
@@ -32,7 +33,11 @@ export function ProductsPage() {
   const { language } = usePreferences();
   const navigate = useNavigate();
 
-  const [searchInput, setSearchInput] = useState('');
+  // The top bar's search lands here as ?search=…; typing here takes over from it.
+  const [searchParams] = useSearchParams();
+  const searchFromUrl = searchParams.get('search') ?? '';
+  const [searchInput, setSearchInput] = useState(searchFromUrl);
+  useEffect(() => setSearchInput(searchFromUrl), [searchFromUrl]);
   const [categoryId, setCategoryId] = useState('');
   const [lowStock, setLowStock] = useState(false);
   const search = useDebounced(searchInput);
@@ -58,9 +63,12 @@ export function ProductsPage() {
     setBarcodeError(null);
     try {
       const product = await resolveProductByBarcode(code);
+      signalScan('accepted', product.sku, language === 'ar' ? product.nameAr || product.nameEn : product.nameEn || product.nameAr);
       navigate(`/products/${product.id}`);
     } catch (err) {
-      setBarcodeError(err instanceof ApiError && err.status === 404 ? t('barcode.notFound') : t('errors.generic'));
+      const message = err instanceof ApiError && err.status === 404 ? t('barcode.notFound') : t('errors.generic');
+      setBarcodeError(message);
+      signalScan('rejected', code, message);
     } finally {
       setBarcodeBusy(false);
     }
@@ -105,7 +113,7 @@ export function ProductsPage() {
           placeholder={t('products.searchPlaceholder')}
           style={{ ...control, minWidth: '260px', flex: '1 1 260px' }}
         />
-        <select value={categoryId} onChange={(e) => setCategoryId(e.target.value)} style={{ ...control, minWidth: '180px' }}>
+        <select aria-label={t('products.category')} value={categoryId} onChange={(e) => setCategoryId(e.target.value)} style={{ ...control, minWidth: '180px' }}>
           <option value="">{t('products.allCategories')}</option>
           {categories.data?.map((c) => (
             <option key={c.id} value={c.id}>{name(c.nameEn, c.nameAr)}</option>

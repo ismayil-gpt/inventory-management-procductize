@@ -1,36 +1,44 @@
+import { FormEvent, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useNavigate } from 'react-router-dom';
-import { Sun, Moon, Languages, LogOut } from 'lucide-react';
+import { Sun, Moon, Languages, Search } from 'lucide-react';
 import { usePreferences } from './preferences.store';
 import { useAuthStore } from '../features/authentication/auth.store';
-import { logoutRequest } from '../api-client/client';
 
 interface TopBarProps {
   title: string;
 }
 
+// Laid out as in the approved "Airfield" demo (2026-10-01): the page's
+// "you are here" sign, then search, language and theme. Sign-out lives at the
+// foot of the navigation rail.
 export function TopBar({ title }: TopBarProps) {
   const { t } = useTranslation();
   const navigate = useNavigate();
   const { theme, toggleTheme, language, toggleLanguage } = usePreferences();
   const user = useAuthStore((s) => s.user);
+  const [query, setQuery] = useState('');
 
-  const onLogout = async () => {
-    await logoutRequest();
-    navigate('/login');
-  };
   const isDark =
     theme === 'dark' ||
     (theme === 'system' && window.matchMedia('(prefers-color-scheme: dark)').matches);
+
+  // Search covers the catalogue: name, SKU or barcode, answered on the Products page.
+  const onSearch = (event: FormEvent) => {
+    event.preventDefault();
+    const q = query.trim();
+    navigate(q ? `/products?search=${encodeURIComponent(q)}` : '/products');
+  };
 
   const iconButton: React.CSSProperties = {
     display: 'inline-flex',
     alignItems: 'center',
     justifyContent: 'center',
-    width: '36px',
+    gap: '6px',
+    minWidth: '36px',
     height: '36px',
     borderRadius: 'var(--radius-md)',
-    border: '1px solid var(--hairline)',
+    border: '1px solid var(--hairline-strong)',
     background: 'var(--surface)',
     color: 'var(--ink-muted)',
     cursor: 'pointer',
@@ -39,51 +47,74 @@ export function TopBar({ title }: TopBarProps) {
   return (
     <header
       style={{
-        height: '56px',
+        minHeight: '56px',
         display: 'flex',
         alignItems: 'center',
-        justifyContent: 'space-between',
-        gap: 'var(--space-4)',
-        padding: '0 var(--space-6)',
+        gap: 'var(--space-3)',
+        padding: 'var(--space-2) var(--space-6)',
         background: 'var(--surface)',
         borderBottom: '1px solid var(--hairline)',
+        flexWrap: 'wrap',
       }}
     >
-      <h1 style={{ margin: 0, fontSize: 'var(--text-xl)', fontWeight: 600, color: 'var(--ink)' }}>
+      {/* "You are here" — the page title is a small location sign that swings in on each navigation. */}
+      <h1
+        key={title}
+        className="sign-location sign-enter"
+        style={{ margin: 0, fontSize: 'var(--text-base)', lineHeight: 1, padding: '9px 14px 6px', whiteSpace: 'nowrap' }}
+      >
         {title}
       </h1>
 
-      <div style={{ display: 'flex', alignItems: 'center', gap: 'var(--space-3)' }}>
-        <button type="button" style={iconButton} onClick={toggleTheme} aria-label={t('common.theme')} title={t('common.theme')}>
-          {isDark ? <Moon size={18} strokeWidth={1.5} /> : <Sun size={18} strokeWidth={1.5} />}
-        </button>
+      <span style={{ flex: 1 }} />
 
-        <button
-          type="button"
-          style={{ ...iconButton, width: 'auto', gap: '6px', padding: '0 12px', fontSize: 'var(--text-sm)' }}
-          onClick={toggleLanguage}
-          aria-label={t('common.language')}
-          title={t('common.language')}
+      <form role="search" onSubmit={onSearch} style={{ flex: '0 1 300px', minWidth: 0 }}>
+        <label
+          style={{
+            display: 'flex',
+            alignItems: 'center',
+            gap: '8px',
+            height: '36px',
+            padding: '0 12px',
+            border: '1px solid var(--hairline-strong)',
+            borderRadius: 'var(--radius-md)',
+            background: 'var(--surface)',
+            color: 'var(--ink-muted)',
+          }}
         >
-          <Languages size={18} strokeWidth={1.5} />
-          <span style={{ fontWeight: 500 }}>{language === 'ar' ? 'العربية' : 'EN'}</span>
-        </button>
+          <Search size={16} strokeWidth={1.5} aria-hidden style={{ flex: 'none' }} />
+          <input
+            type="search"
+            value={query}
+            onChange={(e) => setQuery(e.target.value)}
+            placeholder={t('navigation.search')}
+            aria-label={t('navigation.search')}
+            style={{ flex: 1, minWidth: 0, border: 'none', outline: 'none', background: 'transparent', color: 'var(--ink)', fontSize: 'var(--text-sm)' }}
+          />
+        </label>
+      </form>
 
-        <div style={{ width: '1px', height: '24px', background: 'var(--hairline)' }} />
+      {user && (
+        <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end', lineHeight: 1.25, paddingInline: 'var(--space-2)' }}>
+          <span style={{ fontSize: 'var(--text-xs)', color: 'var(--ink)', fontWeight: 600 }}>{user.displayName}</span>
+          <span style={{ fontSize: 'var(--text-2xs)', color: 'var(--ink-muted)' }}>{t(`roles.${user.role}`)}</span>
+        </div>
+      )}
 
-        {user && (
-          <div style={{ display: 'flex', flexDirection: 'column', alignItems: language === 'ar' ? 'flex-start' : 'flex-end', lineHeight: 1.2 }}>
-            <span style={{ fontSize: 'var(--text-xs)', color: 'var(--ink)', fontWeight: 500 }}>{user.displayName}</span>
-            <span style={{ fontSize: 'var(--text-2xs)', letterSpacing: 'var(--tracking-label)', textTransform: 'uppercase', color: 'var(--ink-muted)' }}>
-              {t(`roles.${user.role}`)}
-            </span>
-          </div>
-        )}
+      <button
+        type="button"
+        style={{ ...iconButton, padding: '0 10px', fontSize: 'var(--text-sm)' }}
+        onClick={toggleLanguage}
+        aria-label={t('common.language')}
+        title={t('common.language')}
+      >
+        <Languages size={18} strokeWidth={1.5} aria-hidden />
+        <span style={{ fontWeight: 600 }}>{language === 'ar' ? 'English' : 'العربية'}</span>
+      </button>
 
-        <button type="button" style={iconButton} onClick={onLogout} aria-label={t('common.logout')} title={t('common.logout')}>
-          <LogOut size={18} strokeWidth={1.5} />
-        </button>
-      </div>
+      <button type="button" style={iconButton} onClick={toggleTheme} aria-label={t('common.theme')} title={t('common.theme')}>
+        {isDark ? <Moon size={18} strokeWidth={1.5} /> : <Sun size={18} strokeWidth={1.5} />}
+      </button>
     </header>
   );
 }

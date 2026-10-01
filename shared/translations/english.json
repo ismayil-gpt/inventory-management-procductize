@@ -10,7 +10,14 @@
     "placeholder": "Ask a question…",
     "send": "Send",
     "you": "You",
-    "thinking": "Thinking…"
+    "thinking": "Thinking…",
+    "neverGuessesTitle": "Answers come only from your stock data",
+    "neverGuessesBody": "Mizan looks up the real figures first, then puts them into words. Every answer lists the records it used.",
+    "sourcesSummary_one": "Based on 1 record",
+    "sourcesSummary_other": "Based on {{count}} records",
+    "suggestLow": "Which products are low on stock?",
+    "suggestPending": "What is waiting for approval?",
+    "suggestCoffee": "How much coffee do we have?"
   },
   "roles": {
     "ADMIN": "Administrator",
@@ -118,10 +125,11 @@
     "scanMode": "Scan",
     "manualPlaceholder": "Enter or scan a barcode",
     "find": "Find",
-    "scanUnavailableTitle": "Scanner not connected",
-    "scanUnavailableBody": "The wireless barcode scanner will activate here automatically once the device is paired. Until then, use manual entry.",
-    "deviceComingSoon": "Device coming soon",
-    "notFound": "Nothing found for that barcode."
+    "notFound": "Nothing found for that barcode.",
+    "scanReadyTitle": "Ready — scan a label",
+    "scanReadyBody": "Point the scanner at a barcode. You don't need to tap anything first.",
+    "scanTakeOverTitle": "Use the scanner here",
+    "scanTakeOverBody": "Another field is listening for the scanner. Tap here to switch it to this one."
   },
   "movements": {
     "title": "Record Stock Movement",
@@ -199,7 +207,13 @@
       "DRAFT": "Draft",
       "SENT": "Sent",
       "RECEIVED": "Received"
-    }
+    },
+    "intro": "Orders are grouped by supplier, one per supplier per approval run. They are emailed as PDF when generated from Replenishment.",
+    "supplier": "Supplier",
+    "created": "Created",
+    "sentAt": "Emailed",
+    "notSent": "Not emailed",
+    "generateHint": "Approve recommendations in Replenishment, then generate orders there."
   },
   "suppliers": {
     "add": "Add supplier",
@@ -225,7 +239,19 @@
     "newPassword": "New password (leave blank to keep)",
     "passwordHint": "At least 12 characters",
     "deleteTitle": "Delete user",
-    "deleteConfirm": "Permanently delete {{name}}? This works only if they have no recorded activity — otherwise deactivate them instead."
+    "deleteConfirm": "Permanently delete {{name}}? This works only if they have no recorded activity — otherwise deactivate them instead.",
+    "openSessions": "Signed in on",
+    "endSessions": "End sessions",
+    "endSessionsHint": "Sign this person out of every device now",
+    "endSessionsTitle": "End all sessions?",
+    "endSessionsConfirm_one": "{{name}} is signed in on 1 device. They will be signed out there at once and must sign in again.",
+    "endSessionsConfirm_other": "{{name}} is signed in on {{count}} devices. They will be signed out on all of them at once and must sign in again.",
+    "twoStep": "Two-step",
+    "twoStepOn": "On",
+    "twoStepOff": "Not set up",
+    "resetMfa": "Reset two-step",
+    "resetMfaTitle": "Reset two-step sign-in?",
+    "resetMfaConfirm": "Use this when {{name}} has lost or replaced their phone. Their two-step sign-in is cleared and they are signed out everywhere. They will set it up again at their next sign-in."
   },
   "audit": {
     "allEntities": "All entities",
@@ -295,17 +321,31 @@
   "navigation": {
     "dashboard": "Dashboard",
     "productCatalogue": "Products",
-    "storageLocations": "Locations",
-    "stockMovements": "Stock",
-    "cycleCounting": "Cycle Counting",
+    "storageLocations": "Storage locations",
+    "stockMovements": "Scan and move",
+    "cycleCounting": "Cycle counts",
     "replenishment": "Replenishment",
-    "purchaseOrders": "Purchase Orders",
+    "purchaseOrders": "Purchase orders",
     "suppliers": "Suppliers",
     "reports": "Reports",
-    "auditLog": "Audit Log",
+    "auditLog": "Audit log",
     "userManagement": "Users",
     "settings": "Settings",
-    "insights": "Insights"
+    "insights": "Insights",
+    "scanAndMove": "Scan and move",
+    "movements": "Movements",
+    "assistant": "Assistant",
+    "groupOperate": "Operate",
+    "groupStock": "Stock",
+    "groupPurchasing": "Purchasing",
+    "groupAnalyse": "Analyse",
+    "groupAdminister": "Administer",
+    "collapse": "Collapse navigation",
+    "expand": "Expand navigation",
+    "search": "Search products, SKUs or barcodes",
+    "pendingApprovals": "{{count}} waiting for approval",
+    "briefing": "Morning briefing",
+    "compliance": "Security and data"
   },
   "settings": {
     "title": "Organization settings",
@@ -360,7 +400,8 @@
     "printSubtree": "Print all shelf labels",
     "newRoot": "New store room",
     "deleteTitle": "Delete location",
-    "deleteConfirm": "Permanently delete {{designator}} and everything under it (racks, levels)? This works only when it holds no stock at all — if any shelf still has items, transfer them to another location first."
+    "deleteConfirm": "Permanently delete {{designator}} and everything under it (racks, levels)? This works only when it holds no stock at all — if any shelf still has items, transfer them to another location first.",
+    "activeLocation": "Active location"
   },
   "stock": {
     "inStock": "In stock",
@@ -412,5 +453,111 @@
     "spendEmpty": "Nothing needs reordering right now — no projected spend.",
     "noSupplier": "No supplier assigned",
     "noCategory": "Uncategorised"
+  },
+  "briefing": {
+    "headline_one": "1 thing needs you today",
+    "headline_other": "{{count}} things need you today",
+    "allClearTitle": "Nothing needs you today",
+    "allClearBody": "Stock is healthy, nothing is waiting for approval and every scan has synced. The next review runs tomorrow at 07:00.",
+    "reviewedAt": "Mizan reviewed stock at {{time}} GST",
+    "humanDecides": "Mizan recommends, you decide. Nothing is ordered until an administrator approves it.",
+    "approveTitle": "Approve orders",
+    "approveHint": "Each recommendation shows the numbers behind it. Change the quantity before approving if you need to.",
+    "seeAllApprovals": "See all {{count}} in Replenishment",
+    "qtyInvalid": "Enter a whole number above zero.",
+    "runningOutTitle": "Running out this week",
+    "runningOutHint": "Products that will run out within 7 days and are not yet waiting for approval.",
+    "runningOutReason": "{{stock}} left, using about {{usage}} a day, so it lasts about {{days}} days.",
+    "daysLeft_one": "1 day",
+    "daysLeft_other": "{{count}} days",
+    "countsTitle": "Counts in progress",
+    "countUntitled": "Cycle count",
+    "countLines_one": "1 line counted",
+    "countLines_other": "{{count}} lines counted",
+    "continueCount": "Continue count",
+    "queuedScans_one": "1 scan is waiting to sync",
+    "queuedScans_other": "{{count}} scans are waiting to sync",
+    "reviewQueue": "Review the queue"
+  },
+  "scanSignal": {
+    "accepted": "Accepted",
+    "rejected": "Not accepted",
+    "duplicate": "Already scanned",
+    "duplicateDetail": "The same label was scanned twice. The second scan was ignored.",
+    "recorded": "{{type}} recorded"
+  },
+  "shelfView": {
+    "title": "Rack view",
+    "empty": "Empty",
+    "legend": {
+      "IN_STOCK": "In stock",
+      "LOW": "Low",
+      "CRITICAL": "Critical",
+      "OUT": "Out"
+    }
+  },
+  "compliance": {
+    "badge": "On-site",
+    "badgeTitle": "All data and the AI stay on this organisation's own server. Nothing goes to the cloud.",
+    "headline": "Your data never leaves this building",
+    "promiseDataTitle": "Stored here",
+    "promiseDataBody": "Stock, users, orders and the audit trail are kept in a database on this organisation's own server.",
+    "promiseAiTitle": "AI runs here",
+    "promiseAiBody": "The AI Store Manager and the assistant run on the same server. No question or figure is sent to an outside AI service.",
+    "promiseEmailTitle": "One way out",
+    "promiseEmailBody": "The only outbound connection is email, used to send approved purchase orders to suppliers.",
+    "controlsTitle": "DESC security controls",
+    "controlsIntro": "Every control required by the Dubai Electronic Security Center, with its current status taken directly from the compliance evidence file. Open a row to see where it is implemented.",
+    "lastUpdated": "Evidence last updated",
+    "colControl": "Control",
+    "colStatus": "Status",
+    "showEvidence": "Show where this is implemented",
+    "status": {
+      "VERIFIED": "Verified",
+      "IMPLEMENTED": "In place",
+      "IN_PROGRESS": "In progress",
+      "NOT_STARTED": "Not started"
+    },
+    "control": {
+      "1": "Encryption in transit",
+      "2": "Encryption at rest",
+      "3": "Password storage",
+      "4": "Session management",
+      "5": "Account lockout",
+      "6": "Idle timeout",
+      "7": "Two-step sign-in (MFA)",
+      "8": "Access control by role",
+      "9": "Audit logging",
+      "10": "Audit log cannot be changed",
+      "11": "Network separation",
+      "12": "Rate limiting on sign-in",
+      "13": "Secure browser headers",
+      "14": "Secrets kept out of the code",
+      "15": "No personal data in logs",
+      "16": "Dependency scanning",
+      "17": "Backup and recovery",
+      "18": "Data stays on-site",
+      "19": "Least privilege for the database",
+      "20": "Input validation"
+    }
+  },
+  "idleTimeout": {
+    "title": "Still there?",
+    "body": "For security you'll be signed out in {{seconds}} seconds because nothing has happened for a while.",
+    "stay": "Stay signed in",
+    "signedOut": "You were signed out after a period of inactivity. Sign in again to continue."
+  },
+  "mfa": {
+    "verifyTitle": "Enter your code",
+    "verifyBody": "Open your authenticator app and enter the 6-digit code shown for Mizan.",
+    "enrollTitle": "Set up two-step sign-in",
+    "enrollBody": "Your organisation requires a second step at sign-in. Scan this code with an authenticator app (such as Microsoft Authenticator or Google Authenticator), then enter the 6-digit code it shows.",
+    "qrAlt": "QR code for your authenticator app",
+    "manualKeyLabel": "Can't scan? Enter this key in the app instead:",
+    "codeLabel": "6-digit code",
+    "codeFormat": "Enter the 6 digits from your authenticator app.",
+    "verifyAction": "Sign in",
+    "enrollAction": "Finish setup and sign in",
+    "startOver": "Use a different account"
   }
 }

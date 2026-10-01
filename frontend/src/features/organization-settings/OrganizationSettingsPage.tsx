@@ -56,7 +56,7 @@ export function OrganizationSettingsPage() {
   return (
     <div style={{ maxWidth: '640px', display: 'flex', flexDirection: 'column', gap: 'var(--space-4)' }}>
       <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-        <span style={{ color: 'var(--primary)' }}><Building2 size={20} strokeWidth={1.5} /></span>
+        <span style={{ color: 'var(--primary-ink)' }}><Building2 size={20} strokeWidth={1.5} /></span>
         <h2 style={{ margin: 0, fontSize: 'var(--text-lg)', fontWeight: 600, color: 'var(--ink)' }}>{t('settings.title')}</h2>
       </div>
       <p style={{ margin: 0, fontSize: 'var(--text-sm)', color: 'var(--ink-muted)' }}>{t('settings.intro')}</p>

@@ -35,6 +35,7 @@ export interface SystemInfo {
   environment: string;
   apiVersion: string; nodeVersion: string; serverTime: string; timezone: string;
   demoLogins?: DemoLogin[];
+  sessionIdleTimeoutMinutes?: number;
 }
 export interface DashboardSummary {
   products: number; shelves: number; storeRooms: number; suppliers: number; totalUnits: number;
@@ -58,31 +59,72 @@ async function getPublic<T>(path: string): Promise<T> {
 }
 
 // ---- Authentication ----
-export async function loginRequest(email: string, password: string): Promise<Session> {
-  const response = await fetch(`${API_BASE}/auth/login`, {
+async function postPublic<T>(path: string, payload: unknown): Promise<T> {
+  const response = await fetch(`${API_BASE}${path}`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json', Accept: 'application/json' },
-    body: JSON.stringify({ email, password }),
+    body: JSON.stringify(payload),
   });
   const body = await response.json().catch(() => ({}));
   if (!response.ok) throw new ApiError(response.status, body as ApiErrorBody);
-  return body as Session;
+  return body as T;
 }
 
-async function tryRefresh(): Promise<boolean> {
-  const { refreshToken, setSession, clearSession } = useAuthStore.getState();
-  if (!refreshToken) return false;
-  const response = await fetch(`${API_BASE}/auth/refresh`, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ refreshToken }),
+/** With two-step sign-in on (DESC #7), a correct password returns a challenge instead of a session. */
+export type SignInOutcome =
+  | Session
+  | { mfaRequired: true; mfaToken: string }
+  | { mfaEnrollmentRequired: true; mfaToken: string };
+export interface MultiFactorEnrollment { otpauthUrl: string; qrDataUrl: string; manualKey: string }
+
+export function loginRequest(email: string, password: string): Promise<SignInOutcome> {
+  return postPublic<SignInOutcome>('/auth/login', { email, password });
+}
+export function verifyMultiFactorCode(mfaToken: string, code: string): Promise<Session> {
+  return postPublic<Session>('/auth/mfa/verify', { mfaToken, code });
+}
+export function startMultiFactorEnrollment(mfaToken: string): Promise<MultiFactorEnrollment> {
+  return postPublic<MultiFactorEnrollment>('/auth/mfa/enroll/start', { mfaToken });
+}
+export function confirmMultiFactorEnrollment(mfaToken: string, code: string): Promise<Session> {
+  return postPublic<Session>('/auth/mfa/enroll/confirm', { mfaToken, code });
+}
+
+// Refresh tokens are single-use (DESC #4): presenting one twice ends the
+// session. So refreshes never overlap — one at a time inside a tab (a shared
+// promise) and across tabs (a Web Lock) — and a tab first checks whether
+// another tab has already refreshed before spending its own token.
+let refreshInFlight: Promise<boolean> | null = null;
+
+function tryRefresh(rejectedAccessToken: string | null): Promise<boolean> {
+  refreshInFlight ??= refreshOnce(rejectedAccessToken).finally(() => {
+    refreshInFlight = null;
   });
-  if (!response.ok) {
-    clearSession();
-    return false;
-  }
-  setSession((await response.json()) as Session);
-  return true;
+  return refreshInFlight;
+}
+
+async function refreshOnce(rejectedAccessToken: string | null): Promise<boolean> {
+  const run = async (): Promise<boolean> => {
+    useAuthStore.getState().reloadFromStorage();
+    const { accessToken, refreshToken, setSession, clearSession } = useAuthStore.getState();
+    // Another tab already refreshed: use its tokens rather than reusing ours.
+    if (accessToken && accessToken !== rejectedAccessToken) return true;
+    if (!refreshToken) return false;
+    const response = await fetch(`${API_BASE}/auth/refresh`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ refreshToken }),
+    });
+    if (!response.ok) {
+      clearSession();
+      return false;
+    }
+    setSession((await response.json()) as Session);
+    return true;
+  };
+  return typeof navigator !== 'undefined' && navigator.locks
+    ? navigator.locks.request('mizan-token-refresh', run)
+    : run();
 }
 
 /** Authenticated request with one automatic refresh-and-retry on 401. */
@@ -97,7 +139,7 @@ export async function authFetch<T>(path: string, options: RequestInit = {}, allo
   const response = await fetch(`${API_BASE}${path}`, { ...options, headers });
 
   if (response.status === 401 && allowRetry) {
-    if (await tryRefresh()) return authFetch<T>(path, options, false);
+    if (await tryRefresh(accessToken)) return authFetch<T>(path, options, false);
     useAuthStore.getState().clearSession();
     throw new ApiError(401, { code: 'UNAUTHENTICATED' });
   }
@@ -205,8 +247,16 @@ export function resolveLocationByBarcode(code: string) {
 }
 
 // ---- Users (ADMIN) ----
-export interface UserRow { id: string; email: string; displayName: string; role: 'ADMIN' | 'STORE_KEEPER'; isActive: boolean; lastLoginAt: string | null; preferredLanguage: string; createdAt: string; }
+export interface UserRow { id: string; email: string; displayName: string; role: 'ADMIN' | 'STORE_KEEPER'; isActive: boolean; lastLoginAt: string | null; preferredLanguage: string; createdAt: string; openSessions: number; mfaEnabledAt: string | null; }
 export interface UserWrite { email: string; displayName: string; role: 'ADMIN' | 'STORE_KEEPER'; password?: string; isActive?: boolean; preferredLanguage?: string; }
+/** DESC #4 — sign a user out of every device now (ADMIN). */
+export function endUserSessions(id: string) {
+  return authFetch<{ ended: number }>(`/users/${id}/end-sessions`, { method: 'POST' });
+}
+/** DESC #7 — clear a user's two-step sign-in so they enrol again (ADMIN). */
+export function resetUserMultiFactor(id: string) {
+  return authFetch<{ reset: boolean; sessionsEnded: number }>(`/users/${id}/reset-mfa`, { method: 'POST' });
+}
 export function useUsers(enabled = true) {
   return useQuery({ queryKey: ['users'], queryFn: () => authFetch<UserRow[]>('/users'), retry: false, enabled });
 }
@@ -289,8 +339,24 @@ export function rejectRecommendation(id: string, reason: string) {
 }
 
 // ---- Purchase orders ----
-// Approving recommendations still generates + emails POs to suppliers; there is
-// no in-app PO viewer (removed by design).
+// Approving recommendations generates + emails POs to suppliers. The in-app
+// list was removed on 2026-08-03 and restored on 2026-10-01 at the client's
+// request, to match the approved "Airfield" navigation.
+export interface PurchaseOrderSummary {
+  id: string; poNumber: string; supplierName: string; status: 'DRAFT' | 'SENT' | 'RECEIVED';
+  lineCount: number; totalQty: number; sentAt: string | null; createdAt: string;
+}
+export function usePurchaseOrders() {
+  return useQuery({ queryKey: ['purchase-orders'], queryFn: () => authFetch<PurchaseOrderSummary[]>('/purchase-orders'), retry: false });
+}
+export async function openPurchaseOrderPdf(id: string): Promise<void> {
+  const { accessToken } = useAuthStore.getState();
+  const res = await fetch(`${API_BASE}/purchase-orders/${id}/pdf`, { headers: accessToken ? { Authorization: `Bearer ${accessToken}` } : {} });
+  if (!res.ok) throw new Error(`PDF request failed (${res.status})`);
+  const url = URL.createObjectURL(await res.blob());
+  window.open(url, '_blank');
+  setTimeout(() => URL.revokeObjectURL(url), 10000);
+}
 export function generatePurchaseOrders() {
   return authFetch<{ created: Array<{ poNumber: string; supplierName: string; lineCount: number; emailed: boolean }>; skippedNoSupplier: number }>('/purchase-orders/generate', { method: 'POST' });
 }

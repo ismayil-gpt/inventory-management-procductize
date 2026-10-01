@@ -4,6 +4,8 @@ import { PassportModule } from '@nestjs/passport';
 import { AuthenticationController } from './authentication.controller';
 import { AuthenticationService } from './authentication.service';
 import { JwtAccessStrategy } from './strategies/jwt-access.strategy';
+import { AuthSessionRepository } from './auth-session.repository';
+import { MultiFactorService } from './multi-factor.service';
 
 @Module({
   imports: [
@@ -13,7 +15,7 @@ import { JwtAccessStrategy } from './strategies/jwt-access.strategy';
     JwtModule.register({}),
   ],
   controllers: [AuthenticationController],
-  providers: [AuthenticationService, JwtAccessStrategy],
-  exports: [AuthenticationService],
+  providers: [AuthenticationService, JwtAccessStrategy, AuthSessionRepository, MultiFactorService],
+  exports: [AuthenticationService, AuthSessionRepository, MultiFactorService],
 })
 export class AuthenticationModule {}

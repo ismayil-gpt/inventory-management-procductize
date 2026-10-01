@@ -60,16 +60,16 @@ export function MovementHistoryPanel() {
     <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--space-4)' }}>
       {/* Filters */}
       <div style={{ display: 'flex', gap: 'var(--space-3)', flexWrap: 'wrap', alignItems: 'center' }}>
-        <select value={type} onChange={(e) => { setType(e.target.value as MovementType | ''); resetPage(); }} style={{ ...control, minWidth: '150px' }}>
+        <select aria-label={t('dashboard.activityType')} value={type} onChange={(e) => { setType(e.target.value as MovementType | ''); resetPage(); }} style={{ ...control, minWidth: '150px' }}>
           <option value="">{t('movements.filterAllTypes')}</option>
           {(Object.keys(MOVEMENT_TYPE_KEY) as MovementType[]).map((k) => <option key={k} value={k}>{t(MOVEMENT_TYPE_KEY[k])}</option>)}
         </select>
-        <select value={productId} onChange={(e) => { setProductId(e.target.value); resetPage(); }} style={{ ...control, minWidth: '200px' }}>
+        <select aria-label={t('dashboard.activityProduct')} value={productId} onChange={(e) => { setProductId(e.target.value); resetPage(); }} style={{ ...control, minWidth: '200px' }}>
           <option value="">{t('movements.filterAllProducts')}</option>
           {products.data?.items.map((p) => <option key={p.id} value={p.id}>{p.sku} · {name(p.nameEn, p.nameAr)}</option>)}
         </select>
         {isAdmin && (
-          <select value={userId} onChange={(e) => { setUserId(e.target.value); resetPage(); }} style={{ ...control, minWidth: '160px' }}>
+          <select aria-label={t('dashboard.activityBy')} value={userId} onChange={(e) => { setUserId(e.target.value); resetPage(); }} style={{ ...control, minWidth: '160px' }}>
             <option value="">{t('movements.filterAllUsers')}</option>
             {users.data?.map((u) => <option key={u.id} value={u.id}>{u.displayName}</option>)}
           </select>
@@ -88,7 +88,8 @@ export function MovementHistoryPanel() {
       </div>
 
       {/* Table */}
-      <div style={{ background: 'var(--surface)', border: '1px solid var(--hairline)', borderRadius: 'var(--radius-md)', overflow: 'auto', maxHeight: '65vh' }}>
+      {/* A scrolling region must be reachable by keyboard (WCAG 2.1.1). */}
+      <div role="region" aria-label={t('navigation.movements')} tabIndex={0} style={{ background: 'var(--surface)', border: '1px solid var(--hairline)', borderRadius: 'var(--radius-md)', overflow: 'auto', maxHeight: '65vh' }}>
         <table style={{ width: '100%', borderCollapse: 'collapse' }}>
           <thead>
             <tr>

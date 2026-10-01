@@ -52,7 +52,7 @@ export function ImportModal({ onClose }: { onClose: () => void }) {
             <button type="button" onClick={() => void downloadImportTemplate()} style={{ ...btn, border: '1px solid var(--hairline)', background: 'var(--surface)', color: 'var(--ink)' }}>
               <Download size={16} strokeWidth={1.5} /> {t('products.import.template')}
             </button>
-            <label style={{ ...btn, border: '1px solid var(--primary)', background: 'var(--primary-soft)', color: 'var(--primary)' }}>
+            <label style={{ ...btn, border: '1px solid var(--primary-ink)', background: 'var(--primary-soft)', color: 'var(--primary-ink)' }}>
               <Upload size={16} strokeWidth={1.5} /> {file ? file.name : t('products.import.choose')}
               <input type="file" accept=".xlsx" style={{ display: 'none' }} onChange={(e) => void onPick(e.target.files?.[0] ?? null)} />
             </label>

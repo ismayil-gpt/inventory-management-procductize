@@ -1,5 +1,7 @@
 # Mizan AI service. Ref: CLAUDE.md §4, §3.3.
-fastapi==0.115.0
+fastapi==0.142.2
+# Pinned explicitly: >= 1.3.1 clears the 2026 advisories (dependency-scan-reports/2026-10-01).
+starlette==1.7.0
 uvicorn[standard]==0.30.6
 pydantic==2.9.2
 pydantic-settings==2.5.2
@@ -13,5 +15,5 @@ statsmodels==0.14.2
 # at a 50-product catalogue. Product-name matching uses stdlib difflib instead.
 
 # Testing (§15)
-pytest==8.3.3
-pytest-asyncio==0.24.0
+pytest==9.1.1
+pytest-asyncio==1.4.0

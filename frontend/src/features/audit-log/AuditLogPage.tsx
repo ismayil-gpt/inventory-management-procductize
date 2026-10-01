@@ -18,14 +18,15 @@ export function AuditLogPage() {
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--space-4)' }}>
       <div style={{ display: 'flex', gap: 'var(--space-3)', flexWrap: 'wrap', alignItems: 'center' }}>
-        <select value={entityType} onChange={(e) => setEntityType(e.target.value)} style={{ ...control, minWidth: '180px' }}>
+        <select aria-label={t('audit.entity')} value={entityType} onChange={(e) => setEntityType(e.target.value)} style={{ ...control, minWidth: '180px' }}>
           {ENTITY_TYPES.map((e) => <option key={e} value={e}>{e || t('audit.allEntities')}</option>)}
         </select>
         <input value={action} onChange={(e) => setAction(e.target.value)} placeholder={t('audit.actionFilter')} style={{ ...control, minWidth: '200px' }} />
         <span style={{ marginInlineStart: 'auto', fontSize: 'var(--text-xs)', color: 'var(--ink-muted)' }} className="tabular">{rows.data?.length ?? 0} {t('audit.entries')}</span>
       </div>
 
-      <div style={{ background: 'var(--surface)', border: '1px solid var(--hairline)', borderRadius: 'var(--radius-md)', overflow: 'auto', maxHeight: '70vh' }}>
+      {/* A scrolling region must be reachable by keyboard (WCAG 2.1.1). */}
+      <div role="region" aria-label={t('navigation.auditLog')} tabIndex={0} style={{ background: 'var(--surface)', border: '1px solid var(--hairline)', borderRadius: 'var(--radius-md)', overflow: 'auto', maxHeight: '70vh' }}>
         <table style={{ width: '100%', borderCollapse: 'collapse' }}>
           <thead>
             <tr>

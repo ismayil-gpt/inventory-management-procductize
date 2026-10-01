@@ -262,6 +262,22 @@ async function main() {
     if (u.role === Role.STORE_KEEPER) keeperUserId = created.id;
   }
 
+  // ---- The AI service's own account (OPEN-QUESTIONS #21) ----
+  // The daily review signs in as a machine, never as a person. Its email and
+  // password come from the environment (SERVICE_ACCOUNT_EMAIL / _PASSWORD, the
+  // same values the ai-service reads), so no machine password lives in code.
+  const serviceEmail = process.env.SERVICE_ACCOUNT_EMAIL?.toLowerCase();
+  const servicePassword = process.env.SERVICE_ACCOUNT_PASSWORD;
+  const isPersonAccount = DEMO_USERS.some((u) => u.email === serviceEmail);
+  if (serviceEmail && servicePassword && servicePassword.length >= 12 && !isPersonAccount) {
+    await prisma.user.create({
+      data: { email: serviceEmail, passwordHash: await hash(servicePassword), displayName: 'AI Store Manager (service account)', role: Role.ADMIN, preferredLanguage: 'en' },
+    });
+    console.log(`  Service account created for the AI service: ${serviceEmail}`);
+  } else {
+    console.log('  No AI service account created: set SERVICE_ACCOUNT_EMAIL and SERVICE_ACCOUNT_PASSWORD (12+ chars) to a dedicated account.');
+  }
+
   // ---- ~150 days of daily movement history per product ----
   // The AI Store Manager's reorder calculator (§8.2) uses a trailing-30-day
   // GOODS_OUT average as its plain input. The Stage-2 forecaster

@@ -1,8 +1,8 @@
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useQueryClient } from '@tanstack/react-query';
-import { Plus, Pencil, Trash2 } from 'lucide-react';
-import { useUsers, createUser, updateUser, deleteUser, ApiError, type UserRow } from '../../api-client/client';
+import { Plus, Pencil, Trash2, LogOut, ShieldOff } from 'lucide-react';
+import { useUsers, createUser, updateUser, deleteUser, endUserSessions, resetUserMultiFactor, ApiError, type UserRow } from '../../api-client/client';
 import { Modal } from '../../design-system/modal/Modal';
 import { ConfirmDialog } from '../../design-system/confirm-dialog/ConfirmDialog';
 import { useAuthStore } from '../authentication/auth.store';
@@ -17,6 +17,8 @@ export function UsersPage() {
   const currentUserId = useAuthStore((s) => s.user?.id);
   const [editing, setEditing] = useState<UserRow | 'new' | null>(null);
   const [deleting, setDeleting] = useState<UserRow | null>(null);
+  const [endingSessions, setEndingSessions] = useState<UserRow | null>(null);
+  const [resettingMfa, setResettingMfa] = useState<UserRow | null>(null);
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--space-4)' }}>
@@ -26,6 +28,24 @@ export function UsersPage() {
         </button>
       </div>
       {editing && <UserModal user={editing === 'new' ? null : editing} onClose={() => setEditing(null)} />}
+      {endingSessions && (
+        <ConfirmDialog
+          title={t('users.endSessionsTitle')}
+          message={t('users.endSessionsConfirm', { name: endingSessions.displayName, count: endingSessions.openSessions })}
+          confirmLabel={t('users.endSessions')}
+          onConfirm={async () => { await endUserSessions(endingSessions.id); await queryClient.invalidateQueries({ queryKey: ['users'] }); }}
+          onClose={() => setEndingSessions(null)}
+        />
+      )}
+      {resettingMfa && (
+        <ConfirmDialog
+          title={t('users.resetMfaTitle')}
+          message={t('users.resetMfaConfirm', { name: resettingMfa.displayName })}
+          confirmLabel={t('users.resetMfa')}
+          onConfirm={async () => { await resetUserMultiFactor(resettingMfa.id); await queryClient.invalidateQueries({ queryKey: ['users'] }); }}
+          onClose={() => setResettingMfa(null)}
+        />
+      )}
       {deleting && (
         <ConfirmDialog
           title={t('users.deleteTitle')}
@@ -44,6 +64,8 @@ export function UsersPage() {
               <th style={th}>{t('users.role')}</th>
               <th style={th}>{t('users.active')}</th>
               <th style={th}>{t('users.lastLogin')}</th>
+              <th style={th}>{t('users.twoStep')}</th>
+              <th style={{ ...th, textAlign: 'end' }}>{t('users.openSessions')}</th>
               <th style={th}></th>
             </tr>
           </thead>
@@ -55,8 +77,20 @@ export function UsersPage() {
                 <td style={td}>{t(`roles.${u.role}`)}</td>
                 <td style={td}><span style={{ display: 'inline-flex', alignItems: 'center', gap: '6px', fontSize: 'var(--text-xs)' }}><span style={{ width: '6px', height: '6px', borderRadius: '50%', background: u.isActive ? 'var(--ok)' : 'var(--ink-faint)' }} />{u.isActive ? t('users.yes') : t('users.no')}</span></td>
                 <td style={{ ...td, color: 'var(--ink-muted)' }} className="tabular" dir="ltr">{u.lastLoginAt ? u.lastLoginAt.slice(0, 16).replace('T', ' ') : '—'}</td>
+                <td style={{ ...td, fontSize: 'var(--text-xs)', color: u.mfaEnabledAt ? 'var(--ok)' : 'var(--ink-muted)' }}>{u.mfaEnabledAt ? t('users.twoStepOn') : t('users.twoStepOff')}</td>
+                <td className="tabular" style={{ ...td, textAlign: 'end' }}>{u.openSessions}</td>
                 <td style={{ ...td, textAlign: 'end' }}>
                   <div style={{ display: 'inline-flex', gap: '6px' }}>
+                    {u.mfaEnabledAt && u.id !== currentUserId && (
+                      <button type="button" onClick={() => setResettingMfa(u)} style={{ display: 'inline-flex', alignItems: 'center', gap: '5px', height: '30px', padding: '0 10px', borderRadius: 'var(--radius-sm)', border: '1px solid var(--hairline)', background: 'var(--surface)', color: 'var(--ink)', fontSize: 'var(--text-xs)', cursor: 'pointer' }}>
+                        <ShieldOff size={13} aria-hidden /> {t('users.resetMfa')}
+                      </button>
+                    )}
+                    {u.openSessions > 0 && u.id !== currentUserId && (
+                      <button type="button" onClick={() => setEndingSessions(u)} title={t('users.endSessionsHint')} style={{ display: 'inline-flex', alignItems: 'center', gap: '5px', height: '30px', padding: '0 10px', borderRadius: 'var(--radius-sm)', border: '1px solid var(--hairline)', background: 'var(--surface)', color: 'var(--ink)', fontSize: 'var(--text-xs)', cursor: 'pointer' }}>
+                        <LogOut size={13} aria-hidden /> {t('users.endSessions')}
+                      </button>
+                    )}
                     <button type="button" onClick={() => setEditing(u)} style={{ display: 'inline-flex', alignItems: 'center', gap: '5px', height: '30px', padding: '0 10px', borderRadius: 'var(--radius-sm)', border: '1px solid var(--hairline)', background: 'var(--surface)', color: 'var(--ink)', fontSize: 'var(--text-xs)', cursor: 'pointer' }}>
                       <Pencil size={13} /> {t('products.edit')}
                     </button>

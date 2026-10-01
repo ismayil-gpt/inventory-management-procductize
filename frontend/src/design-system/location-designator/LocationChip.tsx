@@ -16,8 +16,8 @@ export function LocationChip({ designator }: { designator: string }) {
       style={{
         display: 'inline-flex',
         alignItems: 'stretch',
-        border: '1px solid var(--hairline)',
-        borderRadius: 'var(--radius-sm)',
+        border: '1px solid var(--hairline-strong)',
+        borderRadius: 'var(--radius-chip)',
         fontFamily: 'var(--font-mono)',
         fontSize: 'var(--text-xs)',
         overflow: 'hidden',

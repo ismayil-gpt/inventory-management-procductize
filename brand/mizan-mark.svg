@@ -1,21 +1,16 @@
-<svg viewBox="0 0 512 512" fill="none" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Mizan">
+<svg viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Mizan">
   <title>Mizan mark</title>
-  <!-- Base plinth -->
-  <rect x="171" y="402" width="170" height="22" rx="3" fill="#0B4F5E"/>
-  <rect x="196" y="380" width="120" height="22" rx="3" fill="#0B4F5E"/>
-  <!-- Central post -->
-  <rect x="245" y="150" width="22" height="234" rx="3" fill="#0B4F5E"/>
-  <!-- Balance beam (level = in balance) -->
-  <rect x="100" y="140" width="312" height="20" rx="3" fill="#0B4F5E"/>
-  <!-- Pivot / fulcrum accent -->
-  <circle cx="256" cy="150" r="19" fill="#A67C1A"/>
-  <circle cx="256" cy="150" r="7" fill="#0B4F5E"/>
-  <!-- Left pan: chains + shallow bowl -->
-  <path d="M104 160 L66 214" stroke="#0B4F5E" stroke-width="12" stroke-linecap="round"/>
-  <path d="M104 160 L142 214" stroke="#0B4F5E" stroke-width="12" stroke-linecap="round"/>
-  <path d="M60 214 Q104 260 148 214" stroke="#0B4F5E" stroke-width="16" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
-  <!-- Right pan: chains + shallow bowl -->
-  <path d="M408 160 L370 214" stroke="#0B4F5E" stroke-width="12" stroke-linecap="round"/>
-  <path d="M408 160 L446 214" stroke="#0B4F5E" stroke-width="12" stroke-linecap="round"/>
-  <path d="M364 214 Q408 260 452 214" stroke="#0B4F5E" stroke-width="16" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+  <!-- A balance scale (mīzān) drawn as an airfield location sign: black field,
+       inset yellow border, yellow legend. Same drawing as MizanMark.tsx. -->
+  <rect width="64" height="64" rx="14" fill="#121412"/>
+  <rect x="4.5" y="4.5" width="55" height="55" rx="10.5" fill="none" stroke="#F2C230" stroke-width="2.5"/>
+  <g fill="#F2C230" stroke="#F2C230" stroke-linecap="round" stroke-linejoin="round">
+    <rect x="14" y="19.5" width="36" height="3.5" rx="1.75" stroke="none"/>
+    <rect x="30.25" y="21" width="3.5" height="23" stroke="none"/>
+    <rect x="22" y="43" width="20" height="4" rx="2" stroke="none"/>
+    <path d="M17 23 L11.5 33 M17 23 L22.5 33 M47 23 L41.5 33 M47 23 L52.5 33" fill="none" stroke-width="1.8"/>
+    <path d="M9.5 33 h15 a7.5 5.5 0 0 1 -15 0 z M39.5 33 h15 a7.5 5.5 0 0 1 -15 0 z" stroke="none"/>
+  </g>
+  <circle cx="32" cy="21.25" r="3.6" fill="#F2C230"/>
+  <circle cx="32" cy="21.25" r="1.4" fill="#121412"/>
 </svg>

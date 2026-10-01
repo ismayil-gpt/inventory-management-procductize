@@ -3,12 +3,24 @@ import { useTranslation } from 'react-i18next';
 import { Send } from 'lucide-react';
 import { Drawer } from '../../design-system/drawer/Drawer';
 import { useAssistantUi } from './assistant.store';
-import { queryAssistant, ApiError } from '../../api-client/client';
+import { queryAssistant, ApiError, type AssistantSource } from '../../api-client/client';
 
 interface Message {
   role: 'user' | 'assistant';
   text: string;
   isDevelopmentModel?: boolean;
+  sources?: AssistantSource[];
+}
+
+const SUGGESTED_QUESTION_KEYS = ['assistant.suggestLow', 'assistant.suggestPending', 'assistant.suggestCoffee'] as const;
+
+/** Shows a source's own figures (stock, reorder point, quantity…) — the numbers the answer was built from. */
+function sourceFigures(value: unknown): Array<[string, string]> {
+  if (value === null || typeof value !== 'object') return value === undefined ? [] : [['', String(value)]];
+  return Object.entries(value as Record<string, unknown>)
+    .filter(([, v]) => v === null || ['string', 'number', 'boolean'].includes(typeof v))
+    .slice(0, 4)
+    .map(([k, v]) => [k, String(v)]);
 }
 
 // §8.4 — a plain question/answer panel. No chat-bubble/rounded-pill styling (§9.2):
@@ -31,8 +43,8 @@ export function AssistantPanel() {
 
   const language = (document.documentElement.getAttribute('lang') as 'en' | 'ar') ?? 'en';
 
-  const send = async () => {
-    const text = draft.trim();
+  const send = async (asked?: string) => {
+    const text = (asked ?? draft).trim();
     if (!text || busy) return;
     setMessages((m) => [...m, { role: 'user', text }]);
     setDraft('');
@@ -40,7 +52,7 @@ export function AssistantPanel() {
     setError(null);
     try {
       const result = await queryAssistant(text, language);
-      setMessages((m) => [...m, { role: 'assistant', text: result.answer, isDevelopmentModel: result.isDevelopmentModel }]);
+      setMessages((m) => [...m, { role: 'assistant', text: result.answer, isDevelopmentModel: result.isDevelopmentModel, sources: result.sources }]);
     } catch (err) {
       setError(err instanceof ApiError ? (language === 'ar' ? err.body.messageAr : err.body.messageEn) ?? err.message : String(err));
     } finally {
@@ -52,7 +64,27 @@ export function AssistantPanel() {
     <Drawer title={t('assistant.title')} onClose={close}>
       <div ref={listRef} style={{ flex: 1, overflowY: 'auto', padding: 'var(--space-5)', display: 'flex', flexDirection: 'column', gap: 'var(--space-4)' }}>
         {messages.length === 0 && (
-          <p style={{ color: 'var(--ink-muted)', fontSize: 'var(--text-sm)' }}>{t('assistant.emptyState')}</p>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--space-3)' }}>
+            {/* The promise that sets this assistant apart: it phrases real data, never invents it (§8.4). */}
+            <div style={{ padding: 'var(--space-3) var(--space-4)', borderRadius: 'var(--radius-md)', background: 'var(--gantry)', border: '1px solid var(--gantry-line)', color: 'var(--gantry-ink)' }}>
+              <div style={{ fontWeight: 600 }}>{t('assistant.neverGuessesTitle')}</div>
+              <div style={{ fontSize: 'var(--text-xs)', color: 'var(--gantry-muted)', marginTop: '2px' }}>{t('assistant.neverGuessesBody')}</div>
+            </div>
+            <p style={{ margin: 0, color: 'var(--ink-muted)', fontSize: 'var(--text-sm)' }}>{t('assistant.emptyState')}</p>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
+              {SUGGESTED_QUESTION_KEYS.map((key) => (
+                <button
+                  key={key}
+                  type="button"
+                  onClick={() => void send(t(key))}
+                  disabled={busy}
+                  style={{ textAlign: 'start', padding: '8px 12px', borderRadius: 'var(--radius-md)', border: '1px solid var(--hairline-strong)', background: 'var(--surface)', color: 'var(--ink)', fontSize: 'var(--text-sm)', cursor: 'pointer' }}
+                >
+                  {t(key)}
+                </button>
+              ))}
+            </div>
+          </div>
         )}
         {messages.map((m, i) => (
           <div key={i} style={{ borderTop: i > 0 ? '1px solid var(--hairline)' : undefined, paddingTop: i > 0 ? 'var(--space-3)' : 0 }}>
@@ -63,6 +95,25 @@ export function AssistantPanel() {
               )}
             </div>
             <div style={{ fontSize: 'var(--text-sm)', color: 'var(--ink)', lineHeight: 1.5 }}>{m.text}</div>
+            {m.sources && m.sources.length > 0 && (
+              <details style={{ marginTop: 'var(--space-2)' }}>
+                <summary style={{ cursor: 'pointer', fontSize: 'var(--text-xs)', fontWeight: 600, color: 'var(--primary-ink)' }}>
+                  {t('assistant.sourcesSummary', { count: m.sources.length })}
+                </summary>
+                <ul style={{ listStyle: 'none', margin: '6px 0 0', padding: 0, display: 'flex', flexDirection: 'column', gap: '4px' }}>
+                  {m.sources.slice(0, 12).map((source) => (
+                    <li key={`${source.type}-${source.id}`} style={{ padding: '6px 10px', borderRadius: 'var(--radius-sm)', background: 'var(--surface-sunken)', fontSize: 'var(--text-xs)' }}>
+                      <div dir="ltr" style={{ fontWeight: 600, textAlign: 'start' }}>{source.label}</div>
+                      <div dir="ltr" style={{ display: 'flex', flexWrap: 'wrap', gap: '4px 12px', marginTop: '2px', fontFamily: 'var(--font-mono)', color: 'var(--ink-muted)' }}>
+                        {sourceFigures(source.value).map(([key, value]) => (
+                          <span key={key}>{key ? `${key}: ` : ''}<span style={{ color: 'var(--ink)' }}>{value}</span></span>
+                        ))}
+                      </div>
+                    </li>
+                  ))}
+                </ul>
+              </details>
+            )}
           </div>
         ))}
         {busy && <div style={{ fontSize: 'var(--text-sm)', color: 'var(--ink-muted)' }}>{t('assistant.thinking')}</div>}

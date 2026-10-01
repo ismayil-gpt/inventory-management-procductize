@@ -54,7 +54,7 @@ export function ReplenishmentPage() {
           </button>
         </div>
       )}
-      {notice && <div style={{ padding: '10px 14px', background: 'var(--primary-soft)', color: 'var(--primary)', borderRadius: 'var(--radius-md)', fontSize: 'var(--text-sm)' }}>{notice}</div>}
+      {notice && <div style={{ padding: '10px 14px', background: 'var(--primary-soft)', color: 'var(--primary-ink)', borderRadius: 'var(--radius-md)', fontSize: 'var(--text-sm)' }}>{notice}</div>}
 
       {recs.isLoading && <div style={{ color: 'var(--ink-muted)' }}>{t('common.loading')}</div>}
       {recs.data && recs.data.length === 0 && (
@@ -117,7 +117,7 @@ function RecommendationCard({ rec, isAdmin, language, onDecided, statusTone }: {
         {isAdmin && rec.status === 'PENDING' && !rejecting && (
           <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
             <input type="number" min={1} value={qty} onChange={(e) => setQty(e.target.value)} className="tabular" style={smallInput} aria-label={t('replenishment.orderQty')} />
-            <button type="button" onClick={() => void approve()} disabled={busy} style={{ ...actionBtn, background: 'var(--primary)', color: 'var(--on-primary)' }}><Check size={15} /> {t('replenishment.approve')}</button>
+            <button type="button" onClick={() => void approve()} disabled={busy} style={{ ...actionBtn, background: 'var(--sign-go)', color: 'var(--sign-on-go)', fontWeight: 600 }}><Check size={15} /> {t('replenishment.approve')}</button>
             <button type="button" onClick={() => setRejecting(true)} disabled={busy} style={{ ...actionBtn, background: 'var(--surface)', border: '1px solid var(--hairline)', color: 'var(--critical)' }}><X size={15} /> {t('replenishment.reject')}</button>
           </div>
         )}
@@ -126,7 +126,7 @@ function RecommendationCard({ rec, isAdmin, language, onDecided, statusTone }: {
       {rejecting && (
         <div style={{ marginTop: 'var(--space-3)', display: 'flex', gap: '8px', alignItems: 'center', flexWrap: 'wrap' }}>
           <input value={reason} onChange={(e) => setReason(e.target.value)} placeholder={t('replenishment.rejectReason')} style={{ flex: 1, minWidth: '220px', height: '34px', borderRadius: 'var(--radius-md)', border: '1px solid var(--hairline)', background: 'var(--surface)', color: 'var(--ink)', padding: '0 12px', fontSize: 'var(--text-sm)' }} />
-          <button type="button" onClick={() => void reject()} disabled={busy || reason.trim().length < 3} style={{ ...actionBtn, background: 'var(--critical)', color: '#fff' }}>{t('replenishment.confirmReject')}</button>
+          <button type="button" onClick={() => void reject()} disabled={busy || reason.trim().length < 3} style={{ ...actionBtn, background: 'var(--sign-stop)', color: 'var(--sign-on-stop)', fontWeight: 600 }}>{t('replenishment.confirmReject')}</button>
           <button type="button" onClick={() => setRejecting(false)} style={{ ...actionBtn, background: 'var(--surface)', border: '1px solid var(--hairline)', color: 'var(--ink)' }}>{t('common.cancel')}</button>
         </div>
       )}

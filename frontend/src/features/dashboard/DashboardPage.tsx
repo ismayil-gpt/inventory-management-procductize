@@ -10,6 +10,7 @@ import { useDashboardSummary, type DashboardSummary } from '../../api-client/cli
 import { useAuthStore } from '../authentication/auth.store';
 import { usePreferences } from '../../application-shell/preferences.store';
 import { LocationChip } from '../../design-system/location-designator/LocationChip';
+import { CountUpNumber } from '../../design-system/airfield-signs/CountUpNumber';
 
 function num(v?: number): string {
   return typeof v === 'number' ? v.toLocaleString('en-US') : '—';
@@ -28,12 +29,12 @@ const tooltipStyle: React.CSSProperties = {
   fontSize: 'var(--text-xs)', color: 'var(--ink)', boxShadow: 'var(--shadow-floating)', padding: '8px 10px',
 };
 
-function StatCard({ icon, tint, value, label, sub }: { icon: React.ReactNode; tint: string; value: string; label: string; sub: string }) {
+function StatCard({ icon, tint, value, label, sub }: { icon: React.ReactNode; tint: string; value?: number; label: string; sub: string }) {
   return (
     <div style={{ ...card, padding: 'var(--space-4) var(--space-6)', display: 'flex', flexDirection: 'column', gap: 'var(--space-3)' }}>
-      <span style={{ display: 'inline-flex', width: '36px', height: '36px', alignItems: 'center', justifyContent: 'center', borderRadius: 'var(--radius-md)', background: `var(--${tint}-soft)`, color: `var(--${tint})` }}>{icon}</span>
+      <span style={{ display: 'inline-flex', width: '36px', height: '36px', alignItems: 'center', justifyContent: 'center', borderRadius: 'var(--radius-md)', background: `var(--${tint}-soft)`, color: `var(--${tint}-ink, var(--${tint}))` }}>{icon}</span>
       <div>
-        <div className="tabular" style={{ fontSize: 'var(--text-2xl)', fontWeight: 600, color: 'var(--ink)', lineHeight: 1.1 }}>{value}</div>
+        <div className="tabular" style={{ fontSize: 'var(--text-2xl)', fontWeight: 600, color: 'var(--ink)', lineHeight: 1.1 }}>{typeof value === 'number' ? <CountUpNumber value={value} /> : num(value)}</div>
         <div style={{ fontSize: 'var(--text-sm)', color: 'var(--ink)', fontWeight: 500, marginTop: '4px' }}>{label}</div>
         <div style={panelSub}>{sub}</div>
       </div>
@@ -48,7 +49,7 @@ function SegmentedBar({ segments }: { segments: Array<{ key: string; tone: strin
   const total = Math.max(1, segments.reduce((s, seg) => s + seg.count, 0));
   return (
     <div>
-      <div style={{ display: 'flex', height: '14px', borderRadius: '7px', overflow: 'hidden', background: 'var(--surface-sunken)' }}>
+      <div className="bar-grow" style={{ display: 'flex', height: '14px', borderRadius: '7px', overflow: 'hidden', background: 'var(--surface-sunken)' }}>
         {segments.map((seg) => seg.count > 0 && (
           <div key={seg.key} title={`${seg.label}: ${seg.count}`} style={{ width: `${(seg.count / total) * 100}%`, background: `var(--${seg.tone})` }} />
         ))}
@@ -56,7 +57,7 @@ function SegmentedBar({ segments }: { segments: Array<{ key: string; tone: strin
       <div style={{ display: 'flex', flexWrap: 'wrap', gap: 'var(--space-6)', marginTop: 'var(--space-4)' }}>
         {segments.map((seg) => (
           <div key={seg.key} style={{ display: 'inline-flex', alignItems: 'center', gap: '8px' }}>
-            <span style={{ width: '8px', height: '8px', borderRadius: '2px', background: `var(--${seg.tone})` }} />
+            <span style={{ width: '8px', height: '8px', borderRadius: 'var(--radius-dot)', background: `var(--${seg.tone})` }} />
             <span style={{ fontSize: 'var(--text-sm)', color: 'var(--ink)' }}>{seg.label}</span>
             <span className="tabular" style={{ fontSize: 'var(--text-sm)', color: 'var(--ink-muted)', fontWeight: 500 }}>{seg.count}</span>
           </div>
@@ -76,7 +77,7 @@ function MovementTrendChart({ data, labels, isRtl }: { data: DashboardSummary['m
         <XAxis dataKey="label" reversed={isRtl} tick={{ fontSize: 11, fill: 'var(--ink-faint)', fontFamily: 'var(--font-mono)' }} axisLine={{ stroke: 'var(--hairline)' }} tickLine={false} />
         <YAxis orientation={isRtl ? 'right' : 'left'} tick={{ fontSize: 11, fill: 'var(--ink-faint)', fontFamily: 'var(--font-mono)' }} axisLine={false} tickLine={false} width={36} allowDecimals={false} />
         <Tooltip contentStyle={tooltipStyle} labelStyle={{ color: 'var(--ink-muted)', marginBottom: '4px' }} cursor={{ stroke: 'var(--hairline-strong)' }} />
-        <Line type="monotone" dataKey="goodsIn" name={labels.in} stroke="var(--primary)" strokeWidth={2} dot={false} activeDot={{ r: 3 }} />
+        <Line type="monotone" dataKey="goodsIn" name={labels.in} stroke="var(--chart-primary)" strokeWidth={2} dot={false} activeDot={{ r: 3 }} />
         <Line type="monotone" dataKey="goodsOut" name={labels.out} stroke="var(--ink-faint)" strokeWidth={2} dot={false} activeDot={{ r: 3 }} />
       </LineChart>
     </ResponsiveContainer>
@@ -96,7 +97,7 @@ function CategoryBreakdownChart({ data, language }: { data: DashboardSummary['ca
         <XAxis type="number" reversed={isRtl} tick={{ fontSize: 11, fill: 'var(--ink-faint)', fontFamily: 'var(--font-mono)' }} axisLine={{ stroke: 'var(--hairline)' }} tickLine={false} allowDecimals={false} />
         <YAxis type="category" dataKey="name" orientation={isRtl ? 'right' : 'left'} tick={{ fontSize: 12, fill: 'var(--ink)' }} axisLine={false} tickLine={false} width={axisWidth} />
         <Tooltip contentStyle={tooltipStyle} cursor={{ fill: 'var(--surface-sunken)' }} />
-        <Bar dataKey="units" fill="var(--primary)" radius={isRtl ? [2, 0, 0, 2] : [0, 2, 2, 0]} barSize={16} />
+        <Bar dataKey="units" fill="var(--chart-primary)" radius={isRtl ? [2, 0, 0, 2] : [0, 2, 2, 0]} barSize={16} />
       </BarChart>
     </ResponsiveContainer>
   );
@@ -176,7 +177,7 @@ export function DashboardPage() {
   const needsReorder = s?.needsReorder ?? 0;
 
   const pipelineTone: Record<string, string> = {
-    PENDING: 'warn', APPROVED: 'ok', AMENDED: 'ink-muted', ORDERED: 'primary', RECEIVED: 'ok', REJECTED: 'critical',
+    PENDING: 'warn', APPROVED: 'ok', AMENDED: 'ink-muted', ORDERED: 'chart-primary', RECEIVED: 'ok', REJECTED: 'critical',
   };
   const pipelineSegments = (s?.recommendationsPipeline ?? []).map((p) => ({
     key: p.status, tone: pipelineTone[p.status] ?? 'ink-muted', label: t(`replenishment.status.${p.status}`), count: p.count,
@@ -192,11 +193,11 @@ export function DashboardPage() {
 
       {/* Key numbers */}
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(190px, 1fr))', gap: 'var(--space-4)' }}>
-        <StatCard icon={<Package size={18} strokeWidth={1.75} />} tint="primary" value={num(s?.products)} label={t('dashboard.products')} sub={t('dashboard.productsSub')} />
-        <StatCard icon={<Boxes size={18} strokeWidth={1.75} />} tint="ok" value={num(s?.totalUnits)} label={t('dashboard.unitsInStock')} sub={t('dashboard.unitsSub')} />
-        <StatCard icon={<MapPin size={18} strokeWidth={1.75} />} tint="primary" value={num(s?.shelves)} label={t('dashboard.storageShelves')} sub={t('dashboard.shelvesSub')} />
-        <StatCard icon={<Truck size={18} strokeWidth={1.75} />} tint="primary" value={num(s?.suppliers)} label={t('navigation.suppliers')} sub={t('dashboard.suppliersSub')} />
-        <StatCard icon={<Activity size={18} strokeWidth={1.75} />} tint="primary" value={num(s?.movements30d)} label={t('dashboard.movements30d')} sub={t('dashboard.movements30dSub')} />
+        <StatCard icon={<Package size={18} strokeWidth={1.75} />} tint="primary" value={s?.products} label={t('dashboard.products')} sub={t('dashboard.productsSub')} />
+        <StatCard icon={<Boxes size={18} strokeWidth={1.75} />} tint="ok" value={s?.totalUnits} label={t('dashboard.unitsInStock')} sub={t('dashboard.unitsSub')} />
+        <StatCard icon={<MapPin size={18} strokeWidth={1.75} />} tint="primary" value={s?.shelves} label={t('dashboard.storageShelves')} sub={t('dashboard.shelvesSub')} />
+        <StatCard icon={<Truck size={18} strokeWidth={1.75} />} tint="primary" value={s?.suppliers} label={t('navigation.suppliers')} sub={t('dashboard.suppliersSub')} />
+        <StatCard icon={<Activity size={18} strokeWidth={1.75} />} tint="primary" value={s?.movements30d} label={t('dashboard.movements30d')} sub={t('dashboard.movements30dSub')} />
       </div>
 
       {/* Charts: throughput trend + where stock sits */}
@@ -206,7 +207,7 @@ export function DashboardPage() {
           <div style={panelSub}>{t('dashboard.movementTrendSub')}</div>
           <div style={{ display: 'flex', gap: 'var(--space-4)', marginTop: 'var(--space-2)', marginBottom: 'var(--space-2)' }}>
             <span style={{ display: 'inline-flex', alignItems: 'center', gap: '6px', fontSize: 'var(--text-xs)', color: 'var(--ink-muted)' }}>
-              <span style={{ width: '10px', height: '2px', background: 'var(--primary)', display: 'inline-block' }} />{t('movements.goodsIn')}
+              <span style={{ width: '10px', height: '2px', background: 'var(--chart-primary)', display: 'inline-block' }} />{t('movements.goodsIn')}
             </span>
             <span style={{ display: 'inline-flex', alignItems: 'center', gap: '6px', fontSize: 'var(--text-xs)', color: 'var(--ink-muted)' }}>
               <span style={{ width: '10px', height: '2px', background: 'var(--ink-faint)', display: 'inline-block' }} />{t('movements.goodsOut')}
@@ -256,7 +257,7 @@ export function DashboardPage() {
               </div>
             )}
           </div>
-          <button type="button" onClick={() => navigate('/replenishment')} style={{ display: 'inline-flex', alignItems: 'center', gap: '8px', height: '40px', padding: '0 18px', borderRadius: 'var(--radius-md)', border: 'none', background: 'var(--primary)', color: 'var(--on-primary)', fontWeight: 500, fontSize: 'var(--text-sm)', cursor: 'pointer' }}>
+          <button type="button" onClick={() => navigate('/replenishment')} style={{ display: 'inline-flex', alignItems: 'center', gap: '8px', height: '40px', padding: '0 18px', borderRadius: 'var(--radius-md)', border: 'none', background: 'var(--sign-go)', color: 'var(--sign-on-go)', fontWeight: 600, fontSize: 'var(--text-sm)', cursor: 'pointer' }}>
             {t('dashboard.reviewRecs')}
             <ArrowRight size={16} strokeWidth={1.75} style={{ transform: language === 'ar' ? 'scaleX(-1)' : 'none' }} />
           </button>

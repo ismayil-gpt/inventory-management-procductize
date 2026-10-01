@@ -1,0 +1,160 @@
+{
+  "auditReportVersion": 2,
+  "vulnerabilities": {
+    "@nestjs/swagger": {
+      "name": "@nestjs/swagger",
+      "severity": "moderate",
+      "isDirect": true,
+      "via": [
+        "js-yaml"
+      ],
+      "effects": [],
+      "range": "11.4.6 - 12.0.0",
+      "nodes": [
+        "node_modules/@nestjs/swagger"
+      ],
+      "fixAvailable": {
+        "name": "@nestjs/swagger",
+        "version": "12.0.2",
+        "isSemVerMajor": true
+      }
+    },
+    "exceljs": {
+      "name": "exceljs",
+      "severity": "moderate",
+      "isDirect": true,
+      "via": [
+        "uuid"
+      ],
+      "effects": [],
+      "range": ">=3.5.0",
+      "nodes": [
+        "node_modules/exceljs"
+      ],
+      "fixAvailable": {
+        "name": "exceljs",
+        "version": "3.4.0",
+        "isSemVerMajor": true
+      }
+    },
+    "glob": {
+      "name": "glob",
+      "severity": "high",
+      "isDirect": false,
+      "via": [
+        {
+          "source": 1109842,
+          "name": "glob",
+          "dependency": "glob",
+          "title": "glob CLI: Command injection via -c/--cmd executes matches with shell:true",
+          "url": "https://github.com/advisories/GHSA-5j98-mcp5-4vw2",
+          "severity": "high",
+          "cwe": [
+            "CWE-78"
+          ],
+          "cvss": {
+            "score": 7.5,
+            "vectorString": "CVSS:3.1/AV:N/AC:H/PR:L/UI:N/S:U/C:H/I:H/A:H"
+          },
+          "range": ">=10.2.0 <10.5.0"
+        }
+      ],
+      "effects": [],
+      "range": "10.2.0 - 10.4.5",
+      "nodes": [
+        "node_modules/glob"
+      ],
+      "fixAvailable": true
+    },
+    "js-yaml": {
+      "name": "js-yaml",
+      "severity": "moderate",
+      "isDirect": false,
+      "via": [
+        {
+          "source": 1239991,
+          "name": "js-yaml",
+          "dependency": "js-yaml",
+          "title": "js-yaml: maxTotalMergeKeys does not limit CPU use for empty merge sources",
+          "url": "https://github.com/advisories/GHSA-r3ph-w7gj-g6xm",
+          "severity": "moderate",
+          "cwe": [
+            "CWE-400",
+            "CWE-407"
+          ],
+          "cvss": {
+            "score": 5.3,
+            "vectorString": "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:N/I:N/A:L"
+          },
+          "range": ">=5.0.0 <=5.4.0"
+        }
+      ],
+      "effects": [
+        "@nestjs/swagger"
+      ],
+      "range": "5.0.0 - 5.4.0",
+      "nodes": [
+        "node_modules/js-yaml"
+      ],
+      "fixAvailable": {
+        "name": "@nestjs/swagger",
+        "version": "12.0.2",
+        "isSemVerMajor": true
+      }
+    },
+    "uuid": {
+      "name": "uuid",
+      "severity": "moderate",
+      "isDirect": false,
+      "via": [
+        {
+          "source": 1119441,
+          "name": "uuid",
+          "dependency": "uuid",
+          "title": "uuid: Missing buffer bounds check in v3/v5/v6 when buf is provided",
+          "url": "https://github.com/advisories/GHSA-w5hq-g745-h8pq",
+          "severity": "moderate",
+          "cwe": [
+            "CWE-787",
+            "CWE-1285"
+          ],
+          "cvss": {
+            "score": 7.5,
+            "vectorString": "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:N/I:H/A:N"
+          },
+          "range": "<11.1.1"
+        }
+      ],
+      "effects": [
+        "exceljs"
+      ],
+      "range": "<11.1.1",
+      "nodes": [
+        "node_modules/uuid"
+      ],
+      "fixAvailable": {
+        "name": "exceljs",
+        "version": "3.4.0",
+        "isSemVerMajor": true
+      }
+    }
+  },
+  "metadata": {
+    "vulnerabilities": {
+      "info": 0,
+      "low": 0,
+      "moderate": 4,
+      "high": 1,
+      "critical": 0,
+      "total": 5
+    },
+    "dependencies": {
+      "prod": 367,
+      "dev": 540,
+      "optional": 87,
+      "peer": 0,
+      "peerOptional": 0,
+      "total": 925
+    }
+  }
+}

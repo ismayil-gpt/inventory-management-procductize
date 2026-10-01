@@ -59,7 +59,7 @@ function DaysBar({ days, maxDays, tone }: { days: number; maxDays: number; tone:
   const pct = Math.max(4, Math.min(100, (days / maxDays) * 100));
   return (
     <div style={{ width: '72px', height: '6px', borderRadius: '3px', background: 'var(--surface-sunken)', overflow: 'hidden' }}>
-      <div style={{ width: `${pct}%`, height: '100%', borderRadius: '3px', background: `var(--${tone})` }} />
+      <div className="bar-grow" style={{ width: `${pct}%`, height: '100%', borderRadius: '3px', background: `var(--${tone})` }} />
     </div>
   );
 }
@@ -139,7 +139,7 @@ function ForecastChart({ productId, language, t }: { productId: string; language
     <div>
       <div style={{ display: 'flex', gap: 'var(--space-4)', marginBottom: 'var(--space-3)' }}>
         <span style={{ display: 'inline-flex', alignItems: 'center', gap: '6px', fontSize: 'var(--text-xs)', color: 'var(--ink-muted)' }}>
-          <span style={{ width: '10px', height: '2px', background: 'var(--primary)', display: 'inline-block' }} />{t('insights.forecastActual')}
+          <span style={{ width: '10px', height: '2px', background: 'var(--chart-primary)', display: 'inline-block' }} />{t('insights.forecastActual')}
         </span>
         {data.hasForecast && (
           <span style={{ display: 'inline-flex', alignItems: 'center', gap: '6px', fontSize: 'var(--text-xs)', color: 'var(--ink-muted)' }}>
@@ -153,7 +153,7 @@ function ForecastChart({ productId, language, t }: { productId: string; language
           <XAxis dataKey="date" reversed={isRtl} tickFormatter={(v: string) => dayLabel.format(new Date(`${v}T00:00:00Z`))} tick={{ fontSize: 11, fill: 'var(--ink-faint)', fontFamily: 'var(--font-mono)' }} axisLine={{ stroke: 'var(--hairline)' }} tickLine={false} minTickGap={24} />
           <YAxis orientation={isRtl ? 'right' : 'left'} tick={{ fontSize: 11, fill: 'var(--ink-faint)', fontFamily: 'var(--font-mono)' }} axisLine={false} tickLine={false} width={32} allowDecimals={false} />
           <Tooltip contentStyle={tooltipStyle} labelFormatter={(v: string) => dayLabel.format(new Date(`${v}T00:00:00Z`))} cursor={{ stroke: 'var(--hairline-strong)' }} />
-          <Line type="monotone" dataKey="actual" name={t('insights.forecastActual')} stroke="var(--primary)" strokeWidth={2} dot={false} activeDot={{ r: 3 }} connectNulls={false} />
+          <Line type="monotone" dataKey="actual" name={t('insights.forecastActual')} stroke="var(--chart-primary)" strokeWidth={2} dot={false} activeDot={{ r: 3 }} connectNulls={false} />
           {data.hasForecast && (
             <Line type="monotone" dataKey="forecast" name={t('insights.forecastForecast')} stroke="var(--ink-faint)" strokeWidth={2} strokeDasharray="4 3" dot={false} activeDot={{ r: 3 }} connectNulls />
           )}
@@ -180,7 +180,7 @@ function SpendBarList({ rows, currency, isRtl }: { rows: Array<{ label: string; 
             <span className="tabular" style={{ color: 'var(--ink-muted)', fontWeight: 500 }} dir="ltr">{formatCurrency(r.amount, currency, 0)}</span>
           </div>
           <div style={{ height: '8px', borderRadius: '4px', background: 'var(--surface-sunken)', overflow: 'hidden', direction: isRtl ? 'rtl' : 'ltr' }}>
-            <div style={{ width: `${(r.amount / max) * 100}%`, height: '100%', borderRadius: '4px', background: 'var(--primary)' }} />
+            <div className="bar-grow" style={{ width: `${(r.amount / max) * 100}%`, height: '100%', borderRadius: '4px', background: 'var(--chart-primary)' }} />
           </div>
         </div>
       ))}

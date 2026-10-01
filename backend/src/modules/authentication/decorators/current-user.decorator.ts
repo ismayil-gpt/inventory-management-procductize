@@ -4,6 +4,8 @@ export interface AuthenticatedUser {
   userId: string;
   email: string;
   role: string;
+  /** Server-side session this request belongs to (DESC #4). */
+  sessionId: string;
 }
 
 /** Injects the authenticated user (populated by JwtAccessStrategy). */

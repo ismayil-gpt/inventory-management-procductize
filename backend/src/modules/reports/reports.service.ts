@@ -123,9 +123,11 @@ export class ReportsService {
       doc.on('error', reject);
     });
 
-    doc.fillColor('#0B4F5E').fontSize(18).font('Helvetica-Bold').text('MIZAN', 40, 36);
-    doc.fillColor('#0D1B22').fontSize(13).text(data.title, 40, 58);
-    doc.fillColor('#566A75').fontSize(8).font('Helvetica').text(`Generated ${new Date().toISOString().slice(0, 16).replace('T', ' ')} · Mizan`, 40, 76);
+    // Header is a location sign (brand, 2026-10-01): black panel, yellow legend.
+    doc.roundedRect(40, 28, 92, 26, 5).fill('#121412');
+    doc.fillColor('#F2C230').fontSize(15).font('Helvetica-Bold').text('MIZAN', 40, 35, { width: 92, align: 'center' });
+    doc.fillColor('#141815').fontSize(13).text(data.title, 40, 58);
+    doc.fillColor('#4C554F').fontSize(8).font('Helvetica').text(`Generated ${new Date().toISOString().slice(0, 16).replace('T', ' ')} · Mizan`, 40, 76);
 
     const startX = 40;
     const totalWidth = data.columns.reduce((s, c) => s + c.width, 0);
@@ -136,19 +138,19 @@ export class ReportsService {
 
     let y = 100;
     const drawHeader = () => {
-      doc.font('Helvetica-Bold').fontSize(8).fillColor('#566A75');
+      doc.font('Helvetica-Bold').fontSize(8).fillColor('#4C554F');
       data.columns.forEach((c, i) => doc.text(c.header, colX[i], y, { width: c.width * scale - 4, align: c.align ?? 'left' }));
-      doc.moveTo(startX, y + 12).lineTo(startX + 760, y + 12).strokeColor('#D6DEE2').stroke();
+      doc.moveTo(startX, y + 12).lineTo(startX + 760, y + 12).strokeColor('#CBD0CB').stroke();
       y += 18;
     };
     drawHeader();
-    doc.font('Helvetica').fontSize(8).fillColor('#0D1B22');
+    doc.font('Helvetica').fontSize(8).fillColor('#141815');
     for (const row of data.rows) {
       data.columns.forEach((c, i) => doc.text(String(row[c.key] ?? ''), colX[i], y, { width: c.width * scale - 4, align: c.align ?? 'left', ellipsis: true }));
       y += 15;
-      if (y > 540) { doc.addPage(); y = 50; drawHeader(); doc.font('Helvetica').fontSize(8).fillColor('#0D1B22'); }
+      if (y > 540) { doc.addPage(); y = 50; drawHeader(); doc.font('Helvetica').fontSize(8).fillColor('#141815'); }
     }
-    doc.fillColor('#8497A0').fontSize(7).text(`${data.rows.length} rows`, startX, y + 8);
+    doc.fillColor('#646D67').fontSize(7).text(`${data.rows.length} rows`, startX, y + 8);
     doc.end();
     return done;
   }

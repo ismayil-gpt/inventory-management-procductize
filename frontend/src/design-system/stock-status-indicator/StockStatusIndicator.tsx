@@ -17,7 +17,7 @@ export function StockStatusIndicator({ status }: { status: StockStatus }) {
       <span
         aria-hidden
         style={{
-          width: '6px', height: '6px', borderRadius: '1px',
+          width: '6px', height: '6px', borderRadius: 'var(--radius-dot)',
           background: cfg.filled ? cfg.color : 'transparent',
           border: cfg.filled ? 'none' : `1px solid ${cfg.color}`,
         }}
