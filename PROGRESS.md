@@ -1105,3 +1105,29 @@ network, least-privilege role), which arrive with production packaging.
 
 **Before switching two-step sign-in on**: set `MFA_ENCRYPTION_KEY` (`openssl rand -base64 32`),
 resolve #21, then set `MFA_ENABLED=true`. Everyone enrols at their next sign-in.
+
+### 2026-10-01 (final) — "Do all": push, service account, CSP, upgrades, tests, production packaging
+
+| Item | Result | Commit |
+|---|---|---|
+| Push | `feature/design-airfield-edition` pushed to GitHub (new branch, non-force; the old orphaned commit untouched) | — |
+| AI service account (#21) | `ai-service@example.com`, seeded from env, the only two-step exemption | `5a66718` |
+| DESC #13 strict CSP | API `default-src 'none'`; app policy in `infrastructure/nginx/security-headers.conf`, served by `vite preview` too; label printing rebuilt without inline code; 0 violations on 16 screens | `d0b816b` |
+| FastAPI/Starlette, pytest | 0.142.2 / 1.7.0 / 9.1.1; assistant verified live with source records | `6f39f5e` |
+| NestJS 10 → 11.2.7 | all 29 read endpoints identical to v10; writes, replay, errors, upload verified; NestJS 12 needs Node 22 (#22) | `33d54a9` |
+| React Router 6 → 7.18.4 | every menu link, URL tabs, search, back, redirects | `aed07e0` |
+| Frontend tests | Vitest 15; Playwright 4 critical paths (+1 opt-in); axe 0 violations on 16 screens × en/light + ar/dark | `5369e57` |
+| Production packaging (DESC #1, 2, 11, 19) | production compose, nginx, least-privilege roles, migrate service, backup service, host check, guide | `91263fc` |
+
+Runtime dependency findings: **0** high/critical across backend, frontend and AI service (dev-only
+build tools still carry some; they never ship).
+
+Fixed on the way: production backend would never have started (`dist/main.js` → `dist/src/main.js`).
+
+**Test totals at the end of the day**: backend 36, frontend unit 15, end-to-end 4 (+1 opt-in), axe 3
+runs, AI service 44 — all passing.
+
+**Waiting on you**: restart both dev servers (backend now on NestJS 11, frontend on React Router 7);
+copy the backup key off this machine; OPEN-QUESTIONS #22 (Node 22 / NestJS 12) and #23 (drop Redis and
+MinIO from the dev compose); add your user to the `docker` group so the production images can be built
+and tried here.
