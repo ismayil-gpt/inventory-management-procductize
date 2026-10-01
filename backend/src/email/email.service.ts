@@ -40,7 +40,8 @@ export class EmailService {
   async send(to: string, subject: string, text: string, attachments: EmailAttachment[] = []): Promise<SendResult> {
     const transporter = this.transporter();
     if (!transporter) {
-      this.logger.warn(`SMTP not configured — email to ${to} ("${subject}") was not sent.`);
+      // DESC #15: never log the recipient's address. The subject carries the PO number.
+      this.logger.warn(`SMTP not configured — email "${subject}" was not sent.`);
       return { sent: false, reason: 'SMTP not configured' };
     }
     try {
@@ -53,7 +54,7 @@ export class EmailService {
       });
       return { sent: true };
     } catch (error) {
-      this.logger.error(`Failed to send email to ${to}: ${(error as Error).message}`);
+      this.logger.error(`Failed to send email "${subject}": ${(error as Error).message}`);
       return { sent: false, reason: (error as Error).message };
     }
   }

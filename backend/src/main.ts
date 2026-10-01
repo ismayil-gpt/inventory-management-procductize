@@ -1,5 +1,6 @@
 import { NestFactory } from '@nestjs/core';
 import { Logger } from '@nestjs/common';
+import { Logger as PinoLogger } from 'nestjs-pino';
 import { ConfigService } from '@nestjs/config';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 import helmet from 'helmet';
@@ -10,9 +11,18 @@ import { AppModule } from './app.module';
  * All routes are served under the /api/v1 prefix.
  */
 async function bootstrap(): Promise<void> {
-  const app = await NestFactory.create(AppModule, { bufferLogs: false });
+  // Logs are buffered until Pino is ready, so even startup lines are JSON (§4, DESC #15).
+  const app = await NestFactory.create(AppModule, { bufferLogs: true });
+  app.useLogger(app.get(PinoLogger));
   const config = app.get(ConfigService);
   const logger = new Logger('Bootstrap');
+
+  // Behind nginx (production), req.ip must come from X-Forwarded-For or every
+  // client would share the proxy's address — that would make rate limiting
+  // (DESC #12) and the audit log's IP column meaningless. Set TRUST_PROXY to the
+  // number of proxy hops (1 for nginx); leave it unset when nothing sits in front.
+  const trustProxy = config.get<string>('TRUST_PROXY');
+  if (trustProxy) app.getHttpAdapter().getInstance().set('trust proxy', Number(trustProxy) || trustProxy);
 
   // DESC #13 — secure headers. CSP is relaxed only for the Swagger UI in dev.
   app.use(helmet());

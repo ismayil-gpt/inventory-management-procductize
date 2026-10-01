@@ -1,5 +1,7 @@
 import { Module } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
+import { RateLimitingModule } from './security/rate-limiting/rate-limiting.module';
+import { LogHygieneModule } from './security/log-hygiene/log-hygiene.module';
 import { PrismaModule } from './database/prisma.module';
 import { HealthModule } from './modules/health/health.module';
 import { SystemModule } from './modules/system/system.module';
@@ -34,6 +36,8 @@ import { PredictiveAnalyticsModule } from './modules/predictive-analytics/predic
       envFilePath: ['.env', '../.env.development'],
     }),
     PrismaModule,
+    RateLimitingModule,
+    LogHygieneModule,
     HealthModule,
     SystemModule,
     OrganizationModule,

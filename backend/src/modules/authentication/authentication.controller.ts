@@ -6,8 +6,11 @@ import { ZodValidationPipe } from '../../security/zod-validation.pipe';
 import { loginSchema, LoginDto, refreshSchema, RefreshDto } from './dto/login.schema';
 import { JwtAuthGuard } from './guards/jwt-auth.guard';
 import { CurrentUser, AuthenticatedUser } from './decorators/current-user.decorator';
+import { AuthRateLimitGuard } from '../../security/rate-limiting/auth-rate-limit.guard';
 
 @ApiTags('authentication')
+// DESC control 12: every /auth/* endpoint is rate limited per client.
+@UseGuards(AuthRateLimitGuard)
 @Controller('auth')
 export class AuthenticationController {
   constructor(private readonly auth: AuthenticationService) {}
@@ -17,7 +20,6 @@ export class AuthenticationController {
   @UsePipes(new ZodValidationPipe(loginSchema))
   @ApiOperation({ summary: 'Sign in with email + password → access & refresh tokens' })
   login(@Body() dto: LoginDto, @Req() req: Request) {
-    // TODO(prod): apply rate limiting to /auth/* (DESC #12) once Redis is available.
     return this.auth.login(dto, req.ip);
   }
 
