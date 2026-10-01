@@ -1,42 +1,56 @@
 import type { Label } from '../../api-client/client';
 
-function escapeHtml(s: string): string {
-  return s.replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c] as string));
-}
+// Prints a sheet of barcode labels (§6, §7). The barcode PNGs come from the
+// backend (bwip-js Code128); titles and codes stay LTR.
+//
+// The sheet is built inside this page and shown only by the print stylesheet
+// (`.print-sheet` in global.css). An earlier version wrote a popup window with
+// inline styles and inline scripts, which a strict Content-Security-Policy
+// (DESC #13) rightly blocks; building with DOM calls needs neither.
+const SHEET_ID = 'mizan-print-sheet';
 
-// Opens a print-ready window with a grid of barcode labels (§6, §7). The barcode
-// PNGs come from the backend (bwip-js Code128). Titles/codes stay LTR.
 export function printLabels(labels: Label[], heading = 'Mizan — Labels'): void {
   if (labels.length === 0) return;
-  const win = window.open('', '_blank', 'width=900,height=700');
-  if (!win) return;
-  const cards = labels
-    .map(
-      (l) => `<div class="label">
-        <img alt="" src="${l.png}" />
-        <div class="title" dir="ltr">${escapeHtml(l.title)}</div>
-        <div class="subtitle">${escapeHtml(l.subtitle)}</div>
-      </div>`,
-    )
-    .join('');
-  win.document.write(`<!doctype html><html><head><meta charset="utf-8"><title>${escapeHtml(heading)}</title>
-    <style>
-      * { box-sizing: border-box; }
-      body { font-family: 'Overpass', 'IBM Plex Sans Arabic', system-ui, sans-serif; margin: 14px; color: #141815; }
-      h1 { font-size: 14px; font-weight: 600; margin: 0 0 12px; }
-      .sheet { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; }
-      .label { border: 1px solid #A9B0AA; border-radius: 8px; padding: 8px; text-align: center; page-break-inside: avoid; }
-      .label img { max-width: 100%; height: auto; }
-      .title { font-family: 'Overpass Mono', ui-monospace, monospace; font-weight: 600; font-size: 13px; margin-top: 4px; letter-spacing: 0.04em; }
-      .subtitle { font-size: 11px; color: #4C554F; margin-top: 2px; }
-      .toolbar { margin-bottom: 10px; }
-      button { font: inherit; padding: 6px 14px; border: 2px solid #F2C230; background: #121412; color: #F2C230; font-weight: 600; border-radius: 10px; cursor: pointer; }
-      @media print { .toolbar { display: none; } body { margin: 0; } }
-    </style></head><body>
-    <div class="toolbar"><button onclick="window.print()">Print</button> &nbsp; ${labels.length} label(s)</div>
-    <h1>${escapeHtml(heading)}</h1>
-    <div class="sheet">${cards}</div>
-    <script>window.onload = function(){ setTimeout(function(){ window.print(); }, 350); };</script>
-    </body></html>`);
-  win.document.close();
+  document.getElementById(SHEET_ID)?.remove();
+
+  const sheet = document.createElement('section');
+  sheet.id = SHEET_ID;
+  sheet.className = 'print-sheet';
+  sheet.setAttribute('aria-hidden', 'true');
+
+  const title = document.createElement('h1');
+  title.textContent = heading;
+  sheet.append(title);
+
+  const grid = document.createElement('div');
+  grid.className = 'print-sheet-grid';
+  const images: HTMLImageElement[] = [];
+  for (const label of labels) {
+    const card = document.createElement('div');
+    card.className = 'print-label';
+    const image = document.createElement('img');
+    image.alt = '';
+    image.src = label.png;
+    images.push(image);
+    const code = document.createElement('div');
+    code.className = 'print-label-title';
+    code.dir = 'ltr';
+    code.textContent = label.title;
+    const subtitle = document.createElement('div');
+    subtitle.className = 'print-label-subtitle';
+    subtitle.textContent = label.subtitle;
+    card.append(image, code, subtitle);
+    grid.append(card);
+  }
+  sheet.append(grid);
+  document.body.append(sheet);
+
+  const removeSheet = () => {
+    sheet.remove();
+    window.removeEventListener('afterprint', removeSheet);
+  };
+  window.addEventListener('afterprint', removeSheet);
+
+  // Open the print dialog once every barcode image is ready, so none print blank.
+  void Promise.all(images.map((image) => image.decode().catch(() => undefined))).then(() => window.print());
 }

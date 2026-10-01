@@ -214,3 +214,59 @@ tbody tr {
   }
   .beacon { opacity: 1; }
 }
+
+/* ---------------------------------------------------------------------------
+ * Printed label sheets (features/barcode-scanning/print-labels.ts).
+ * Hidden on screen; when printing, only the sheet is shown. Paper colours are
+ * fixed so a label prints the same from the dark theme.
+ * ------------------------------------------------------------------------ */
+.print-sheet {
+  display: none;
+}
+@media print {
+  body > *:not(.print-sheet) {
+    display: none !important;
+  }
+  body {
+    background: var(--paper);
+  }
+  .print-sheet {
+    display: block;
+    background: var(--paper);
+    color: var(--print-ink);
+    font-family: var(--font-sans);
+  }
+  .print-sheet h1 {
+    font-size: 14px;
+    font-weight: 600;
+    margin: 0 0 12px;
+  }
+  .print-sheet-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 8px;
+  }
+  .print-label {
+    border: 1px solid var(--print-rule);
+    border-radius: var(--radius-sm);
+    padding: 8px;
+    text-align: center;
+    break-inside: avoid;
+  }
+  .print-label img {
+    max-width: 100%;
+    height: auto;
+  }
+  .print-label-title {
+    font-family: var(--font-mono);
+    font-weight: 600;
+    font-size: 13px;
+    margin-top: 4px;
+    letter-spacing: 0.04em;
+  }
+  .print-label-subtitle {
+    font-size: 11px;
+    color: var(--print-ink-muted);
+    margin-top: 2px;
+  }
+}

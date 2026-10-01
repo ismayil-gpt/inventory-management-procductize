@@ -63,6 +63,9 @@
   --gantry-muted:    #6B5A1C;
   /* Always white in both themes: anything that must be scanned or printed (QR codes, labels). */
   --paper:           #FFFFFF;
+  --print-ink:       #141815;   /* printed labels: dark on paper in every theme */
+  --print-ink-muted: #4C554F;
+  --print-rule:      #A9B0AA;
 }
 
 :root[data-theme="dark"] {

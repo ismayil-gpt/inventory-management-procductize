@@ -24,8 +24,36 @@ async function bootstrap(): Promise<void> {
   const trustProxy = config.get<string>('TRUST_PROXY');
   if (trustProxy) app.getHttpAdapter().getInstance().set('trust proxy', Number(trustProxy) || trustProxy);
 
-  // DESC #13 — secure headers. CSP is relaxed only for the Swagger UI in dev.
-  app.use(helmet());
+  // DESC #13 — secure headers with a strict Content-Security-Policy. The API
+  // only ever returns data (JSON, PDF, Excel), so nothing may load or run from
+  // its responses. The API docs page is the one HTML page here; it gets its own
+  // narrower policy, and is switched off in production (SWAGGER_ENABLED).
+  const apiHeaders = helmet({
+    contentSecurityPolicy: {
+      useDefaults: false,
+      directives: { defaultSrc: ["'none'"], frameAncestors: ["'none'"], baseUri: ["'none'"], formAction: ["'none'"] },
+    },
+  });
+  const docsHeaders = helmet({
+    contentSecurityPolicy: {
+      useDefaults: false,
+      directives: {
+        defaultSrc: ["'self'"],
+        scriptSrc: ["'self'"],
+        // Swagger UI sets inline styles on its own elements.
+        styleSrc: ["'self'", "'unsafe-inline'"],
+        imgSrc: ["'self'", 'data:'],
+        objectSrc: ["'none'"],
+        frameAncestors: ["'none'"],
+        baseUri: ["'self'"],
+      },
+    },
+  });
+  const isProduction = config.get<string>('NODE_ENV') === 'production';
+  const isSwaggerEnabled = String(config.get('SWAGGER_ENABLED', isProduction ? 'false' : 'true')) === 'true';
+  app.use((req: { path: string }, res: unknown, next: () => void) =>
+    (isSwaggerEnabled && req.path.startsWith('/api/v1/docs') ? docsHeaders : apiHeaders)(req as never, res as never, next),
+  );
 
   // Frontend (Vite dev server) may call the API from another origin in dev.
   const corsOrigin = config.get<string>('CORS_ORIGIN', 'http://localhost:5173');
@@ -44,15 +72,17 @@ async function bootstrap(): Promise<void> {
     .setVersion('0.1.0')
     .addBearerAuth()
     .build();
-  const document = SwaggerModule.createDocument(app, swaggerConfig);
-  SwaggerModule.setup('api/v1/docs', app, document);
+  if (isSwaggerEnabled) {
+    const document = SwaggerModule.createDocument(app, swaggerConfig);
+    SwaggerModule.setup('api/v1/docs', app, document);
+  }
 
   // Locally uses API_PORT (3000). A managed host (e.g. Cloud Run) injects PORT,
   // which takes precedence when present — local behaviour is unchanged.
   const port = Number(process.env.PORT ?? config.get('API_PORT', 3000));
   await app.listen(port, '0.0.0.0');
   logger.log(`Mizan API listening on port ${port} (prefix /api/v1)`);
-  logger.log(`OpenAPI docs at /api/v1/docs`);
+  if (isSwaggerEnabled) logger.log(`OpenAPI docs at /api/v1/docs`);
 }
 
 void bootstrap();
