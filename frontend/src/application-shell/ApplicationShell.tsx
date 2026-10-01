@@ -1,4 +1,8 @@
-import { Outlet, useLocation } from 'react-router-dom';
+import { useCallback } from 'react';
+import { Outlet, useLocation, useNavigate } from 'react-router-dom';
+import { logoutRequest, useSystemInfo } from '../api-client/client';
+import { useIdleTimeout } from './idle-timeout.hook';
+import { IdleTimeoutWarning } from './IdleTimeoutWarning';
 import { useTranslation } from 'react-i18next';
 import { NavigationRail } from './NavigationRail';
 import { TopBar } from './TopBar';
@@ -11,6 +15,14 @@ import { ScanSignalOverlay } from '../design-system/scan-signal/ScanSignalOverla
 export function ApplicationShell() {
   const { t } = useTranslation();
   const location = useLocation();
+  const navigate = useNavigate();
+  const systemInfo = useSystemInfo();
+  // DESC #6: sign out after the configured idle period, then require a fresh sign-in.
+  const signOutForInactivity = useCallback(async () => {
+    await logoutRequest();
+    navigate('/login?reason=idle', { replace: true });
+  }, [navigate]);
+  const idle = useIdleTimeout(systemInfo.data?.sessionIdleTimeoutMinutes, signOutForInactivity);
 
   const TITLE_BY_PREFIX: Array<[string, string]> = [
     ['/products', 'navigation.productCatalogue'],
@@ -53,6 +65,7 @@ export function ApplicationShell() {
       <AssistantPanel />
       <AssistantLauncher />
       <ScanSignalOverlay />
+      {idle.secondsLeft !== null && <IdleTimeoutWarning secondsLeft={idle.secondsLeft} onStay={idle.stayActive} />}
     </div>
   );
 }

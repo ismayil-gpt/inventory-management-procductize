@@ -35,6 +35,7 @@ export interface SystemInfo {
   environment: string;
   apiVersion: string; nodeVersion: string; serverTime: string; timezone: string;
   demoLogins?: DemoLogin[];
+  sessionIdleTimeoutMinutes?: number;
 }
 export interface DashboardSummary {
   products: number; shelves: number; storeRooms: number; suppliers: number; totalUnits: number;

@@ -1,3 +1,4 @@
+import { writeLastActivity } from '../../application-shell/idle-timeout.hook';
 import { create } from 'zustand';
 
 // Ref: CLAUDE.md §4 (Zustand for auth session), §11 #4.
@@ -42,6 +43,8 @@ export const useAuthStore = create<AuthState>((set) => ({
   ...loadInitial(),
   setSession: (session) => {
     localStorage.setItem(STORAGE_KEY, JSON.stringify(session));
+    // Signing in is activity: the idle clock (DESC #6) starts now, not at the last session's end.
+    writeLastActivity(Date.now());
     set({ accessToken: session.accessToken, refreshToken: session.refreshToken, user: session.user });
   },
   clearSession: () => {

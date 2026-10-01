@@ -528,5 +528,11 @@
       "19": "Least privilege for the database",
       "20": "Input validation"
     }
+  },
+  "idleTimeout": {
+    "title": "Still there?",
+    "body": "For security you'll be signed out in {{seconds}} seconds because nothing has happened for a while.",
+    "stay": "Stay signed in",
+    "signedOut": "You were signed out after a period of inactivity. Sign in again to continue."
   }
 }

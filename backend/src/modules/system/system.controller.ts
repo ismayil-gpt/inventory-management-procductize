@@ -52,6 +52,8 @@ export class SystemController {
       nodeVersion: process.version,
       serverTime: new Date().toISOString(),
       timezone: this.config.get<string>('TZ', 'Asia/Dubai'),
+      // DESC #6 — the frontend signs the user out after this much inactivity.
+      sessionIdleTimeoutMinutes: Number(this.config.get('SESSION_IDLE_TIMEOUT_MINUTES', 30)),
       demoLogins,
     };
   }

@@ -1,5 +1,5 @@
 import { FormEvent, useState } from 'react';
-import { useNavigate, Navigate } from 'react-router-dom';
+import { useNavigate, Navigate, useSearchParams } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { usePreferences } from '../../application-shell/preferences.store';
 import { useAuthStore } from './auth.store';
@@ -22,6 +22,8 @@ export function LoginPage() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState<string | null>(null);
+  const [searchParams] = useSearchParams();
+  const wasSignedOutForInactivity = searchParams.get('reason') === 'idle';
   const [submitting, setSubmitting] = useState(false);
 
   if (currentUser) return <Navigate to="/briefing" replace />;
@@ -76,6 +78,11 @@ export function LoginPage() {
 
         <div style={{ background: 'var(--surface)', border: '1px solid var(--hairline)', borderRadius: 'var(--radius-lg)', padding: 'var(--space-6)' }}>
 
+        {wasSignedOutForInactivity && !error && (
+          <div role="status" style={{ marginBottom: 'var(--space-4)', padding: '9px 12px', borderRadius: 'var(--radius-md)', background: 'var(--info-soft)', color: 'var(--primary-ink)', fontSize: 'var(--text-xs)' }}>
+            {t('idleTimeout.signedOut')}
+          </div>
+        )}
         <form onSubmit={onSubmit}>
           <div style={{ marginBottom: 'var(--space-4)' }}>
             <label style={label} htmlFor="email">{t('auth.email')}</label>
