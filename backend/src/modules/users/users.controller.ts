@@ -41,6 +41,12 @@ export class UsersController {
     return this.users.endSessions(id, user.userId, user.sessionId);
   }
 
+  @Post(':id/reset-mfa')
+  @ApiOperation({ summary: 'Clear a user\'s two-step sign-in so they enrol again (ADMIN, DESC #7)' })
+  resetMultiFactor(@Param('id') id: string, @CurrentUser() user: AuthenticatedUser) {
+    return this.users.resetMultiFactor(id, user.userId);
+  }
+
   @Delete(':id')
   @ApiOperation({ summary: 'Delete a user that has no recorded activity (ADMIN). Otherwise deactivate.' })
   remove(@Param('id') id: string, @CurrentUser() user: AuthenticatedUser) {

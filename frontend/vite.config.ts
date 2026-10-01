@@ -30,7 +30,8 @@ export default defineConfig({
     fs: { allow: [path.resolve(__dirname, '..')] },
     proxy: {
       '/api': {
-        target: 'http://localhost:3000',
+        // Overridable so a second backend (e.g. one with MFA_ENABLED=true) can be tried side by side.
+        target: process.env.VITE_DEV_API_TARGET ?? 'http://localhost:3000',
         changeOrigin: true,
       },
     },

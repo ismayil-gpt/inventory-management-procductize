@@ -3,7 +3,7 @@ import { ApiOperation, ApiTags, ApiBearerAuth } from '@nestjs/swagger';
 import type { Request } from 'express';
 import { AuthenticationService } from './authentication.service';
 import { ZodValidationPipe } from '../../security/zod-validation.pipe';
-import { loginSchema, LoginDto, refreshSchema, RefreshDto } from './dto/login.schema';
+import { loginSchema, LoginDto, refreshSchema, RefreshDto, mfaChallengeSchema, MfaChallengeDto, mfaCodeSchema, MfaCodeDto } from './dto/login.schema';
 import { JwtAuthGuard } from './guards/jwt-auth.guard';
 import { CurrentUser, AuthenticatedUser } from './decorators/current-user.decorator';
 import { AuthRateLimitGuard } from '../../security/rate-limiting/auth-rate-limit.guard';
@@ -21,6 +21,30 @@ export class AuthenticationController {
   @ApiOperation({ summary: 'Sign in with email + password → access & refresh tokens' })
   login(@Body() dto: LoginDto, @Req() req: Request) {
     return this.auth.login(dto, req.ip);
+  }
+
+  @Post('mfa/verify')
+  @HttpCode(200)
+  @UsePipes(new ZodValidationPipe(mfaCodeSchema))
+  @ApiOperation({ summary: 'Second step of sign-in: the authenticator code (DESC #7)' })
+  verifyMultiFactor(@Body() dto: MfaCodeDto, @Req() req: Request) {
+    return this.auth.verifyMultiFactor(dto.mfaToken, dto.code, req.ip);
+  }
+
+  @Post('mfa/enroll/start')
+  @HttpCode(200)
+  @UsePipes(new ZodValidationPipe(mfaChallengeSchema))
+  @ApiOperation({ summary: 'Begin two-step enrolment: returns the QR code and manual key' })
+  startMultiFactorEnrollment(@Body() dto: MfaChallengeDto) {
+    return this.auth.startMultiFactorEnrollment(dto.mfaToken);
+  }
+
+  @Post('mfa/enroll/confirm')
+  @HttpCode(200)
+  @UsePipes(new ZodValidationPipe(mfaCodeSchema))
+  @ApiOperation({ summary: 'Finish enrolment with the first code, then sign in' })
+  confirmMultiFactorEnrollment(@Body() dto: MfaCodeDto, @Req() req: Request) {
+    return this.auth.confirmMultiFactorEnrollment(dto.mfaToken, dto.code, req.ip);
   }
 
   @Post('refresh')

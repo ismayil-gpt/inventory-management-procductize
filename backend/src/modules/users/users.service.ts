@@ -5,7 +5,7 @@ import { CreateUserDto, UpdateUserDto } from './dto/user.schema';
 import { AuthSessionRepository } from '../authentication/auth-session.repository';
 
 const PUBLIC_SELECT = {
-  id: true, email: true, displayName: true, role: true, isActive: true, lastLoginAt: true, preferredLanguage: true, createdAt: true,
+  id: true, email: true, displayName: true, role: true, isActive: true, lastLoginAt: true, preferredLanguage: true, createdAt: true, mfaEnabledAt: true,
 } as const;
 
 @Injectable()
@@ -92,6 +92,25 @@ export class UsersService {
     if (!user) throw new NotFoundException({ code: 'USER_NOT_FOUND', messageEn: 'User not found.', messageAr: 'المستخدم غير موجود.' });
     const ended = await this.endSessionsWithAudit(id, 'ADMIN_ENDED', actorId, id === actorId ? actorSessionId : undefined);
     return { ended };
+  }
+
+  /**
+   * ADMIN action for a lost or replaced phone (DESC #7): clears two-step
+   * sign-in so the person enrols again at their next sign-in, and ends their
+   * sessions, since whoever has the old phone should not stay signed in.
+   */
+  async resetMultiFactor(id: string, actorId: string) {
+    const user = await this.prisma.user.findUnique({ where: { id }, select: { id: true, mfaEnabledAt: true } });
+    if (!user) throw new NotFoundException({ code: 'USER_NOT_FOUND', messageEn: 'User not found.', messageAr: 'المستخدم غير موجود.' });
+    if (id === actorId) {
+      throw new BadRequestException({ code: 'CANNOT_RESET_OWN_MFA', messageEn: 'Ask another administrator to reset your two-step sign-in.', messageAr: 'اطلب من مسؤول آخر إعادة تعيين التحقق بخطوتين الخاص بك.' });
+    }
+    await this.prisma.$transaction(async (tx) => {
+      await tx.user.update({ where: { id }, data: { mfaSecret: null, mfaEnabledAt: null, mfaLastUsedStep: null } });
+      await tx.auditLog.create({ data: { actorId, action: 'USER_MFA_RESET', entityType: 'User', entityId: id, before: { mfaEnabled: Boolean(user.mfaEnabledAt) }, after: { mfaEnabled: false } } });
+    });
+    const ended = await this.sessions.revokeAllForUser(id, 'MFA_RESET');
+    return { reset: true, sessionsEnded: ended };
   }
 
   private async endSessionsWithAudit(userId: string, reason: 'USER_DEACTIVATED' | 'PASSWORD_CHANGED' | 'ADMIN_ENDED', actorId: string, keepSessionId?: string) {

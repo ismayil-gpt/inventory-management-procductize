@@ -61,6 +61,8 @@
   --gantry-line:     #EBD48A;
   --gantry-ink:      #4A3D0F;
   --gantry-muted:    #6B5A1C;
+  /* Always white in both themes: anything that must be scanned or printed (QR codes, labels). */
+  --paper:           #FFFFFF;
 }
 
 :root[data-theme="dark"] {

@@ -49,7 +49,9 @@ model User {
   preferredLanguage String    @default("en")
   preferredTheme    String    @default("system")
   isActive          Boolean   @default(true)
-  mfaSecret         String?
+  mfaSecret         String?   // AES-256-GCM encrypted TOTP secret (DESC #7); pending until mfaEnabledAt is set
+  mfaEnabledAt      DateTime?
+  mfaLastUsedStep   Int?      // last accepted 30-second TOTP step — a code works once
   failedLoginCount  Int       @default(0)
   lockedUntil       DateTime?
   lastLoginAt       DateTime?

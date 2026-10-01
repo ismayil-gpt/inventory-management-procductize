@@ -1083,3 +1083,25 @@ test (`7a7257b`). Backend tests: 21/21.
 `dependency-scan-reports/2026-10-01/remediation.md` (NestJS, FastAPI/Starlette, multer, exceljs,
 react-router), and the production-only controls 1, 2, 11, 19 (TLS, encrypted volumes, Docker
 network, least-privilege role), which arrive with production packaging.
+
+### 2026-10-01 (late night) — DESC 4 (sessions) and 7 (two-step sign-in) verified
+
+- **Control 4** (`efd9860`): server-side sessions in PostgreSQL (`AuthSession`), refresh-token
+  rotation with reuse detection, revocation on sign-out, deactivation, password change and a new
+  admin "End sessions" action; open sessions shown on Users. The frontend refresh is single-flight and
+  serialised across tabs so normal use never trips reuse detection. Also fixed: a token refresh
+  had been counting as user activity, which would have kept idle users signed in. Redis was
+  deliberately not added (OPEN-QUESTIONS #20).
+- **Control 7**: authenticator-app two-step sign-in, off by default (`MFA_ENABLED=false`).
+  Enrolment by server-drawn QR, encrypted secret, single-use codes, wrong codes count towards
+  lockout, admin reset for lost phones. Verified with a second backend started with MFA on
+  (enrolment, wrong code, sign-in, second sign-in, Arabic dark), then the store keeper was reset
+  so the shared dev database is back to normal.
+- Found: the AI service uses a person's admin account to sign in (OPEN-QUESTIONS #21). A
+  network-restricted exemption exists for a dedicated service account; create that account before
+  switching MFA on.
+- `vite.config.ts`: proxy target overridable with `VITE_DEV_API_TARGET` (used for the MFA test).
+- Backend tests: 36/36.
+
+**Before switching two-step sign-in on**: set `MFA_ENCRYPTION_KEY` (`openssl rand -base64 32`),
+resolve #21, then set `MFA_ENABLED=true`. Everyone enrols at their next sign-in.

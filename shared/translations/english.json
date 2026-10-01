@@ -245,7 +245,13 @@
     "endSessionsHint": "Sign this person out of every device now",
     "endSessionsTitle": "End all sessions?",
     "endSessionsConfirm_one": "{{name}} is signed in on 1 device. They will be signed out there at once and must sign in again.",
-    "endSessionsConfirm_other": "{{name}} is signed in on {{count}} devices. They will be signed out on all of them at once and must sign in again."
+    "endSessionsConfirm_other": "{{name}} is signed in on {{count}} devices. They will be signed out on all of them at once and must sign in again.",
+    "twoStep": "Two-step",
+    "twoStepOn": "On",
+    "twoStepOff": "Not set up",
+    "resetMfa": "Reset two-step",
+    "resetMfaTitle": "Reset two-step sign-in?",
+    "resetMfaConfirm": "Use this when {{name}} has lost or replaced their phone. Their two-step sign-in is cleared and they are signed out everywhere. They will set it up again at their next sign-in."
   },
   "audit": {
     "allEntities": "All entities",
@@ -540,5 +546,18 @@
     "body": "For security you'll be signed out in {{seconds}} seconds because nothing has happened for a while.",
     "stay": "Stay signed in",
     "signedOut": "You were signed out after a period of inactivity. Sign in again to continue."
+  },
+  "mfa": {
+    "verifyTitle": "Enter your code",
+    "verifyBody": "Open your authenticator app and enter the 6-digit code shown for Mizan.",
+    "enrollTitle": "Set up two-step sign-in",
+    "enrollBody": "Your organisation requires a second step at sign-in. Scan this code with an authenticator app (such as Microsoft Authenticator or Google Authenticator), then enter the 6-digit code it shows.",
+    "qrAlt": "QR code for your authenticator app",
+    "manualKeyLabel": "Can't scan? Enter this key in the app instead:",
+    "codeLabel": "6-digit code",
+    "codeFormat": "Enter the 6 digits from your authenticator app.",
+    "verifyAction": "Sign in",
+    "enrollAction": "Finish setup and sign in",
+    "startOver": "Use a different account"
   }
 }

@@ -5,6 +5,7 @@ import { usePreferences } from '../../application-shell/preferences.store';
 import { useAuthStore } from './auth.store';
 import { loginRequest, useSystemInfo, ApiError } from '../../api-client/client';
 import { MizanMark } from '../../design-system/brand-mark/MizanMark';
+import { MultiFactorStep } from './MultiFactorStep';
 import { SplitFlapText } from '../../design-system/airfield-signs/SplitFlapText';
 
 // Real JWT login (§11 #3-5). argon2id verification + lockout are enforced server-side.
@@ -25,6 +26,8 @@ export function LoginPage() {
   const [searchParams] = useSearchParams();
   const wasSignedOutForInactivity = searchParams.get('reason') === 'idle';
   const [submitting, setSubmitting] = useState(false);
+  // DESC #7: after a correct password, the second step when two-step sign-in is on.
+  const [challenge, setChallenge] = useState<{ mode: 'verify' | 'enroll'; mfaToken: string } | null>(null);
 
   if (currentUser) return <Navigate to="/briefing" replace />;
 
@@ -33,9 +36,15 @@ export function LoginPage() {
     setError(null);
     setSubmitting(true);
     try {
-      const session = await loginRequest(email.trim().toLowerCase(), password);
-      startSession(session);
-      navigate('/briefing');
+      const outcome = await loginRequest(email.trim().toLowerCase(), password);
+      if ('mfaRequired' in outcome) {
+        setChallenge({ mode: 'verify', mfaToken: outcome.mfaToken });
+      } else if ('mfaEnrollmentRequired' in outcome) {
+        setChallenge({ mode: 'enroll', mfaToken: outcome.mfaToken });
+      } else {
+        startSession(outcome);
+        navigate('/briefing');
+      }
     } catch (err) {
       if (err instanceof ApiError) {
         if (err.body.code === 'ACCOUNT_LOCKED') {
@@ -83,6 +92,14 @@ export function LoginPage() {
             {t('idleTimeout.signedOut')}
           </div>
         )}
+        {challenge ? (
+          <MultiFactorStep
+            mode={challenge.mode}
+            mfaToken={challenge.mfaToken}
+            onSignedIn={(session) => { startSession(session); navigate('/briefing'); }}
+            onRestart={(message) => { setChallenge(null); setPassword(''); setError(message ?? null); }}
+          />
+        ) : (
         <form onSubmit={onSubmit}>
           <div style={{ marginBottom: 'var(--space-4)' }}>
             <label style={label} htmlFor="email">{t('auth.email')}</label>
@@ -107,6 +124,7 @@ export function LoginPage() {
             {submitting ? t('common.loading') : t('auth.signIn')}
           </button>
         </form>
+        )}
 
         <button type="button" onClick={toggleLanguage} style={{ marginTop: 'var(--space-3)', background: 'none', border: 'none', color: 'var(--ink-muted)', fontSize: 'var(--text-xs)', cursor: 'pointer', width: '100%' }}>
           {language === 'ar' ? 'English' : 'العربية'}

@@ -59,15 +59,35 @@ async function getPublic<T>(path: string): Promise<T> {
 }
 
 // ---- Authentication ----
-export async function loginRequest(email: string, password: string): Promise<Session> {
-  const response = await fetch(`${API_BASE}/auth/login`, {
+async function postPublic<T>(path: string, payload: unknown): Promise<T> {
+  const response = await fetch(`${API_BASE}${path}`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json', Accept: 'application/json' },
-    body: JSON.stringify({ email, password }),
+    body: JSON.stringify(payload),
   });
   const body = await response.json().catch(() => ({}));
   if (!response.ok) throw new ApiError(response.status, body as ApiErrorBody);
-  return body as Session;
+  return body as T;
+}
+
+/** With two-step sign-in on (DESC #7), a correct password returns a challenge instead of a session. */
+export type SignInOutcome =
+  | Session
+  | { mfaRequired: true; mfaToken: string }
+  | { mfaEnrollmentRequired: true; mfaToken: string };
+export interface MultiFactorEnrollment { otpauthUrl: string; qrDataUrl: string; manualKey: string }
+
+export function loginRequest(email: string, password: string): Promise<SignInOutcome> {
+  return postPublic<SignInOutcome>('/auth/login', { email, password });
+}
+export function verifyMultiFactorCode(mfaToken: string, code: string): Promise<Session> {
+  return postPublic<Session>('/auth/mfa/verify', { mfaToken, code });
+}
+export function startMultiFactorEnrollment(mfaToken: string): Promise<MultiFactorEnrollment> {
+  return postPublic<MultiFactorEnrollment>('/auth/mfa/enroll/start', { mfaToken });
+}
+export function confirmMultiFactorEnrollment(mfaToken: string, code: string): Promise<Session> {
+  return postPublic<Session>('/auth/mfa/enroll/confirm', { mfaToken, code });
 }
 
 // Refresh tokens are single-use (DESC #4): presenting one twice ends the
@@ -227,11 +247,15 @@ export function resolveLocationByBarcode(code: string) {
 }
 
 // ---- Users (ADMIN) ----
-export interface UserRow { id: string; email: string; displayName: string; role: 'ADMIN' | 'STORE_KEEPER'; isActive: boolean; lastLoginAt: string | null; preferredLanguage: string; createdAt: string; openSessions: number; }
+export interface UserRow { id: string; email: string; displayName: string; role: 'ADMIN' | 'STORE_KEEPER'; isActive: boolean; lastLoginAt: string | null; preferredLanguage: string; createdAt: string; openSessions: number; mfaEnabledAt: string | null; }
 export interface UserWrite { email: string; displayName: string; role: 'ADMIN' | 'STORE_KEEPER'; password?: string; isActive?: boolean; preferredLanguage?: string; }
 /** DESC #4 — sign a user out of every device now (ADMIN). */
 export function endUserSessions(id: string) {
   return authFetch<{ ended: number }>(`/users/${id}/end-sessions`, { method: 'POST' });
+}
+/** DESC #7 — clear a user's two-step sign-in so they enrol again (ADMIN). */
+export function resetUserMultiFactor(id: string) {
+  return authFetch<{ reset: boolean; sessionsEnded: number }>(`/users/${id}/reset-mfa`, { method: 'POST' });
 }
 export function useUsers(enabled = true) {
   return useQuery({ queryKey: ['users'], queryFn: () => authFetch<UserRow[]>('/users'), retry: false, enabled });
