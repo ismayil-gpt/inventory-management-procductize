@@ -4,7 +4,7 @@
 # See docker-compose.production.yml for the on-premise/GPU counterpart.
 #
 # Network segmentation (DESC §11.1 #11): only nginx is published to the host.
-# postgres, redis, minio and ai-service are reachable ONLY on the internal
+# postgres and ai-service are reachable ONLY on the internal
 # Docker network.
 #
 # Ollama is deliberately NOT a service here — it runs natively as a systemd
@@ -37,7 +37,7 @@ services:
     build:
       context: .
       dockerfile: infrastructure/docker/backend.Dockerfile
-    depends_on: [postgres, redis, minio]
+    depends_on: [postgres]
     expose: ["3000"]
     env_file: [.env.development]
     # Development keeps one database user, so the API applies migrations itself on start.
@@ -85,23 +85,9 @@ services:
       retries: 5
     networks: [mizan-internal]
 
-  redis:
-    image: redis:7-alpine
-    expose: ["6379"]
-    volumes:
-      - redis-data:/data
-    networks: [mizan-internal]
 
-  minio:
-    image: minio/minio:latest
-    command: server /data --console-address ":9001"
-    environment:
-      MINIO_ROOT_USER: ${MINIO_ACCESS_KEY}
-      MINIO_ROOT_PASSWORD: ${MINIO_SECRET_KEY}
-    expose: ["9000", "9001"]
-    volumes:
-      - minio-data:/data
-    networks: [mizan-internal]
+# Redis and MinIO were removed on 2026-10-02: nothing in the code used them
+# (OPEN-QUESTIONS #23). Add them back when a feature needs a queue or file storage.
 
 networks:
   mizan-internal:
@@ -109,5 +95,3 @@ networks:
 
 volumes:
   postgres-data:
-  redis-data:
-  minio-data:
