@@ -51,7 +51,8 @@ describe('EmailService', () => {
   it('sends the purchase order with its PDF attachment over SMTP', async () => {
     const smtp = await startFakeSmtp();
     try {
-      const service = new EmailService(new ConfigService({ SMTP_HOST: '127.0.0.1', SMTP_PORT: String(smtp.port), SMTP_FROM: 'Mizan <inventory@example.com>' }));
+      // The in-process test relay speaks plain SMTP only, so TLS is waived here explicitly.
+      const service = new EmailService(new ConfigService({ SMTP_HOST: '127.0.0.1', SMTP_PORT: String(smtp.port), SMTP_FROM: 'Mizan <inventory@example.com>', SMTP_REQUIRE_TLS: 'false' }));
       const result = await service.send(
         'orders@supplier.example',
         'Purchase order PO-2026-0099',
@@ -62,6 +63,18 @@ describe('EmailService', () => {
       expect(smtp.recipients.join(' ')).toContain('orders@supplier.example');
       expect(smtp.received()).toContain('Subject: Purchase order PO-2026-0099');
       expect(smtp.received()).toContain('PO-2026-0099.pdf');
+    } finally {
+      smtp.server.close();
+    }
+  });
+
+  it('refuses to send in clear when the relay offers no TLS (the default)', async () => {
+    const smtp = await startFakeSmtp();
+    try {
+      const service = new EmailService(new ConfigService({ SMTP_HOST: '127.0.0.1', SMTP_PORT: String(smtp.port) }));
+      const result = await service.send('orders@supplier.example', 'Purchase order PO-2026-0100', 'Body');
+      expect(result.sent).toBe(false);
+      expect(smtp.received()).not.toContain('PO-2026-0100');
     } finally {
       smtp.server.close();
     }

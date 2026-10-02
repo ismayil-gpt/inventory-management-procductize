@@ -27,10 +27,16 @@ export class EmailService {
   private transporter(): nodemailer.Transporter | null {
     const host = this.config.get<string>('SMTP_HOST');
     if (!host) return null;
+    const port = Number(this.config.get('SMTP_PORT', 587));
     return nodemailer.createTransport({
       host,
-      port: Number(this.config.get('SMTP_PORT', 587)),
-      secure: false,
+      port,
+      // DESC #1 — supplier email is the only outbound traffic, so it is never
+      // sent in clear: port 465 is TLS from the first byte; any other port must
+      // upgrade with STARTTLS, and the send fails if the relay cannot.
+      // SMTP_REQUIRE_TLS=false exists only for a lab relay without TLS.
+      secure: String(this.config.get('SMTP_SECURE', port === 465)) === 'true',
+      requireTLS: String(this.config.get('SMTP_REQUIRE_TLS', 'true')) !== 'false',
       auth: this.config.get<string>('SMTP_USER')
         ? { user: this.config.get<string>('SMTP_USER'), pass: this.config.get<string>('SMTP_PASSWORD') }
         : undefined,
