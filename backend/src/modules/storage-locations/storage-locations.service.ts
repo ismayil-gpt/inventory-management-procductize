@@ -241,7 +241,8 @@ export class StorageLocationsService {
       await tx.locationNode.createMany({ data });
       await tx.auditLog.create({ data: { actorId: userId, action: 'LOCATION_BULK_CREATE', entityType: 'LocationNode', entityId: parent?.id ?? 'root', after: { count: planned.length, parent: parent?.designator ?? null } } });
     });
-    return { count: planned.length };
+    // The new stock-holding nodes, so the caller can print their labels at once (§5A.3).
+    return { count: planned.length, labelledLocationIds: data.filter((n) => n.barcode).map((n) => n.id) };
   }
 
   /**

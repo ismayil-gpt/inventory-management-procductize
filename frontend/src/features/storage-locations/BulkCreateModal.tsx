@@ -1,15 +1,18 @@
 import { useEffect, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useQueryClient } from '@tanstack/react-query';
-import { Plus, Trash2 } from 'lucide-react';
+import { Plus, Trash2, Printer } from 'lucide-react';
+import { printLabels } from '../barcode-scanning/print-labels';
 import { Modal } from '../../design-system/modal/Modal';
-import { useLocationTypes, bulkCreateLocations, ApiError } from '../../api-client/client';
+import { useLocationTypes, bulkCreateLocations, fetchLabelsBatch, ApiError } from '../../api-client/client';
 import { usePreferences } from '../../application-shell/preferences.store';
 
 interface LevelRow { locationTypeId: string; prefix: string; from: number; to: number; }
 
-const PREFIX_BY_CODE: Record<string, string> = { STORE_ROOM: 'SR', RACK: 'R', LEVEL: 'L', ZONE: 'Z', AISLE: 'A', BIN: 'B', WAREHOUSE: 'WH', SITE: 'S' };
-const prefixFor = (code: string) => PREFIX_BY_CODE[code] ?? code.slice(0, 2).toUpperCase();
+// Suggested code prefix from the type's configured name: "Store Room" → "SR",
+// "Rack" → "R", "Aisle" → "A". Derived, never a hard-coded list of types (§5A.1).
+const prefixFor = (typeName: string) =>
+  typeName.split(/[\s_-]+/).filter(Boolean).map((word) => word[0]).join('').toUpperCase() || 'X';
 
 // Instant, client-side preview — no network round-trip.
 function computePreview(levels: LevelRow[], parentDesignator: string): { count: number; sample: string[] } {
@@ -43,6 +46,9 @@ export function BulkCreateModal({ parent, onClose, onCreated }: { parent: { id: 
   const [seeded, setSeeded] = useState(false);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  // After creating: offer the new shelves' labels straight away (§5A.3).
+  const [created, setCreated] = useState<{ count: number; labelledLocationIds: string[] } | null>(null);
+  const [printing, setPrinting] = useState(false);
 
   const parentDepth = parent ? parent.designator.split('-').length - 1 : -1;
 
@@ -50,7 +56,7 @@ export function BulkCreateModal({ parent, onClose, onCreated }: { parent: { id: 
   useEffect(() => {
     if (seeded || !types.data) return;
     const usable = types.data.filter((ty) => ty.depth > parentDepth);
-    setLevels(usable.length ? usable.map((ty) => ({ locationTypeId: ty.id, prefix: prefixFor(ty.code), from: 1, to: 1 })) : [{ locationTypeId: '', prefix: '', from: 1, to: 1 }]);
+    setLevels(usable.length ? usable.map((ty) => ({ locationTypeId: ty.id, prefix: prefixFor(ty.nameEn), from: 1, to: 1 })) : [{ locationTypeId: '', prefix: '', from: 1, to: 1 }]);
     setSeeded(true);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [types.data]);
@@ -65,9 +71,10 @@ export function BulkCreateModal({ parent, onClose, onCreated }: { parent: { id: 
   const create = async () => {
     setError(null); setBusy(true);
     try {
-      await bulkCreateLocations({ parentId: parent?.id ?? null, levels: levels.map((l) => ({ locationTypeId: l.locationTypeId, prefix: l.prefix.trim(), from: Number(l.from), to: Number(l.to) })) }, false);
+      const result = await bulkCreateLocations({ parentId: parent?.id ?? null, levels: levels.map((l) => ({ locationTypeId: l.locationTypeId, prefix: l.prefix.trim(), from: Number(l.from), to: Number(l.to) })) }, false);
       await queryClient.invalidateQueries({ queryKey: ['locations-tree'] });
-      onCreated();
+      setCreated({ count: result.count, labelledLocationIds: 'labelledLocationIds' in result ? result.labelledLocationIds : [] });
+      setBusy(false);
     } catch (err) {
       setError(err instanceof ApiError ? (language === 'ar' ? err.body.messageAr : err.body.messageEn) ?? t('errors.generic') : t('errors.generic'));
       setBusy(false);
@@ -77,6 +84,30 @@ export function BulkCreateModal({ parent, onClose, onCreated }: { parent: { id: 
   const input: React.CSSProperties = { height: '34px', width: '100%', borderRadius: 'var(--radius-md)', border: '1px solid var(--hairline)', background: 'var(--surface)', color: 'var(--ink)', padding: '0 10px', fontSize: 'var(--text-sm)' };
   const fieldLabel: React.CSSProperties = { display: 'block', fontSize: 'var(--text-2xs)', letterSpacing: 'var(--tracking-label)', textTransform: 'uppercase', color: 'var(--ink-muted)', marginBottom: '3px' };
   const btn: React.CSSProperties = { display: 'inline-flex', alignItems: 'center', gap: '6px', height: '38px', padding: '0 18px', borderRadius: 'var(--radius-md)', fontSize: 'var(--text-sm)', cursor: 'pointer' };
+
+  if (created) {
+    const printNew = async () => {
+      setPrinting(true);
+      try {
+        printLabels(await fetchLabelsBatch('location', created.labelledLocationIds), parent?.designator ?? t('locations.bulkCreate'));
+      } finally {
+        setPrinting(false);
+      }
+    };
+    return (
+      <Modal title={t('locations.bulkCreate')} onClose={onCreated} width={480}>
+        <p role="status" style={{ margin: 0, fontSize: 'var(--text-base)', fontWeight: 600 }}>{t('locations.createdDone', { count: created.count })}</p>
+        <div style={{ display: 'flex', justifyContent: 'flex-end', gap: 'var(--space-3)', marginTop: 'var(--space-6)', flexWrap: 'wrap' }}>
+          <button type="button" onClick={onCreated} style={{ ...btn, border: '1px solid var(--hairline)', background: 'var(--surface)', color: 'var(--ink)' }}>{t('locations.done')}</button>
+          {created.labelledLocationIds.length > 0 && (
+            <button type="button" onClick={() => void printNew()} disabled={printing} style={{ ...btn, border: 'none', background: 'var(--primary)', color: 'var(--on-primary)', fontWeight: 600 }}>
+              <Printer size={15} strokeWidth={1.5} aria-hidden /> {printing ? t('common.loading') : t('locations.printNewLabels', { count: created.labelledLocationIds.length })}
+            </button>
+          )}
+        </div>
+      </Modal>
+    );
+  }
 
   return (
     <Modal title={t('locations.bulkCreate')} onClose={onClose} width={620}>

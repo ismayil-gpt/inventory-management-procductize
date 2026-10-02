@@ -1154,3 +1154,24 @@ checked live), `audit-logging-specification.md`. New open question #24: audit re
 wording; claims checked against the code (one corrected: Print labels prints the listed products).
 
 Backend tests 37/37.
+
+### 2026-10-02 (later) — Accessibility finished; ready for acceptance testing
+
+**Accessibility** (`481bcad`): axe now covers every pop-up and panel and both two-step screens
+(fixed: unlinked labels in the location generator); a keyboard-only test passes (fixed: storage
+tree rows and product rows were mouse-only; dialogs had no Escape, focus move, Tab containment or
+focus return); focus is visible on every screen (fixed: top-bar search, date fields); tablets at
+768 and 1024 px have no sideways scrolling and 44 px controls. Full end-to-end: 17 passed, 1 opt-in.
+
+**Acceptance preparation**:
+- `scripts/reset-demo-database.sh --yes` rebuilds the demo database cleanly in ~10 s (backup
+  first, refuses production). 4,899 orphaned movement rows are gone (OPEN-QUESTIONS #14 resolved).
+- `documentation/client-acceptance/demo-script.md` (25 minutes, with what not to show: the
+  Arabic assistant, §2.2) and `acceptance-checklist.md` (27 checks with sign-off).
+- Gaps found and fixed while writing them: bulk create now offers **Print N shelf labels** for
+  exactly what it created, and the rack view has **Print rack labels** (§5A.3); the dashboard
+  counted store rooms by the hard-coded type `STORE_ROOM` and the generator suggested prefixes
+  from a hard-coded type list, so both now derive from configuration (§5A.1). The
+  `STORE_ROOM`/`RACK`/`LEVEL` scan is clean outside seed data and tests.
+
+Demo database rebuilt clean at the end of the session.

@@ -401,7 +401,11 @@
     "newRoot": "New store room",
     "deleteTitle": "Delete location",
     "deleteConfirm": "Permanently delete {{designator}} and everything under it (racks, levels)? This works only when it holds no stock at all — if any shelf still has items, transfer them to another location first.",
-    "activeLocation": "Active location"
+    "activeLocation": "Active location",
+    "createdDone": "Created {{count}} locations.",
+    "printNewLabels": "Print {{count}} shelf labels",
+    "printRackLabels": "Print rack labels",
+    "done": "Done"
   },
   "stock": {
     "inStock": "In stock",

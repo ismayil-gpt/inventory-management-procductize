@@ -412,7 +412,7 @@ export interface BulkCreatePayload {
 }
 export interface BulkPreview { count: number; nodes: Array<{ designator: string; code: string; depth: number; canHoldStock: boolean }> }
 export function bulkCreateLocations(payload: BulkCreatePayload, preview: boolean) {
-  return authFetch<BulkPreview | { count: number }>(`/storage-locations/bulk-create${preview ? '?preview=true' : ''}`, {
+  return authFetch<BulkPreview | { count: number; labelledLocationIds: string[] }>(`/storage-locations/bulk-create${preview ? '?preview=true' : ''}`, {
     method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload),
   });
 }

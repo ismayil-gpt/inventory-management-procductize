@@ -1,7 +1,10 @@
+import { useState } from 'react';
 import { useQueries } from '@tanstack/react-query';
+import { Printer } from 'lucide-react';
+import { printLabels } from '../barcode-scanning/print-labels';
 import { useTranslation } from 'react-i18next';
 import {
-  authFetch, useProducts, type LocationResolved, type LocationTreeNode, type StockStatus,
+  authFetch, useProducts, fetchLocationLabels, type LocationResolved, type LocationTreeNode, type StockStatus,
 } from '../../api-client/client';
 import { usePreferences } from '../../application-shell/preferences.store';
 
@@ -27,6 +30,15 @@ export function ShelfView({ parent, highlightedId, onSelect }: ShelfViewProps) {
   const { t } = useTranslation();
   const { language } = usePreferences();
   const name = (en: string, ar: string) => (language === 'ar' ? ar || en : en || ar);
+  const [printing, setPrinting] = useState(false);
+  const printRack = async () => {
+    setPrinting(true);
+    try {
+      printLabels(await fetchLocationLabels(parent.id, true), parent.designator);
+    } finally {
+      setPrinting(false);
+    }
+  };
 
   // Floor at the bottom: reverse the configured order so the first child sits lowest.
   const shelves = [...parent.children].reverse();
@@ -47,6 +59,9 @@ export function ShelfView({ parent, highlightedId, onSelect }: ShelfViewProps) {
         <span style={{ fontSize: 'var(--text-sm)', fontWeight: 600 }}>
           {t('shelfView.title')} <bdi dir="ltr" style={{ fontFamily: 'var(--font-mono)' }}>{parent.designator}</bdi>
         </span>
+        <button type="button" onClick={() => void printRack()} disabled={printing} style={{ display: 'inline-flex', alignItems: 'center', gap: '5px', height: '28px', padding: '0 10px', borderRadius: 'var(--radius-sm)', border: '1px solid var(--hairline)', background: 'var(--surface)', color: 'var(--ink)', fontSize: 'var(--text-xs)', cursor: 'pointer' }}>
+          <Printer size={13} strokeWidth={1.5} aria-hidden /> {printing ? t('common.loading') : t('locations.printRackLabels')}
+        </button>
         <span style={{ display: 'flex', gap: 'var(--space-3)', fontSize: 'var(--text-xs)', color: 'var(--ink-muted)' }}>
           {(['IN_STOCK', 'LOW', 'CRITICAL', 'OUT'] as StockStatus[]).map((s) => (
             <span key={s} style={{ display: 'inline-flex', alignItems: 'center', gap: '5px' }}>

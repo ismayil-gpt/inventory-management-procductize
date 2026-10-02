@@ -36,7 +36,9 @@ export class DashboardService {
       }),
       this.prisma.stockPosition.findMany({ select: { productId: true, quantity: true } }),
       this.prisma.locationNode.count({ where: { barcode: { not: null }, isActive: true } }),
-      this.prisma.locationType.findMany({ where: { code: 'STORE_ROOM' }, select: { id: true } }),
+      // Top-level sites of whatever type this organisation configured (store rooms,
+      // warehouses, buildings) — never a hard-coded type code (§5A.1).
+      this.prisma.locationNode.count({ where: { parentId: null, isActive: true } }),
       this.prisma.supplier.count({ where: { isActive: true } }),
       this.prisma.stockMovement.findMany({
         where: { createdAt: { gte: since14 }, type: { in: ['GOODS_IN', 'GOODS_OUT'] } },
@@ -71,10 +73,7 @@ export class DashboardService {
       }
     }
 
-    // Number of store rooms = root nodes of the STORE_ROOM type.
-    const storeRooms = storeRoomCount.length
-      ? await this.prisma.locationNode.count({ where: { locationTypeId: storeRoomCount[0].id } })
-      : 0;
+    const storeRooms = storeRoomCount;
 
     return {
       products: products.length,
