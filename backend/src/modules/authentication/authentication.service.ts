@@ -2,7 +2,7 @@ import { Injectable, UnauthorizedException, Logger } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { ConfigService } from '@nestjs/config';
 import { verify } from '@node-rs/argon2';
-import type { User } from '@prisma/client';
+import type { Prisma, User } from '@prisma/client';
 import { randomBytes } from 'node:crypto';
 import { PrismaService } from '../../database/prisma.service';
 import { LoginDto } from './dto/login.schema';
@@ -93,8 +93,7 @@ export class AuthenticationService {
       await this.registerFailedAttempt(user, ipAddress, 'MFA_FAILED');
       throw this.wrongCode();
     }
-    await this.prisma.user.update({ where: { id: user.id }, data: { mfaLastUsedStep: step } });
-    return this.completeSignIn(user, ipAddress, true);
+    return this.completeSignIn(user, ipAddress, true, undefined, { mfaLastUsedStep: step });
   }
 
   /** DESC #7 — enrolment, step 1: a fresh secret and its QR code (kept pending until confirmed). */
@@ -102,10 +101,11 @@ export class AuthenticationService {
     const userId = await this.multiFactor.readChallenge(mfaToken, 'enroll');
     const user = await this.activeUnlockedUser(userId);
     const enrollment = await this.multiFactor.createEnrollment(user.email);
-    await this.prisma.user.update({
-      where: { id: user.id },
-      data: { mfaSecret: this.multiFactor.encryptSecret(enrollment.secret), mfaEnabledAt: null, mfaLastUsedStep: null },
-    });
+    await this.auditedUserUpdate(
+      user.id,
+      { mfaSecret: this.multiFactor.encryptSecret(enrollment.secret), mfaEnabledAt: null, mfaLastUsedStep: null },
+      'MFA_ENROLLMENT_STARTED',
+    );
     return { otpauthUrl: enrollment.otpauthUrl, qrDataUrl: enrollment.qrDataUrl, manualKey: enrollment.manualKey };
   }
 
@@ -119,19 +119,26 @@ export class AuthenticationService {
       await this.registerFailedAttempt(user, ipAddress, 'MFA_FAILED');
       throw this.wrongCode();
     }
-    await this.prisma.user.update({ where: { id: user.id }, data: { mfaEnabledAt: new Date(), mfaLastUsedStep: step } });
-    await this.writeAudit(user.id, 'MFA_ENROLLED', user.id, ipAddress);
+    await this.auditedUserUpdate(user.id, { mfaEnabledAt: new Date(), mfaLastUsedStep: step }, 'MFA_ENROLLED', ipAddress);
     return this.completeSignIn(user, ipAddress, true);
   }
 
   /** Reset counters, stamp the login, audit it, open the session. */
-  private async completeSignIn(user: User, ipAddress: string | undefined, usedMultiFactor: boolean, exemption?: 'EXEMPT_SERVICE_ACCOUNT') {
-    await this.prisma.user.update({
-      where: { id: user.id },
-      data: { failedLoginCount: 0, lockedUntil: null, lastLoginAt: new Date() },
-    });
+  private async completeSignIn(
+    user: User,
+    ipAddress: string | undefined,
+    usedMultiFactor: boolean,
+    exemption?: 'EXEMPT_SERVICE_ACCOUNT',
+    extra: Prisma.UserUpdateInput = {},
+  ) {
     const secondFactor = usedMultiFactor ? 'TOTP' : exemption;
-    await this.writeAudit(user.id, 'LOGIN_SUCCESS', user.id, ipAddress, secondFactor ? { secondFactor } : undefined);
+    await this.auditedUserUpdate(
+      user.id,
+      { ...extra, failedLoginCount: 0, lockedUntil: null, lastLoginAt: new Date() },
+      'LOGIN_SUCCESS',
+      ipAddress,
+      secondFactor ? { secondFactor } : undefined,
+    );
     return this.startSession(user);
   }
 
@@ -235,18 +242,10 @@ export class AuthenticationService {
 
     if (nextCount >= maxAttempts) {
       const lockedUntil = new Date(Date.now() + lockMinutes * 60000);
-      await this.prisma.user.update({
-        where: { id: user.id },
-        data: { failedLoginCount: nextCount, lockedUntil },
-      });
-      await this.writeAudit(user.id, 'ACCOUNT_LOCKED', user.id, ipAddress);
+      await this.auditedUserUpdate(user.id, { failedLoginCount: nextCount, lockedUntil }, 'ACCOUNT_LOCKED', ipAddress);
       this.logger.warn(`Account locked after ${nextCount} failed attempts: user ${user.id}`);
     } else {
-      await this.prisma.user.update({
-        where: { id: user.id },
-        data: { failedLoginCount: nextCount },
-      });
-      await this.writeAudit(user.id, failureAction, user.id, ipAddress);
+      await this.auditedUserUpdate(user.id, { failedLoginCount: nextCount }, failureAction, ipAddress);
     }
   }
 
@@ -280,13 +279,25 @@ export class AuthenticationService {
   }
 
   /** DESC #9/#15 — audit every auth event; store the user id, never the password. */
+  /**
+   * DESC #9 / §12 rule 8 — a change to the user row and its audit record are
+   * saved in one transaction: both happen or neither does.
+   */
+  private async auditedUserUpdate(userId: string, data: Prisma.UserUpdateInput, action: string, ipAddress?: string, after?: Record<string, string>) {
+    await this.prisma.$transaction([
+      this.prisma.user.update({ where: { id: userId }, data }),
+      this.prisma.auditLog.create({ data: { actorId: userId, action, entityType: 'User', entityId: userId, ipAddress: ipAddress ?? null, after } }),
+    ]);
+  }
+
+  /**
+   * Audit for sign-in events that change no user row (a challenge issued, a
+   * sign-out, a reused refresh token). Not swallowed: if the audit trail cannot
+   * be written, the request fails rather than going unrecorded.
+   */
   private async writeAudit(actorId: string | null, action: string, entityId: string, ipAddress?: string, after?: Record<string, string>) {
-    try {
-      await this.prisma.auditLog.create({
-        data: { actorId, action, entityType: 'User', entityId, ipAddress: ipAddress ?? null, after },
-      });
-    } catch (error) {
-      this.logger.error(`Failed to write audit log for ${action}`);
-    }
+    await this.prisma.auditLog.create({
+      data: { actorId, action, entityType: 'User', entityId, ipAddress: ipAddress ?? null, after },
+    });
   }
 }

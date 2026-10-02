@@ -37,19 +37,24 @@ export class SuppliersController {
   @Roles(Role.ADMIN)
   @ApiOperation({ summary: 'Create a supplier (ADMIN)' })
   async create(@Body(new ZodValidationPipe(createSupplierSchema)) dto: CreateSupplierDto, @CurrentUser() user: AuthenticatedUser) {
-    const created = await this.prisma.supplier.create({ data: { name: dto.name, email: dto.email, phone: dto.phone ?? null, leadTimeDays: dto.leadTimeDays, isActive: dto.isActive } });
-    await this.prisma.auditLog.create({ data: { actorId: user.userId, action: 'SUPPLIER_CREATE', entityType: 'Supplier', entityId: created.id, after: created as unknown as object } });
-    return created;
+    // Change and audit record in one transaction (§12 rule 8, DESC #9).
+    return this.prisma.$transaction(async (tx) => {
+      const created = await tx.supplier.create({ data: { name: dto.name, email: dto.email, phone: dto.phone ?? null, leadTimeDays: dto.leadTimeDays, isActive: dto.isActive } });
+      await tx.auditLog.create({ data: { actorId: user.userId, action: 'SUPPLIER_CREATE', entityType: 'Supplier', entityId: created.id, after: created as unknown as object } });
+      return created;
+    });
   }
 
   @Patch(':id')
   @Roles(Role.ADMIN)
   @ApiOperation({ summary: 'Update a supplier (ADMIN)' })
   async update(@Param('id') id: string, @Body(new ZodValidationPipe(updateSupplierSchema)) dto: UpdateSupplierDto, @CurrentUser() user: AuthenticatedUser) {
-    const before = await this.prisma.supplier.findUnique({ where: { id } });
-    const updated = await this.prisma.supplier.update({ where: { id }, data: dto });
-    await this.prisma.auditLog.create({ data: { actorId: user.userId, action: 'SUPPLIER_UPDATE', entityType: 'Supplier', entityId: id, before: before as unknown as object, after: updated as unknown as object } });
-    return updated;
+    return this.prisma.$transaction(async (tx) => {
+      const before = await tx.supplier.findUnique({ where: { id } });
+      const updated = await tx.supplier.update({ where: { id }, data: dto });
+      await tx.auditLog.create({ data: { actorId: user.userId, action: 'SUPPLIER_UPDATE', entityType: 'Supplier', entityId: id, before: before as unknown as object, after: updated as unknown as object } });
+      return updated;
+    });
   }
 
   @Delete(':id')

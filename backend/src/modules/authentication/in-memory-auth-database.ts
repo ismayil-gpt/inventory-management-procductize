@@ -20,7 +20,7 @@ export function fakePrisma(user: Record<string, unknown>) {
       }
       return value === condition;
     });
-  const prisma = {
+  const prisma: Record<string, unknown> = {
     user: {
       findUnique: async () => user,
       update: async ({ data }: { data: Record<string, unknown> }) => Object.assign(user, data),
@@ -42,5 +42,7 @@ export function fakePrisma(user: Record<string, unknown>) {
       findMany: async ({ where }: { where: Record<string, unknown> }) => [...sessions.values()].filter((r) => matches(r, where)),
     },
   };
+  // Array form only, as used by AuthenticationService: the calls above run eagerly here.
+  prisma.$transaction = async (operations: Array<Promise<unknown>>) => Promise.all(operations);
   return { prisma: prisma as unknown as PrismaService, sessions, audit };
 }
