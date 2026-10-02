@@ -1,4 +1,18 @@
 import { expect, type APIRequestContext, type Page } from '@playwright/test';
+import { readFileSync } from 'node:fs';
+import path from 'node:path';
+import { fileURLToPath } from 'node:url';
+
+const here = path.dirname(fileURLToPath(import.meta.url));
+
+const translations = {
+  en: JSON.parse(readFileSync(path.resolve(here, '../../shared/translations/english.json'), 'utf8')),
+  ar: JSON.parse(readFileSync(path.resolve(here, '../../shared/translations/arabic.json'), 'utf8')),
+};
+/** The on-screen text for a translation key, so tests work in both languages. */
+export function label(language: 'en' | 'ar', key: string): string {
+  return key.split('.').reduce((node: Record<string, unknown>, part) => node[part] as Record<string, unknown>, translations[language]) as unknown as string;
+}
 
 export const ADMIN = { email: process.env.E2E_ADMIN_EMAIL ?? 'admin@example.com', password: process.env.E2E_ADMIN_PASSWORD ?? 'Admin@Mizan2026' };
 export const KEEPER = { email: process.env.E2E_KEEPER_EMAIL ?? 'storekeeper@example.com', password: process.env.E2E_KEEPER_PASSWORD ?? 'Store@Mizan2026' };

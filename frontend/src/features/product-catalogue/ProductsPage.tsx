@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { useNavigate, useSearchParams } from 'react-router-dom';
+import { Link, useNavigate, useSearchParams } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { Plus, Upload, Printer } from 'lucide-react';
 import { useProducts, useProductCategories, useOrganization, resolveProductByBarcode, fetchLabelsBatch, formatCurrency, ApiError } from '../../api-client/client';
@@ -152,7 +152,10 @@ export function ProductsPage() {
                 onMouseLeave={(e) => (e.currentTarget.style.background = 'transparent')}
               >
                 <td style={{ ...tdStyle, fontFamily: 'var(--font-mono)', color: 'var(--ink-muted)' }} dir="ltr">{p.sku}</td>
-                <td style={tdStyle}>{name(p.nameEn, p.nameAr)}</td>
+                <td style={tdStyle}>
+                  {/* The row is clickable with a mouse; the name is the keyboard route (WCAG 2.1.1). */}
+                  <Link to={`/products/${p.id}`} onClick={(e) => e.stopPropagation()} style={{ color: 'inherit', textDecoration: 'none' }}>{name(p.nameEn, p.nameAr)}</Link>
+                </td>
                 <td style={{ ...tdStyle, color: 'var(--ink-muted)' }}>{name(p.categoryNameEn ?? '—', p.categoryNameAr ?? '—')}</td>
                 <td style={{ ...tdStyle, textAlign: 'end' }} className="tabular">{p.totalStock} {p.baseUnitCode ?? ''}</td>
                 <td style={{ ...tdStyle, textAlign: 'end', color: 'var(--ink-muted)' }} className="tabular">{p.reorderPoint}</td>

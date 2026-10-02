@@ -1,8 +1,10 @@
 import { ReactNode } from 'react';
 import { X } from 'lucide-react';
+import { useDialogFocus } from './dialog-focus.hook';
 
 // A tight, hairline-bordered modal (§9.5 — shadow only on floating layers).
 export function Modal({ title, onClose, children, width = 520 }: { title: string; onClose: () => void; children: ReactNode; width?: number }) {
+  const dialogRef = useDialogFocus<HTMLDivElement>(onClose);
   return (
     <div
       onClick={onClose}
@@ -11,8 +13,11 @@ export function Modal({ title, onClose, children, width = 520 }: { title: string
     >
       <div
         onClick={(e) => e.stopPropagation()}
+        ref={dialogRef}
+        tabIndex={-1}
         role="dialog"
         aria-modal="true"
+        aria-label={title}
         className="float-enter"
         style={{ width, maxWidth: '100%', maxHeight: '90vh', overflow: 'auto', background: 'var(--surface)', border: '1px solid var(--hairline)', borderRadius: 'var(--radius-lg)', boxShadow: 'var(--shadow-floating)' }}
       >

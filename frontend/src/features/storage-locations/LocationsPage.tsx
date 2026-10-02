@@ -104,12 +104,8 @@ export function LocationsPage() {
     return (
       <div key={node.id}>
         <div
-          onClick={() => {
-            if (hasChildren) { toggle(node.id); setBulkParent({ id: node.id, designator: node.designator }); }
-            if (node.canHoldStock) setSelectedId(node.id);
-          }}
           style={{
-            display: 'flex', alignItems: 'center', gap: '8px', height: '36px', cursor: 'pointer',
+            display: 'flex', alignItems: 'center', gap: '8px', height: '36px',
             paddingInlineStart: `${8 + depth * 18}px`, paddingInlineEnd: '12px',
             background: isSelected ? 'var(--primary-soft)' : 'transparent',
             borderInlineStart: isSelected ? '2px solid var(--primary-ink)' : '2px solid transparent',
@@ -117,6 +113,18 @@ export function LocationsPage() {
           onMouseEnter={(e) => { if (!isSelected) e.currentTarget.style.background = 'var(--surface-sunken)'; }}
           onMouseLeave={(e) => { if (!isSelected) e.currentTarget.style.background = 'transparent'; }}
         >
+          {/* A real button, so the tree works with Tab and Enter (WCAG 2.1.1), and
+              announces whether a branch is open. The delete button sits beside it. */}
+          <button
+            type="button"
+            onClick={() => {
+              if (hasChildren) { toggle(node.id); setBulkParent({ id: node.id, designator: node.designator }); }
+              if (node.canHoldStock) setSelectedId(node.id);
+            }}
+            aria-expanded={hasChildren ? isOpen : undefined}
+            aria-current={isSelected ? 'location' : undefined}
+            style={{ flex: 1, minWidth: 0, display: 'flex', alignItems: 'center', gap: '8px', height: '100%', padding: 0, border: 'none', background: 'transparent', font: 'inherit', color: 'inherit', textAlign: 'start', cursor: 'pointer' }}
+          >
           <span style={{ width: '16px', display: 'inline-flex', color: 'var(--ink-faint)' }}>
             {hasChildren ? (isOpen ? <ChevronDown size={16} /> : <ChevronRight size={16} style={{ transform: language === 'ar' ? 'scaleX(-1)' : 'none' }} />) : node.canHoldStock ? <Package size={14} strokeWidth={1.5} /> : null}
           </span>
@@ -127,6 +135,7 @@ export function LocationsPage() {
           <span className="tabular" style={{ fontSize: 'var(--text-2xs)', color: 'var(--ink-muted)' }}>
             {node.itemCount} · {node.unitCount}
           </span>
+          </button>
           {isAdmin && (
             <button
               type="button"

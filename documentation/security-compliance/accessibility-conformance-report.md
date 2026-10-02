@@ -87,8 +87,27 @@ English/light and Arabic/dark, plus the sign-in screen. Run with `npm run test:e
   by keyboard. Both fixed (`aria-label`; scrolling region with `role="region"`, a label and `tabIndex=0`).
 - Second run: **0 violations** on every screen in both modes. No colour-contrast failures.
 
+## Overlays, keyboard and tablet (2026-10-02)
+
+`frontend/e2e/accessibility-overlays.spec.ts` and `keyboard-and-tablet.spec.ts`:
+
+- **axe on every overlay** (new product, import, new store room, bulk create, add supplier, add user,
+  end-sessions confirmation, assistant panel) in English/light and Arabic/dark, and on both
+  two-step sign-in screens (code entry and enrolment). First run: the location generator's
+  labels were not linked to their fields. Fixed; now **0 violations**.
+- **Keyboard only**: sign in, reach a menu item with Tab and open it with Enter, expand a
+  storage tree branch, open a dialog, close it with Escape and land back on the opener — passes.
+  Fixed on the way: storage tree rows were mouse-only `div`s (now buttons announcing open or
+  closed); product rows opened only on click (the name is now a link); dialogs and panels had no
+  Escape, focus move, Tab containment or focus return (new `dialog-focus.hook.ts`).
+- **Focus visible** (WCAG 2.4.7) on every focusable element reached by Tab on all 16 screens.
+  Fixed: the top-bar search hid its outline, and date fields lost it in Chromium.
+- **Tablets** (§9.7) at 768 × 1024 and 1024 × 768 on all 16 screens: no sideways scrolling, rail
+  collapsed to icons, every button, link and field at least 44 px tall (status strip grows to 44 px).
+
+Full end-to-end run after these changes: 17 passed, 1 opt-in skipped.
+
 ## Not yet done
 
-- Screens behind interactions (modals, drawers, the two-step sign-in step) are not yet in the axe run.
-- Manual keyboard walk-through and a screen-reader pass (NVDA / VoiceOver), which axe cannot replace.
-- Tablet widths (768 and 1024 px).
+- A screen-reader pass with real assistive technology (NVDA on Windows, VoiceOver on iPad) by a person.
+- Testing on the actual tablets the store keepers will use.

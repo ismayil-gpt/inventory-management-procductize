@@ -88,23 +88,23 @@ export function BulkCreateModal({ parent, onClose, onCreated }: { parent: { id: 
         {levels.map((l, i) => (
           <div key={i} style={{ display: 'flex', gap: 'var(--space-3)', alignItems: 'flex-end', flexWrap: 'wrap', padding: 'var(--space-3)', border: '1px solid var(--hairline)', borderRadius: 'var(--radius-md)', background: 'var(--surface-sunken)' }}>
             <div style={{ flex: '1 1 150px', minWidth: '130px' }}>
-              <label style={fieldLabel}>{t('locations.type')}</label>
-              <select style={input} value={l.locationTypeId} onChange={(e) => setLevel(i, { locationTypeId: e.target.value })}>
+              <label htmlFor={`bulk-level-${i}-type`} style={fieldLabel}>{t('locations.type')}</label>
+              <select id={`bulk-level-${i}-type`} style={input} value={l.locationTypeId} onChange={(e) => setLevel(i, { locationTypeId: e.target.value })}>
                 <option value="">—</option>
                 {types.data?.map((ty) => <option key={ty.id} value={ty.id}>{name(ty.nameEn, ty.nameAr)}</option>)}
               </select>
             </div>
             <div style={{ flex: '0 1 90px' }}>
-              <label style={fieldLabel}>{t('locations.prefix')}</label>
-              <input style={input} value={l.prefix} onChange={(e) => setLevel(i, { prefix: e.target.value })} dir="ltr" />
+              <label htmlFor={`bulk-level-${i}-prefix`} style={fieldLabel}>{t('locations.prefix')}</label>
+              <input id={`bulk-level-${i}-prefix`} style={input} value={l.prefix} onChange={(e) => setLevel(i, { prefix: e.target.value })} dir="ltr" />
             </div>
             <div style={{ width: '64px' }}>
-              <label style={fieldLabel}>{t('locations.from')}</label>
-              <input style={input} type="number" min={0} className="tabular" value={l.from} onChange={(e) => setLevel(i, { from: Number(e.target.value) })} />
+              <label htmlFor={`bulk-level-${i}-from`} style={fieldLabel}>{t('locations.from')}</label>
+              <input id={`bulk-level-${i}-from`} style={input} type="number" min={0} className="tabular" value={l.from} onChange={(e) => setLevel(i, { from: Number(e.target.value) })} />
             </div>
             <div style={{ width: '64px' }}>
-              <label style={fieldLabel}>{t('locations.to')}</label>
-              <input style={input} type="number" min={0} className="tabular" value={l.to} onChange={(e) => setLevel(i, { to: Number(e.target.value) })} />
+              <label htmlFor={`bulk-level-${i}-to`} style={fieldLabel}>{t('locations.to')}</label>
+              <input id={`bulk-level-${i}-to`} style={input} type="number" min={0} className="tabular" value={l.to} onChange={(e) => setLevel(i, { to: Number(e.target.value) })} />
             </div>
             <button type="button" onClick={() => removeLevel(i)} disabled={levels.length === 1} aria-label={t('common.delete')} title={t('common.delete')}
               style={{ height: '34px', width: '34px', display: 'inline-flex', alignItems: 'center', justifyContent: 'center', borderRadius: 'var(--radius-md)', border: '1px solid var(--hairline)', background: 'var(--surface)', color: levels.length === 1 ? 'var(--ink-faint)' : 'var(--critical)', cursor: levels.length === 1 ? 'default' : 'pointer' }}>

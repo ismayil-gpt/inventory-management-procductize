@@ -36,6 +36,51 @@ body {
   outline-offset: 1px;
 }
 
+/* Form fields always show focus, also where :focus-visible is unreliable
+   (Chromium date inputs). WCAG 2.4.7. */
+input:focus,
+input:focus-within,
+select:focus,
+textarea:focus {
+  outline: 2px solid var(--focus);
+  outline-offset: 1px;
+}
+
+/* A field whose own outline is suppressed shows focus on its wrapper instead. */
+.focus-ring-within:focus-within {
+  outline: 2px solid var(--focus);
+  outline-offset: 1px;
+}
+
+/* Tablets (§9.7: 768–1024px): every control is at least 44px tall for a finger.
+   min-height wins over the smaller inline heights used on desktop. */
+@media (max-width: 1024px) {
+  /* The status strip grows to finger height; it stays visible (§9.7). */
+  :root {
+    --status-strip-height: 44px;
+  }
+  /* Text links get a full-height touch area without changing how they read. */
+  main a[href],
+  footer a[href] {
+    display: inline-flex;
+    align-items: center;
+    min-height: 44px;
+  }
+  button,
+  a.rail-link,
+  [role='button'],
+  summary,
+  input:not([type='checkbox']):not([type='radio']):not([type='hidden']),
+  select {
+    /* !important: deliberately beats the compact inline sizes used on desktop. */
+    min-height: 44px !important;
+  }
+  /* Square icon buttons grow both ways. */
+  button[aria-label]:not(:has(span, svg + *)) {
+    min-width: 44px !important;
+  }
+}
+
 /* Designators and codes are never translated/mirrored — keep them LTR (§10). */
 .designator {
   font-family: var(--font-mono);

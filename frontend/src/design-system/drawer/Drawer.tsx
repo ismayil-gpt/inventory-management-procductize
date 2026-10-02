@@ -1,10 +1,12 @@
 import { ReactNode } from 'react';
 import { X } from 'lucide-react';
+import { useDialogFocus } from '../modal/dialog-focus.hook';
 
 // Edge-anchored panel (§9.5 — radius-lg, shadow only on floating layers). Anchors to
 // the reading-end edge via a logical property so it flips sides automatically in RTL
 // (§10) — right in English, left in Arabic — without any direction-specific code here.
 export function Drawer({ title, onClose, children, width = 380 }: { title: string; onClose: () => void; children: ReactNode; width?: number }) {
+  const dialogRef = useDialogFocus<HTMLDivElement>(onClose);
   return (
     <div
       onClick={onClose}
@@ -13,6 +15,8 @@ export function Drawer({ title, onClose, children, width = 380 }: { title: strin
     >
       <div
         onClick={(e) => e.stopPropagation()}
+        ref={dialogRef}
+        tabIndex={-1}
         role="dialog"
         aria-modal="true"
         aria-label={title}

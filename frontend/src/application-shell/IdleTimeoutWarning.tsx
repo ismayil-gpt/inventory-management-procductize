@@ -1,11 +1,15 @@
 import { useTranslation } from 'react-i18next';
+import { useDialogFocus } from '../design-system/modal/dialog-focus.hook';
 
 // Shown in the last minute before an idle sign-out (DESC control 6).
 export function IdleTimeoutWarning({ secondsLeft, onStay }: { secondsLeft: number; onStay: () => void }) {
   const { t } = useTranslation();
+  // Escape counts as "stay": the person is clearly at the keyboard.
+  const dialogRef = useDialogFocus<HTMLDivElement>(onStay);
   return (
     <div className="backdrop-enter" style={{ position: 'fixed', inset: 0, zIndex: 90, display: 'grid', placeItems: 'center', padding: 'var(--space-6)', background: 'rgb(0 0 0 / 0.4)' }}>
       <div
+        ref={dialogRef}
         role="alertdialog"
         aria-modal="true"
         aria-labelledby="idle-timeout-title"

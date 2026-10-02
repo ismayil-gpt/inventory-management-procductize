@@ -69,7 +69,9 @@ export function TopBar({ title }: TopBarProps) {
       <span style={{ flex: 1 }} />
 
       <form role="search" onSubmit={onSearch} style={{ flex: '0 1 300px', minWidth: 0 }}>
+        {/* The focus ring is drawn around the whole box (.focus-ring-within), not the bare text field. */}
         <label
+          className="focus-ring-within"
           style={{
             display: 'flex',
             alignItems: 'center',
