@@ -1175,3 +1175,26 @@ focus return); focus is visible on every screen (fixed: top-bar search, date fie
   `STORE_ROOM`/`RACK`/`LEVEL` scan is clean outside seed data and tests.
 
 Demo database rebuilt clean at the end of the session.
+
+### 2026-10-03 — "Clay" design edition, no square corners left
+
+The client approved the clay demo (artifact `7UgyNyjUCBJ48sXRYAvUyV`) and asked for it in the app,
+with every remaining square corner rounded. Branch `feature/design-clay-edition`.
+
+- **Tokens** (`shared/design-tokens/design-tokens.css`): cool blue-grey clay palette for light and
+  dark, butter-yellow signs on a navy gantry in both themes, clay relief tokens (`--clay-raised`,
+  `--clay-raised-sm`, `--clay-pressed`, `--clay-tinted`, `--clay-gantry`), larger radii plus
+  `--radius-panel`, `--shell-gap`, `--motion-squish`. Fonts: Figtree, Fredoka (signs, brand),
+  DM Mono, IBM Plex Sans Arabic, all self-hosted; Overpass removed.
+- **Components**: about 100 inline hairline-bordered styles across 34 files became raised panels,
+  raised buttons, pressed fields or tinted filled buttons. The menu rail, top bar and status strip
+  are now floating rounded slabs. Signs are clay tiles that squish into place.
+- **Square corners fixed** (found by a script that lists every visible box with radius under 3px on all
+  16 screens): shell slabs, scanner mode tabs, dashboard stacked bars, the selected storage-tree
+  row, the menu count badge, status squares (now 8px, rounded), the rail footer, rack-view
+  shelves and chips. The script now reports nothing on any screen, in English light or Arabic dark.
+- **Fixed on the way**: Arabic category labels on the dashboard chart were cut off under the bars.
+- **Tests**: unit 15/15; axe on every screen and every pop-up in en/light and ar/dark: 0 violations;
+  keyboard, focus-visible (tightened: shadows no longer count as focus), tablet 768/1024 and
+  preferences all pass. Contrast table regenerated from the new tokens: all pairs pass.
+- `CLAUDE.md` §9 records the decision; where the older §9 text disagrees, the clay note wins.

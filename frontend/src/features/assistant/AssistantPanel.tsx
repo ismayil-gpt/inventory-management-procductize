@@ -66,7 +66,7 @@ export function AssistantPanel() {
         {messages.length === 0 && (
           <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--space-3)' }}>
             {/* The promise that sets this assistant apart: it phrases real data, never invents it (§8.4). */}
-            <div style={{ padding: 'var(--space-3) var(--space-4)', borderRadius: 'var(--radius-md)', background: 'var(--gantry)', border: '1px solid var(--gantry-line)', color: 'var(--gantry-ink)' }}>
+            <div style={{ padding: 'var(--space-3) var(--space-4)', borderRadius: 'var(--radius-md)', background: 'var(--gantry)', border: 'none', boxShadow: 'var(--clay-gantry)', color: 'var(--gantry-ink)' }}>
               <div style={{ fontWeight: 600 }}>{t('assistant.neverGuessesTitle')}</div>
               <div style={{ fontSize: 'var(--text-xs)', color: 'var(--gantry-muted)', marginTop: '2px' }}>{t('assistant.neverGuessesBody')}</div>
             </div>
@@ -78,7 +78,7 @@ export function AssistantPanel() {
                   type="button"
                   onClick={() => void send(t(key))}
                   disabled={busy}
-                  style={{ textAlign: 'start', padding: '8px 12px', borderRadius: 'var(--radius-md)', border: '1px solid var(--hairline-strong)', background: 'var(--surface)', color: 'var(--ink)', fontSize: 'var(--text-sm)', cursor: 'pointer' }}
+                  style={{ textAlign: 'start', padding: '8px 12px', borderRadius: 'var(--radius-md)', border: 'none', boxShadow: 'var(--clay-raised-sm)', background: 'var(--surface)', color: 'var(--ink)', fontSize: 'var(--text-sm)', cursor: 'pointer' }}
                 >
                   {t(key)}
                 </button>
@@ -135,9 +135,9 @@ export function AssistantPanel() {
             flex: 1,
             height: '36px',
             padding: '0 var(--space-3)',
-            border: '1px solid var(--hairline)',
+            border: 'none', boxShadow: 'var(--clay-pressed)',
             borderRadius: 'var(--radius-sm)',
-            background: 'var(--surface)',
+            background: 'var(--surface-sunken)',
             color: 'var(--ink)',
             fontSize: 'var(--text-sm)',
           }}
@@ -153,7 +153,7 @@ export function AssistantPanel() {
             alignItems: 'center',
             justifyContent: 'center',
             borderRadius: 'var(--radius-md)',
-            border: 'none',
+            border: 'none', boxShadow: 'var(--clay-tinted)',
             background: 'var(--primary)',
             color: 'var(--on-primary)',
             cursor: busy || !draft.trim() ? 'default' : 'pointer',

@@ -301,7 +301,7 @@ Locked. Do not substitute without recording the reason in `OPEN-QUESTIONS.md`.
 | Charts | Recharts |
 | Icons | Lucide React, 1.5px stroke, 18px default |
 | Offline storage | Dexie (IndexedDB) |
-| Fonts | Overpass / Overpass Mono / IBM Plex Sans Arabic, self-hosted via @fontsource (§9.3) |
+| Fonts | Figtree / Fredoka / DM Mono / IBM Plex Sans Arabic, self-hosted via @fontsource (§9.3) |
 
 ### Backend
 
@@ -819,6 +819,15 @@ Natural-language queries over stock. Architecture: classify intent → run a str
 
 ### 9.1 Design thesis
 
+> **Revised client decision, 2026-10-03 — "Clay" edition.** The client approved the clay demo
+> (artifact `7UgyNyjUCBJ48sXRYAvUyV`) and asked that no square corners remain. The airfield sign
+> meanings below are unchanged; the material changed. Every surface is moulded clay: panels,
+> buttons and the shell (rail, top bar, status strip) are raised slabs floating on the ground;
+> fields, tracks, switches and table headers are pressed in; signs are tiles of coloured clay on a
+> navy clay gantry, day and night. Tokens: `--clay-raised`, `--clay-raised-sm`, `--clay-pressed`,
+> `--clay-tinted`, `--clay-gantry`, `--radius-panel`, `--shell-gap`, `--motion-squish`. Where §9.2–§9.9
+> below disagree with this note, this note wins; the values in `design-tokens.css` are authoritative.
+>
 > **Revised client decision, 2026-10-01 — "Airfield" edition.** The client approved the
 > airfield-signage direction (demo artifact) over the original teal-and-Plex instrument look.
 > It replaces §9.3–§9.6 and §9.9 below. Code: `shared/design-tokens/design-tokens.css`,
@@ -843,7 +852,7 @@ The interface is an **instrument**, not a brochure. Dense, quiet, precise. The s
 - ❌ Glassmorphism, blur-behind, translucent panels
 - ❌ Emoji as icons
 - ❌ Pill-shaped or capsule buttons (radius ≥ half the element's height) — see §9.5 for the (now pronounced) corner radius itself
-- ❌ Drop shadows on resting elements
+- ❌ Drop shadows on resting elements — *except the clay relief tokens (`--clay-*`), 2026-10-03*; never an ad-hoc shadow
 - ❌ Card grids where a table belongs
 - ❌ Cream backgrounds with terracotta accents
 - ❌ Near-black backgrounds with a single acid accent
@@ -857,11 +866,12 @@ Self-hosted through `@fontsource` packages bundled by Vite. No external font CDN
 
 | Role | Family | Weights |
 |---|---|---|
-| Interface, Latin, sign legends | **Overpass** | 400, 600, 800 |
+| Interface, Latin | **Figtree** | 400, 600, 700 |
+| Sign legends, designator, brand (`--font-sign`) | **Fredoka** | 500, 600 |
 | Interface, Arabic | **IBM Plex Sans Arabic** | 400, 600 |
-| Data, SKUs, barcodes | **Overpass Mono** | 400, 600 |
+| Data, SKUs, barcodes | **DM Mono** | 400, 500 |
 
-Overpass descends from Highway Gothic, the lettering of road and airfield signs, so the sign legends are set in the face the signs themselves use. Plex Sans Arabic carries Arabic at a matching weight and is the first family when the document is RTL.
+Clay edition (2026-10-03): Fredoka's rounded strokes match the moulded surfaces; Figtree stays plain and legible at table sizes. Plex Sans Arabic carries Arabic at a matching weight and is the first family when the document is RTL. (Airfield edition used Overpass / Overpass Mono.)
 
 ```
 --text-2xs    11px / 16px   uppercase labels, letter-spacing 0.06em
@@ -871,7 +881,7 @@ Overpass descends from Highway Gothic, the lettering of road and airfield signs,
 --text-lg     18px / 26px   section headings
 --text-xl     22px / 30px   page titles
 --text-2xl    28px / 36px   dashboard figures
---designator  40px / 1.0    designator sign legend (Overpass 800)
+--designator  40px / 1.0    designator sign legend (Fredoka 600)
 ```
 
 **All numerals use `font-variant-numeric: tabular-nums`.** Quantities in a column must align.
@@ -881,6 +891,12 @@ Overpass descends from Highway Gothic, the lettering of road and airfield signs,
 A concrete-apron ground with a slight green-grey bias, and the sign colours. Sign yellow is the accent; semantic colours carry stock state, which is functional. Token names are unchanged from the original palette so feature code did not change — only values.
 
 Defined once in `shared/design-tokens/`, consumed as CSS custom properties.
+
+**Clay edition values (2026-10-03) replace the hex values below** — light: canvas `#D9E1EA`,
+surface `#ECF1F6`, sunken `#DEE5ED`, ink `#1C2737`, sign yellow `#F4C64A`, navy gantry `#2A3A52`;
+dark: canvas `#1B2230`, surface `#253043`, gantry `#121A27`. Token names are unchanged. The full
+set and its contrast results are in `design-tokens.css` and the accessibility report. The values
+below are kept as the record of the airfield edition.
 
 **Palette option A, "Direction sign"** — chosen by the client 2026-10-01 from three options
 (the other two were taxiway blue and control-tower teal). Light mode has no large black
@@ -957,13 +973,17 @@ Every text/background pair must meet **WCAG 2.1 AA (4.5:1)**. Verify with a cont
 ### 9.5 Geometry and space
 
 ```
---radius-dot:   2px    6px status squares
---radius-chip:  6px    location chips, tags
---radius-sm:    8px    inputs
---radius-sign: 10px    sign panels and designator segments
---radius-md:   14px    buttons, panels     ← default
---radius-lg:   20px    modals
+--radius-dot:    3px    8px status squares
+--radius-chip:  10px    location chips, tags, badges
+--radius-sm:    12px    small buttons, inputs, tree rows
+--radius-sign:  16px    sign tiles and designator segments
+--radius-md:    18px    buttons, fields     ← default
+--radius-panel: 24px    panels, tables, the shell slabs
+--radius-lg:    28px    modals, drawers, the gantry
 ```
+
+Clay edition, 2026-10-03: **no visible box has square corners** — every surface,
+row highlight, bar segment and badge is rounded. Still never a pill on buttons.
 
 Revised client decision, 2026-10-01: the small squares (sign panels, chips, status
 squares, the rail's active sign) were rounded further. Still rectangles — never pills.
@@ -975,7 +995,7 @@ pill or capsule (§9.2 still bans that on buttons, tab pills, badges, etc.).
 
 8px grid: `4 8 12 16 24 32 48 64`.
 
-**Separation uses hairline borders, not shadows.** Shadows only on genuinely floating layers (modal, dropdown, toast), kept tight: `0 2px 8px rgb(0 0 0 / 0.12)`.
+**Separation uses clay relief, not boxes** (2026-10-03): raised surfaces take `--clay-raised` / `--clay-raised-sm`, pressed-in ones `--clay-pressed`, coloured fills `--clay-tinted`. Hairlines remain only as row dividers. Floating layers (modal, drawer, toast) use `--shadow-floating`.
 
 ### 9.6 Signature element — the location designator strip
 

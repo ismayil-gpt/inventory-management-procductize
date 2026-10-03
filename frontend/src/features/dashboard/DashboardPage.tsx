@@ -21,11 +21,11 @@ const dayTimeLabel = new Intl.DateTimeFormat('en-GB', {
   day: '2-digit', month: '2-digit', hour: '2-digit', minute: '2-digit', hour12: false, timeZone: 'Asia/Dubai',
 });
 
-const card: React.CSSProperties = { background: 'var(--surface)', border: '1px solid var(--hairline)', borderRadius: 'var(--radius-md)', padding: 'var(--space-6)' };
+const card: React.CSSProperties = { background: 'var(--surface)', border: 'none', boxShadow: 'var(--clay-raised)', borderRadius: 'var(--radius-panel)', padding: 'var(--space-6)' };
 const panelTitle: React.CSSProperties = { fontSize: 'var(--text-lg)', fontWeight: 600, color: 'var(--ink)' };
 const panelSub: React.CSSProperties = { fontSize: 'var(--text-xs)', color: 'var(--ink-muted)', marginTop: '2px' };
 const tooltipStyle: React.CSSProperties = {
-  background: 'var(--surface)', border: '1px solid var(--hairline-strong)', borderRadius: 'var(--radius-sm)',
+  background: 'var(--surface)', border: 'none', borderRadius: 'var(--radius-sm)',
   fontSize: 'var(--text-xs)', color: 'var(--ink)', boxShadow: 'var(--shadow-floating)', padding: '8px 10px',
 };
 
@@ -49,9 +49,10 @@ function SegmentedBar({ segments }: { segments: Array<{ key: string; tone: strin
   const total = Math.max(1, segments.reduce((s, seg) => s + seg.count, 0));
   return (
     <div>
-      <div className="bar-grow" style={{ display: 'flex', height: '14px', borderRadius: '7px', overflow: 'hidden', background: 'var(--surface-sunken)' }}>
+      <div className="bar-grow" style={{ display: 'flex', gap: '3px', height: '14px', padding: '2px', borderRadius: 'var(--radius-chip)', background: 'var(--surface-sunken)', boxShadow: 'var(--clay-pressed)' }}>
+        {/* Each segment is its own rounded clay piece pressed into the track. */}
         {segments.map((seg) => seg.count > 0 && (
-          <div key={seg.key} title={`${seg.label}: ${seg.count}`} style={{ width: `${(seg.count / total) * 100}%`, background: `var(--${seg.tone})` }} />
+          <div key={seg.key} title={`${seg.label}: ${seg.count}`} style={{ width: `${(seg.count / total) * 100}%`, minWidth: '6px', borderRadius: 'var(--radius-dot)', background: `var(--${seg.tone})` }} />
         ))}
       </div>
       <div style={{ display: 'flex', flexWrap: 'wrap', gap: 'var(--space-6)', marginTop: 'var(--space-4)' }}>
@@ -89,17 +90,22 @@ function CategoryBreakdownChart({ data, language }: { data: DashboardSummary['ca
   const chartData = data.map((c) => ({ name: isRtl ? c.nameAr : c.nameEn, units: c.units }));
   const height = Math.max(180, chartData.length * 34);
   const axisWidth = isRtl ? 140 : 110;
+  // The chart mirrors itself (axis side, bar direction), so its SVG is drawn
+  // left-to-right; an RTL document would otherwise anchor the Arabic category
+  // labels under the bars and cut them off.
   return (
-    <ResponsiveContainer width="100%" height={height}>
-      <BarChart data={chartData} layout="vertical" margin={{ top: 0, right: isRtl ? 0 : 16, bottom: 0, left: isRtl ? 16 : 0 }}>
-        <CartesianGrid horizontal={false} stroke="var(--hairline)" />
-        {/* §10 — charts mirror axis placement in RTL: category axis moves to the reading-start side, bars grow toward it. */}
-        <XAxis type="number" reversed={isRtl} tick={{ fontSize: 11, fill: 'var(--ink-faint)', fontFamily: 'var(--font-mono)' }} axisLine={{ stroke: 'var(--hairline)' }} tickLine={false} allowDecimals={false} />
-        <YAxis type="category" dataKey="name" orientation={isRtl ? 'right' : 'left'} tick={{ fontSize: 12, fill: 'var(--ink)' }} axisLine={false} tickLine={false} width={axisWidth} />
-        <Tooltip contentStyle={tooltipStyle} cursor={{ fill: 'var(--surface-sunken)' }} />
-        <Bar dataKey="units" fill="var(--chart-primary)" radius={isRtl ? [2, 0, 0, 2] : [0, 2, 2, 0]} barSize={16} />
-      </BarChart>
-    </ResponsiveContainer>
+    <div dir="ltr">
+      <ResponsiveContainer width="100%" height={height}>
+        <BarChart data={chartData} layout="vertical" margin={{ top: 0, right: isRtl ? 0 : 16, bottom: 0, left: isRtl ? 16 : 0 }}>
+          <CartesianGrid horizontal={false} stroke="var(--hairline)" />
+          {/* §10 — charts mirror axis placement in RTL: category axis moves to the reading-start side, bars grow toward it. */}
+          <XAxis type="number" reversed={isRtl} tick={{ fontSize: 11, fill: 'var(--ink-faint)', fontFamily: 'var(--font-mono)' }} axisLine={{ stroke: 'var(--hairline)' }} tickLine={false} allowDecimals={false} />
+          <YAxis type="category" dataKey="name" orientation={isRtl ? 'right' : 'left'} tick={{ fontSize: 12, fill: 'var(--ink)' }} axisLine={false} tickLine={false} width={axisWidth} />
+          <Tooltip contentStyle={tooltipStyle} cursor={{ fill: 'var(--surface-sunken)' }} />
+          <Bar dataKey="units" fill="var(--chart-primary)" radius={isRtl ? [6, 0, 0, 6] : [0, 6, 6, 0]} barSize={16} />
+        </BarChart>
+      </ResponsiveContainer>
+    </div>
   );
 }
 
@@ -257,7 +263,7 @@ export function DashboardPage() {
               </div>
             )}
           </div>
-          <button type="button" onClick={() => navigate('/replenishment')} style={{ display: 'inline-flex', alignItems: 'center', gap: '8px', height: '40px', padding: '0 18px', borderRadius: 'var(--radius-md)', border: 'none', background: 'var(--sign-go)', color: 'var(--sign-on-go)', fontWeight: 600, fontSize: 'var(--text-sm)', cursor: 'pointer' }}>
+          <button type="button" onClick={() => navigate('/replenishment')} style={{ display: 'inline-flex', alignItems: 'center', gap: '8px', height: '40px', padding: '0 18px', borderRadius: 'var(--radius-md)', border: 'none', boxShadow: 'var(--clay-tinted)', background: 'var(--sign-go)', color: 'var(--sign-on-go)', fontWeight: 600, fontSize: 'var(--text-sm)', cursor: 'pointer' }}>
             {t('dashboard.reviewRecs')}
             <ArrowRight size={16} strokeWidth={1.75} style={{ transform: language === 'ar' ? 'scaleX(-1)' : 'none' }} />
           </button>

@@ -76,17 +76,17 @@ export function ProductsPage() {
 
   const name = (en: string, ar: string) => (language === 'ar' ? ar : en);
   const control: React.CSSProperties = {
-    height: '36px', borderRadius: 'var(--radius-md)', border: '1px solid var(--hairline)',
-    background: 'var(--surface)', color: 'var(--ink)', padding: '0 12px', fontSize: 'var(--text-sm)',
+    height: '36px', borderRadius: 'var(--radius-md)', border: 'none', boxShadow: 'var(--clay-pressed)',
+    background: 'var(--surface-sunken)', color: 'var(--ink)', padding: '0 12px', fontSize: 'var(--text-sm)',
   };
 
-  const toolbarBtn: React.CSSProperties = { display: 'inline-flex', alignItems: 'center', gap: '6px', height: '36px', padding: '0 14px', borderRadius: 'var(--radius-md)', fontSize: 'var(--text-sm)', cursor: 'pointer', border: '1px solid var(--hairline)', background: 'var(--surface)', color: 'var(--ink)' };
+  const toolbarBtn: React.CSSProperties = { display: 'inline-flex', alignItems: 'center', gap: '6px', height: '36px', padding: '0 14px', borderRadius: 'var(--radius-md)', fontSize: 'var(--text-sm)', cursor: 'pointer', border: 'none', boxShadow: 'var(--clay-raised-sm)', background: 'var(--surface)', color: 'var(--ink)' };
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--space-4)' }}>
       <div style={{ display: 'flex', gap: 'var(--space-3)', flexWrap: 'wrap' }}>
         {isAdmin && (
-          <button type="button" onClick={() => setShowForm(true)} style={{ ...toolbarBtn, border: 'none', background: 'var(--primary)', color: 'var(--on-primary)', fontWeight: 500 }}>
+          <button type="button" onClick={() => setShowForm(true)} style={{ ...toolbarBtn, border: 'none', background: 'var(--primary)', color: 'var(--on-primary)', fontWeight: 500, boxShadow: 'var(--clay-tinted)' }}>
             <Plus size={16} strokeWidth={1.5} /> {t('products.newProduct')}
           </button>
         )}
@@ -129,7 +129,7 @@ export function ProductsPage() {
       </div>
 
       {/* Table */}
-      <div style={{ background: 'var(--surface)', border: '1px solid var(--hairline)', borderRadius: 'var(--radius-md)', overflow: 'auto' }}>
+      <div style={{ background: 'var(--surface)', border: 'none', boxShadow: 'var(--clay-raised)', borderRadius: 'var(--radius-panel)', overflow: 'auto' }}>
         <table style={{ width: '100%', borderCollapse: 'collapse' }}>
           <thead>
             <tr>

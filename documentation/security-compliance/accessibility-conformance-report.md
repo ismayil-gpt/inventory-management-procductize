@@ -2,64 +2,84 @@
 
 > DESC evidence (CLAUDE.md §9.4, §11.3, §17). Update whenever tokens or motion change.
 
-## Colour contrast — palette option A "Direction sign" (2026-10-01)
+## Colour contrast — "Clay" edition (2026-10-03)
 
 Every text/background token pair used by the interface, computed with the WCAG 2.1
 relative-luminance formula from the values in `shared/design-tokens/design-tokens.css`.
-Threshold: 4.5:1 for text, 3:1 for graphical objects (chart lines and bars). **Result: all pairs pass.**
+Threshold: 4.5:1 for text, 3:1 for graphical objects (chart lines and bars). Clay relief
+(the `--clay-*` shadows) is decoration only: no text or state depends on it. **Result: all pairs pass.**
 
 **light**
 
 | Text | Background | Ratio | Result |
 |---|---|---|---|
-| `ink` #1A1D18 | `surface` #FFFFFF | 17.03:1 | Pass |
-| `ink` #1A1D18 | `canvas` #F1F2EE | 15.15:1 | Pass |
-| `ink-muted` #50574D | `surface` #FFFFFF | 7.47:1 | Pass |
-| `ink-muted` #50574D | `surface-sunken` #E8EAE4 | 6.16:1 | Pass |
-| `ink-faint` #656C62 | `surface` #FFFFFF | 5.42:1 | Pass |
-| `ink-faint` #656C62 | `canvas` #F1F2EE | 4.82:1 | Pass |
-| `on-primary` #1A1D18 | `primary` #F2C230 | 10.17:1 | Pass |
-| `primary-ink` #6E5100 | `surface` #FFFFFF | 7.39:1 | Pass |
-| `primary-ink` #6E5100 | `primary-soft` #FBF3D6 | 6.65:1 | Pass |
-| `ok` #2E6A3E | `surface` #FFFFFF | 6.47:1 | Pass |
-| `warn` #7E5400 | `surface` #FFFFFF | 6.66:1 | Pass |
-| `critical` #A8241C | `surface` #FFFFFF | 7.16:1 | Pass |
-| `critical` #A8241C | `critical-soft` #F6E0DE | 5.67:1 | Pass |
-| `warn` #7E5400 | `warn-soft` #F6ECD6 | 5.67:1 | Pass |
-| `sign-legend` #1A1D18 | `sign` #F2C230 | 10.17:1 | Pass |
-| `gantry-ink` #4A3D0F | `gantry` #FBF3D6 | 9.61:1 | Pass |
-| `gantry-muted` #6B5A1C | `gantry` #FBF3D6 | 6.09:1 | Pass |
-| `sign-on-stop` #FFFFFF | `sign-stop` #B3261E | 6.54:1 | Pass |
-| `chart-primary (graphic, 3:1)` #A07800 | `surface` #FFFFFF | 4.05:1 | Pass |
+| `ink` #1C2737 | `surface` #ECF1F6 | 13.25:1 | Pass |
+| `ink` #1C2737 | `canvas` #D9E1EA | 11.41:1 | Pass |
+| `ink` #1C2737 | `surface-sunken` #DEE5ED | 11.86:1 | Pass |
+| `ink-muted` #465267 | `surface` #ECF1F6 | 6.94:1 | Pass |
+| `ink-muted` #465267 | `surface-sunken` #DEE5ED | 6.21:1 | Pass |
+| `ink-muted` #465267 | `canvas` #D9E1EA | 5.97:1 | Pass |
+| `ink-faint` #56627A | `surface` #ECF1F6 | 5.40:1 | Pass |
+| `ink-faint` #56627A | `canvas` #D9E1EA | 4.65:1 | Pass |
+| `ink-faint` #56627A | `surface-sunken` #DEE5ED | 4.83:1 | Pass |
+| `on-primary` #1C2737 | `primary` #F4C64A | 9.34:1 | Pass |
+| `primary-ink` #6B4E00 | `surface` #ECF1F6 | 6.81:1 | Pass |
+| `primary-ink` #6B4E00 | `primary-soft` #F8EBC2 | 6.50:1 | Pass |
+| `ok` #1F6848 | `surface` #ECF1F6 | 5.90:1 | Pass |
+| `ok` #1F6848 | `canvas` #D9E1EA | 5.08:1 | Pass |
+| `ok` #1F6848 | `ok-soft` #D3ECDF | 5.37:1 | Pass |
+| `warn` #7A5300 | `surface` #ECF1F6 | 6.03:1 | Pass |
+| `warn` #7A5300 | `warn-soft` #F5E6C3 | 5.54:1 | Pass |
+| `critical` #A1312A | `surface` #ECF1F6 | 6.18:1 | Pass |
+| `critical` #A1312A | `critical-soft` #F5DCD8 | 5.39:1 | Pass |
+| `ink` #1C2737 | `primary-soft` #F8EBC2 | 12.66:1 | Pass |
+| `sign-legend` #1C2737 | `sign` #F4C64A | 9.34:1 | Pass |
+| `gantry-ink` #FFFFFF | `gantry` #2A3A52 | 11.50:1 | Pass |
+| `gantry-muted` #C3CEDD | `gantry` #2A3A52 | 7.23:1 | Pass |
+| `sign` #F4C64A | `gantry` #2A3A52 | 7.13:1 | Pass |
+| `sign-on-stop` #FFFFFF | `sign-stop` #B3362C | 6.03:1 | Pass |
+| `chart-primary` (graphic, 3:1) #8F6A00 | `surface` #ECF1F6 | 4.37:1 | Pass |
+| `chart-secondary` (graphic, 3:1) #5B7DA6 | `surface` #ECF1F6 | 3.75:1 | Pass |
 
 **dark**
 
 | Text | Background | Ratio | Result |
 |---|---|---|---|
-| `ink` #E4E9EE | `surface` #161D25 | 13.90:1 | Pass |
-| `ink` #E4E9EE | `canvas` #0F141A | 15.14:1 | Pass |
-| `ink-muted` #9AA6B2 | `surface` #161D25 | 6.85:1 | Pass |
-| `ink-muted` #9AA6B2 | `surface-sunken` #0B1015 | 7.71:1 | Pass |
-| `ink-faint` #8592A0 | `surface` #161D25 | 5.35:1 | Pass |
-| `ink-faint` #8592A0 | `canvas` #0F141A | 5.83:1 | Pass |
-| `on-primary` #121619 | `primary` #F2C230 | 10.86:1 | Pass |
-| `primary-ink` #F2C230 | `surface` #161D25 | 10.14:1 | Pass |
-| `primary-ink` #F2C230 | `primary-soft` #2A2416 | 9.20:1 | Pass |
-| `ok` #72C189 | `surface` #161D25 | 7.85:1 | Pass |
-| `warn` #E3B24D | `surface` #161D25 | 8.69:1 | Pass |
-| `critical` #F2847D | `surface` #161D25 | 6.77:1 | Pass |
-| `critical` #F2847D | `critical-soft` #2E1A1C | 6.54:1 | Pass |
-| `sign-legend` #F2C230 | `sign` #0B1015 | 11.40:1 | Pass |
-| `gantry-ink` #E4E9EE | `gantry` #0B1015 | 15.64:1 | Pass |
-| `gantry-muted` #9AA6B2 | `gantry` #0B1015 | 7.71:1 | Pass |
-| `sign-on-stop` #FFFFFF | `sign-stop` #C9362C | 5.19:1 | Pass |
+| `ink` #E7ECF3 | `surface` #253043 | 11.18:1 | Pass |
+| `ink` #E7ECF3 | `canvas` #1B2230 | 13.42:1 | Pass |
+| `ink` #E7ECF3 | `surface-sunken` #1F2838 | 12.47:1 | Pass |
+| `ink-muted` #B3BDCC | `surface` #253043 | 6.99:1 | Pass |
+| `ink-muted` #B3BDCC | `surface-sunken` #1F2838 | 7.80:1 | Pass |
+| `ink-muted` #B3BDCC | `canvas` #1B2230 | 8.40:1 | Pass |
+| `ink-faint` #98A3B5 | `surface` #253043 | 5.21:1 | Pass |
+| `ink-faint` #98A3B5 | `canvas` #1B2230 | 6.25:1 | Pass |
+| `ink-faint` #98A3B5 | `surface-sunken` #1F2838 | 5.81:1 | Pass |
+| `on-primary` #1C2737 | `primary` #F4C64A | 9.34:1 | Pass |
+| `primary-ink` #F4C64A | `surface` #253043 | 8.23:1 | Pass |
+| `primary-ink` #F4C64A | `primary-soft` #3A3320 | 7.78:1 | Pass |
+| `ok` #86D9B4 | `surface` #253043 | 7.96:1 | Pass |
+| `ok` #86D9B4 | `canvas` #1B2230 | 9.56:1 | Pass |
+| `ok` #86D9B4 | `ok-soft` #1F3B33 | 7.28:1 | Pass |
+| `warn` #F2C26A | `surface` #253043 | 8.03:1 | Pass |
+| `warn` #F2C26A | `warn-soft` #3A3120 | 7.74:1 | Pass |
+| `critical` #F4A49C | `surface` #253043 | 6.72:1 | Pass |
+| `critical` #F4A49C | `critical-soft` #41262A | 6.93:1 | Pass |
+| `ink` #E7ECF3 | `primary-soft` #3A3320 | 10.57:1 | Pass |
+| `sign-legend` #1C2737 | `sign` #F4C64A | 9.34:1 | Pass |
+| `gantry-ink` #FFFFFF | `gantry` #121A27 | 17.46:1 | Pass |
+| `gantry-muted` #B9C4D4 | `gantry` #121A27 | 9.90:1 | Pass |
+| `sign` #F4C64A | `gantry` #121A27 | 10.83:1 | Pass |
+| `sign-on-stop` #FFFFFF | `sign-stop` #C9443A | 4.80:1 | Pass |
+| `chart-primary` (graphic, 3:1) #F4C64A | `surface` #253043 | 8.23:1 | Pass |
+| `chart-secondary` (graphic, 3:1) #8FB0D6 | `surface` #253043 | 5.91:1 | Pass |
 
 Notes:
 
-- `ink-faint` on `canvas` (4.82:1 light) is the tightest text pair. Do not lighten `ink-faint`.
-- Light-theme `--primary` (#F2C230) is only ever a fill under dark text (10.17:1). The accent as
-  text uses `--primary-ink` (7.39:1); as a chart mark, `--chart-primary` (4.05:1, graphics need 3:1).
-- `gold` (#C99A0E) is used only for sign borders and rules, never as text.
+- `ink-faint` and `ok` on `canvas` are the tightest light pairs. Do not lighten either.
+- `--primary` (butter yellow) is only ever a fill under dark text. The accent as text uses
+  `--primary-ink`; as a chart mark, `--chart-primary`.
+- The gantry is navy clay in both themes, so the yellow sign tiles read the same day and night.
+- `gold` is used only for rules, never as text.
 
 ## Colour is never the only signal
 
@@ -106,6 +126,22 @@ English/light and Arabic/dark, plus the sign-in screen. Run with `npm run test:e
   collapsed to icons, every button, link and field at least 44 px tall (status strip grows to 44 px).
 
 Full end-to-end run after these changes: 17 passed, 1 opt-in skipped.
+
+## Clay edition re-run (2026-10-03)
+
+After the clay restyle (new palette, fonts, shadows and radii) the full accessibility suite was
+run again against the live development build:
+
+- `e2e/accessibility.spec.ts`: every screen, English light and Arabic dark — **0 violations**.
+- `e2e/accessibility-overlays.spec.ts`: every pop-up, both two-step screens, both modes — **0 violations**.
+- `e2e/keyboard-and-tablet.spec.ts`: keyboard-only flow, focus visible on every screen, tablets at
+  768 and 1024 px — **pass**. The focus check was tightened: a box shadow no longer counts as a
+  focus indicator, because every clay surface carries one at rest. Only an outline counts, and
+  every focusable element has one.
+- `e2e/preferences.spec.ts`: language and theme persist — **pass**.
+
+Also fixed: in Arabic the dashboard's category chart drew its labels under the bars and cut them
+off; the chart now renders its (already mirrored) SVG left to right.
 
 ## Not yet done
 

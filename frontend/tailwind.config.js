@@ -48,6 +48,7 @@ export default {
       sign: 'var(--radius-sign)',
       DEFAULT: 'var(--radius-md)',
       md: 'var(--radius-md)',
+      panel: 'var(--radius-panel)',
       lg: 'var(--radius-lg)',
     },
     extend: {

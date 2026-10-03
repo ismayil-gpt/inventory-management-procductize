@@ -3,64 +3,77 @@
  * Ref: CLAUDE.md §9. Consumed as CSS custom properties by frontend + PDFs.
  * Do NOT hardcode colours, sizes, radii or fonts anywhere else.
  *
- * Design thesis (§9.1, "Airfield" edition — client decision 2026-10-01):
- * identity comes from airfield signage. Three sign types carry three meanings
- * and are used for nothing else:
- *   location sign  — yellow panel, dark legend by day; black panel, yellow
- *                    legend by night                → where you are
- *   direction sign — yellow field, black legend  → go ahead / primary action
- *   mandatory sign — red field, white legend     → stop / rejected
- * Everything around the signs stays quiet: light concrete by day, blue-grey
- * night apron after dark (palette option A, chosen 2026-10-01).
+ * Design thesis (§9.1, "Clay" edition — client decision 2026-10-03, building
+ * on the airfield signage of 2026-10-01): every surface is moulded clay.
+ * Panels and buttons are raised (soft drop, lit top edge, shaded lower edge);
+ * fields, tracks and table headers are pressed in. No hairline boxes.
+ * The signs keep their meanings:
+ *   location sign  — butter-yellow clay tile on a navy gantry → where you are
+ *   direction sign — yellow clay, dark legend               → go ahead
+ *   mandatory sign — red clay, white legend                 → stop / rejected
+ * Light is cool blue-grey clay; dark is the same clay at night, never black.
  * ========================================================================== */
 
 :root,
 :root[data-theme="light"] {
-  /* ---- Surfaces (light concrete, faint olive bias) ---- */
-  --canvas:          #F1F2EE;
-  --surface:         #FFFFFF;
-  --surface-sunken:  #E8EAE4;
-  --hairline:        #D3D7CF;
-  --hairline-strong: #B4BAB0;
+  /* ---- Surfaces: clay. --canvas is the ground, --surface a raised slab,
+     --surface-sunken a pressed-in well. Hairlines only divide rows. ---- */
+  --canvas:          #D9E1EA;
+  --surface:         #ECF1F6;
+  --surface-sunken:  #DEE5ED;
+  --hairline:        #CBD5E1;
+  --hairline-strong: #A9B6C7;
 
   /* ---- Ink ---- */
-  --ink:             #1A1D18;
-  --ink-muted:       #50574D;
-  --ink-faint:       #656C62;
+  --ink:             #1C2737;
+  --ink-muted:       #465267;
+  --ink-faint:       #56627A;
 
-  /* ---- Primary: the yellow direction sign. Yellow fails as text on white, so
-     anything that draws the accent as text or a thin line uses --primary-ink,
-     and charts use --chart-primary. ---- */
-  --primary:         #F2C230;
-  --primary-hover:   #E3B21F;
-  --primary-soft:    #FBF3D6;
-  --on-primary:      #1A1D18;
-  --primary-ink:     #6E5100;
-  --chart-primary:   #A07800;
+  /* ---- Primary: butter-yellow clay. Yellow fails as text on the light
+     clay, so the accent as text or a thin line uses --primary-ink, and
+     charts use --chart-primary. ---- */
+  --primary:         #F4C64A;
+  --primary-hover:   #EDBA31;
+  --primary-soft:    #F8EBC2;
+  --on-primary:      #1C2737;
+  --primary-ink:     #6B4E00;
+  --chart-primary:   #8F6A00;
+  --chart-secondary: #5B7DA6;
 
-  --gold:            #C99A0E;
-  --gold-soft:       #FBF3D6;
+  --gold:            #C99A1E;
+  --gold-soft:       #F8EBC2;
 
   /* ---- Semantic / stock state ---- */
-  --ok:              #2E6A3E;  --ok-soft:       #DFEDE2;
-  --warn:            #7E5400;  --warn-soft:     #F6ECD6;
-  --critical:        #A8241C;  --critical-soft: #F6E0DE;
-  --info:            #6E5100;  --info-soft:     #FBF3D6;
-  --focus:           #1A1D18;
+  --ok:              #1F6848;  --ok-soft:       #D3ECDF;
+  --warn:            #7A5300;  --warn-soft:     #F5E6C3;
+  --critical:        #A1312A;  --critical-soft: #F5DCD8;
+  --info:            #6B4E00;  --info-soft:     #F8EBC2;
+  --focus:           #1C2737;
 
-  /* ---- Signs. By day a location sign is a yellow panel with a dark legend;
-     the row of signs sits on a pale yellow gantry. No black blocks. ---- */
-  --sign:            #F2C230;
-  --sign-legend:     #1A1D18;
-  --sign-line:       #C99A0E;
-  --sign-go:         #F2C230;
-  --sign-on-go:      #1A1D18;
-  --sign-stop:       #B3261E;
+  /* ---- Signs: yellow clay tiles on a navy clay gantry, day and night. ---- */
+  --sign:            #F4C64A;
+  --sign-legend:     #1C2737;
+  --sign-line:       #C99A1E;
+  --sign-go:         #F4C64A;
+  --sign-on-go:      #1C2737;
+  --sign-stop:       #B3362C;
   --sign-on-stop:    #FFFFFF;
-  --gantry:          #FBF3D6;
-  --gantry-line:     #EBD48A;
-  --gantry-ink:      #4A3D0F;
-  --gantry-muted:    #6B5A1C;
+  --gantry:          #2A3A52;
+  --gantry-line:     #3B4D68;
+  --gantry-ink:      #FFFFFF;
+  --gantry-muted:    #C3CEDD;
+
+  /* ---- Clay relief. Light from the top-left: a soft drop below, a lit
+     inner edge above, a shaded inner edge below. ---- */
+  --clay-light:      rgb(255 255 255 / 0.90);
+  --clay-shade:      rgb(41 58 82 / 0.16);
+  --clay-drop:       rgb(41 58 82 / 0.34);
+  --clay-raised:     0 14px 28px -14px var(--clay-drop), inset 5px 5px 10px var(--clay-light), inset -5px -5px 10px var(--clay-shade);
+  --clay-raised-sm:  0 7px 14px -8px var(--clay-drop), inset 3px 3px 6px var(--clay-light), inset -3px -3px 6px var(--clay-shade);
+  --clay-pressed:    inset 3px 3px 7px var(--clay-shade), inset -3px -3px 7px var(--clay-light);
+  /* Coloured clay (yellow, red, navy): its own highlight and shade. */
+  --clay-tinted:     0 8px 16px -8px var(--clay-drop), inset 3px 3px 6px rgb(255 255 255 / 0.45), inset -3px -4px 8px rgb(0 0 0 / 0.20);
+  --clay-gantry:     0 20px 36px -18px var(--clay-drop), inset 6px 6px 14px rgb(255 255 255 / 0.10), inset -8px -8px 16px rgb(0 0 0 / 0.35);
   /* Always white in both themes: anything that must be scanned or printed (QR codes, labels). */
   --paper:           #FFFFFF;
   --print-ink:       #141815;   /* printed labels: dark on paper in every theme */
@@ -69,98 +82,140 @@
 }
 
 :root[data-theme="dark"] {
-  /* "Night apron" — cool blue-grey, not black; signs keep the night look. */
-  --canvas:          #0F141A;
-  --surface:         #161D25;
-  --surface-sunken:  #0B1015;
-  --hairline:        #26313D;
-  --hairline-strong: #3A4655;
+  /* Clay at night — deep blue-grey, never black; the yellow tiles stay. */
+  /* ---- Surfaces: clay. --canvas is the ground, --surface a raised slab,
+     --surface-sunken a pressed-in well. Hairlines only divide rows. ---- */
+  --canvas:          #1B2230;
+  --surface:         #253043;
+  --surface-sunken:  #1F2838;
+  --hairline:        #334058;
+  --hairline-strong: #465570;
 
-  --ink:             #E4E9EE;
-  --ink-muted:       #9AA6B2;
-  --ink-faint:       #8592A0;
+  /* ---- Ink ---- */
+  --ink:             #E7ECF3;
+  --ink-muted:       #B3BDCC;
+  --ink-faint:       #98A3B5;
 
-  --primary:         #F2C230;
-  --primary-hover:   #F7D25E;
-  --primary-soft:    #2A2416;
-  --on-primary:      #121619;
-  --primary-ink:     #F2C230;
-  --chart-primary:   #F2C230;
+  /* ---- Primary: butter-yellow clay. Yellow fails as text on the light
+     clay, so the accent as text or a thin line uses --primary-ink, and
+     charts use --chart-primary. ---- */
+  --primary:         #F4C64A;
+  --primary-hover:   #F7D36E;
+  --primary-soft:    #3A3320;
+  --on-primary:      #1C2737;
+  --primary-ink:     #F4C64A;
+  --chart-primary:   #F4C64A;
+  --chart-secondary: #8FB0D6;
 
-  --gold:            #F2C230;
-  --gold-soft:       #2A2416;
+  --gold:            #F4C64A;
+  --gold-soft:       #3A3320;
 
-  --ok:              #72C189;  --ok-soft:       #14271E;
-  --warn:            #E3B24D;  --warn-soft:     #2A2416;
-  --critical:        #F2847D;  --critical-soft: #2E1A1C;
-  --info:            #F2C230;  --info-soft:     #2A2416;
-  --focus:           #F2C230;
+  /* ---- Semantic / stock state ---- */
+  --ok:              #86D9B4;  --ok-soft:       #1F3B33;
+  --warn:            #F2C26A;  --warn-soft:     #3A3120;
+  --critical:        #F4A49C;  --critical-soft: #41262A;
+  --info:            #F4C64A;  --info-soft:     #3A3320;
+  --focus:           #F4C64A;
 
-  --sign:            #0B1015;
-  --sign-legend:     #F2C230;
-  --sign-line:       #F2C230;
-  --sign-go:         #F2C230;
-  --sign-on-go:      #121619;
-  --sign-stop:       #C9362C;
+  /* ---- Signs: yellow clay tiles on a navy clay gantry, day and night. ---- */
+  --sign:            #F4C64A;
+  --sign-legend:     #1C2737;
+  --sign-line:       #C99A1E;
+  --sign-go:         #F4C64A;
+  --sign-on-go:      #1C2737;
+  --sign-stop:       #C9443A;
   --sign-on-stop:    #FFFFFF;
-  --gantry:          #0B1015;
-  --gantry-line:     #26313D;
-  --gantry-ink:      #E4E9EE;
-  --gantry-muted:    #9AA6B2;
+  --gantry:          #121A27;
+  --gantry-line:     #2A354A;
+  --gantry-ink:      #FFFFFF;
+  --gantry-muted:    #B9C4D4;
+
+  /* ---- Clay relief. Light from the top-left: a soft drop below, a lit
+     inner edge above, a shaded inner edge below. ---- */
+  --clay-light:      rgb(255 255 255 / 0.07);
+  --clay-shade:      rgb(0 0 0 / 0.38);
+  --clay-drop:       rgb(0 0 0 / 0.60);
+  --clay-raised:     0 14px 28px -14px var(--clay-drop), inset 5px 5px 10px var(--clay-light), inset -5px -5px 10px var(--clay-shade);
+  --clay-raised-sm:  0 7px 14px -8px var(--clay-drop), inset 3px 3px 6px var(--clay-light), inset -3px -3px 6px var(--clay-shade);
+  --clay-pressed:    inset 3px 3px 7px var(--clay-shade), inset -3px -3px 7px var(--clay-light);
+  /* Coloured clay (yellow, red, navy): its own highlight and shade. */
+  --clay-tinted:     0 8px 16px -8px var(--clay-drop), inset 3px 3px 6px rgb(255 255 255 / 0.45), inset -3px -4px 8px rgb(0 0 0 / 0.20);
+  --clay-gantry:     0 20px 36px -18px var(--clay-drop), inset 6px 6px 14px rgb(255 255 255 / 0.10), inset -8px -8px 16px rgb(0 0 0 / 0.35);
 }
 
 /* Follow the OS when no explicit data-theme is set (the toggle stamps data-theme). */
 @media (prefers-color-scheme: dark) {
   :root:not([data-theme]) {
-    /* "Night apron" — cool blue-grey, not black; signs keep the night look. */
-    --canvas:          #0F141A;
-    --surface:         #161D25;
-    --surface-sunken:  #0B1015;
-    --hairline:        #26313D;
-    --hairline-strong: #3A4655;
+    /* ---- Surfaces: clay. --canvas is the ground, --surface a raised slab,
+       --surface-sunken a pressed-in well. Hairlines only divide rows. ---- */
+    --canvas:          #1B2230;
+    --surface:         #253043;
+    --surface-sunken:  #1F2838;
+    --hairline:        #334058;
+    --hairline-strong: #465570;
 
-    --ink:             #E4E9EE;
-    --ink-muted:       #9AA6B2;
-    --ink-faint:       #8592A0;
+    /* ---- Ink ---- */
+    --ink:             #E7ECF3;
+    --ink-muted:       #B3BDCC;
+    --ink-faint:       #98A3B5;
 
-    --primary:         #F2C230;
-    --primary-hover:   #F7D25E;
-    --primary-soft:    #2A2416;
-    --on-primary:      #121619;
-    --primary-ink:     #F2C230;
-    --chart-primary:   #F2C230;
+    /* ---- Primary: butter-yellow clay. Yellow fails as text on the light
+       clay, so the accent as text or a thin line uses --primary-ink, and
+       charts use --chart-primary. ---- */
+    --primary:         #F4C64A;
+    --primary-hover:   #F7D36E;
+    --primary-soft:    #3A3320;
+    --on-primary:      #1C2737;
+    --primary-ink:     #F4C64A;
+    --chart-primary:   #F4C64A;
+    --chart-secondary: #8FB0D6;
 
-    --gold:            #F2C230;
-    --gold-soft:       #2A2416;
+    --gold:            #F4C64A;
+    --gold-soft:       #3A3320;
 
-    --ok:              #72C189;  --ok-soft:       #14271E;
-    --warn:            #E3B24D;  --warn-soft:     #2A2416;
-    --critical:        #F2847D;  --critical-soft: #2E1A1C;
-    --info:            #F2C230;  --info-soft:     #2A2416;
-    --focus:           #F2C230;
+    /* ---- Semantic / stock state ---- */
+    --ok:              #86D9B4;  --ok-soft:       #1F3B33;
+    --warn:            #F2C26A;  --warn-soft:     #3A3120;
+    --critical:        #F4A49C;  --critical-soft: #41262A;
+    --info:            #F4C64A;  --info-soft:     #3A3320;
+    --focus:           #F4C64A;
 
-    --sign:            #0B1015;
-    --sign-legend:     #F2C230;
-    --sign-line:       #F2C230;
-    --sign-go:         #F2C230;
-    --sign-on-go:      #121619;
-    --sign-stop:       #C9362C;
+    /* ---- Signs: yellow clay tiles on a navy clay gantry, day and night. ---- */
+    --sign:            #F4C64A;
+    --sign-legend:     #1C2737;
+    --sign-line:       #C99A1E;
+    --sign-go:         #F4C64A;
+    --sign-on-go:      #1C2737;
+    --sign-stop:       #C9443A;
     --sign-on-stop:    #FFFFFF;
-    --gantry:          #0B1015;
-    --gantry-line:     #26313D;
-    --gantry-ink:      #E4E9EE;
-    --gantry-muted:    #9AA6B2;
-  }
+    --gantry:          #121A27;
+    --gantry-line:     #2A354A;
+    --gantry-ink:      #FFFFFF;
+    --gantry-muted:    #B9C4D4;
+
+    /* ---- Clay relief. Light from the top-left: a soft drop below, a lit
+       inner edge above, a shaded inner edge below. ---- */
+    --clay-light:      rgb(255 255 255 / 0.07);
+    --clay-shade:      rgb(0 0 0 / 0.38);
+    --clay-drop:       rgb(0 0 0 / 0.60);
+    --clay-raised:     0 14px 28px -14px var(--clay-drop), inset 5px 5px 10px var(--clay-light), inset -5px -5px 10px var(--clay-shade);
+    --clay-raised-sm:  0 7px 14px -8px var(--clay-drop), inset 3px 3px 6px var(--clay-light), inset -3px -3px 6px var(--clay-shade);
+    --clay-pressed:    inset 3px 3px 7px var(--clay-shade), inset -3px -3px 7px var(--clay-light);
+    /* Coloured clay (yellow, red, navy): its own highlight and shade. */
+    --clay-tinted:     0 8px 16px -8px var(--clay-drop), inset 3px 3px 6px rgb(255 255 255 / 0.45), inset -3px -4px 8px rgb(0 0 0 / 0.20);
+    --clay-gantry:     0 20px 36px -18px var(--clay-drop), inset 6px 6px 14px rgb(255 255 255 / 0.10), inset -8px -8px 16px rgb(0 0 0 / 0.35);
+}
 }
 
 :root {
   /* ---- Typography (§9.3). Self-hosted via @fontsource — no external CDN.
-     Overpass descends from Highway Gothic, the lettering of road and
-     airfield signs; Plex Sans Arabic carries Arabic at matching weight. ---- */
-  --font-sans:        'Overpass', 'IBM Plex Sans Arabic', ui-sans-serif, sans-serif;
-  --font-sans-arabic: 'IBM Plex Sans Arabic', 'Overpass', ui-sans-serif, sans-serif;
-  --font-mono:        'Overpass Mono', ui-monospace, 'SF Mono', monospace;
-  --font-sign:        'Overpass', ui-sans-serif, sans-serif;
+     Figtree carries the interface; Fredoka's rounded strokes set the sign
+     legends, headings and figures to match the clay; DM Mono for codes.
+     Plex Sans Arabic carries Arabic at matching weight. ---- */
+  --font-sans:        'Figtree', 'IBM Plex Sans Arabic', ui-sans-serif, sans-serif;
+  --font-sans-arabic: 'IBM Plex Sans Arabic', 'Figtree', ui-sans-serif, sans-serif;
+  --font-mono:        'DM Mono', ui-monospace, 'SF Mono', monospace;
+  --font-sign:        'Fredoka', 'Figtree', 'IBM Plex Sans Arabic', ui-sans-serif, sans-serif;
 
   --text-2xs:   11px;  --leading-2xs:  16px;  /* uppercase labels, tracking .06em */
   --text-xs:    12px;  --leading-xs:   18px;  /* table meta, captions */
@@ -169,27 +224,29 @@
   --text-lg:    18px;  --leading-lg:   26px;  /* section headings */
   --text-xl:    22px;  --leading-xl:   30px;  /* page titles */
   --text-2xl:   28px;  --leading-2xl:  36px;  /* dashboard figures */
-  --text-designator: 40px;                    /* designator sign legend (800) */
+  --text-designator: 40px;                    /* designator sign legend (Fredoka 600) */
 
   --tracking-label: 0.06em;
   --tracking-designator: 0.03em;
 
-  /* ---- Geometry (§9.5). Rectangles with soft, visible corners — never a
-     pill. Signs and status squares were rounded further on 2026-10-01. ---- */
-  --radius-dot:  2px;   /* 6px status squares */
-  --radius-chip: 6px;   /* location chips, tags */
-  --radius-sm:   8px;   /* inputs */
-  --radius-sign: 10px;  /* sign panels and designator segments */
-  --radius-md:   14px;  /* buttons, panels — default */
-  --radius-lg:   20px;  /* modals */
+  /* ---- Geometry (§9.5). Clay edition 2026-10-03: every visible box has a
+     moulded corner — nothing is square. Still never a pill. ---- */
+  --radius-dot:   3px;   /* 8px status squares */
+  --radius-chip:  10px;  /* location chips, tags, badges */
+  --radius-sm:    12px;  /* small buttons, inputs */
+  --radius-sign:  16px;  /* sign tiles and designator segments */
+  --radius-md:    18px;  /* buttons, fields — default */
+  --radius-panel: 24px;  /* panels, tables, the shell slabs */
+  --radius-lg:    28px;  /* modals, drawers, the gantry */
 
   /* ---- Spacing — 8px grid ---- */
   --space-1: 4px;   --space-2: 8px;   --space-3: 12px;  --space-4: 16px;  --space-5: 20px;
   --space-6: 24px;  --space-8: 32px;  --space-12: 48px; --space-16: 64px;
 
-  /* ---- Elevation — only genuinely floating layers (§9.5) ---- */
-  --shadow-floating: 0 2px 8px rgb(0 0 0 / 0.12);
-  --shadow-lift:     0 6px 16px rgb(0 0 0 / 0.10);
+  /* ---- Elevation. Resting surfaces use the clay relief above; floating
+     layers (modal, drawer, toast) add a deeper drop. ---- */
+  --shadow-floating: 0 24px 48px -16px var(--clay-drop), inset 5px 5px 10px var(--clay-light), inset -5px -5px 10px var(--clay-shade);
+  --shadow-lift:     0 18px 32px -14px var(--clay-drop), inset 5px 5px 10px var(--clay-light), inset -5px -5px 10px var(--clay-shade);
 
   /* ---- Motion (§9.9, expanded 2026-10-01) ---- */
   --motion-duration: 140ms;   /* hover, focus, press */
@@ -197,12 +254,14 @@
   --motion-slow:     480ms;   /* bars growing, figures counting */
   --motion-easing:   cubic-bezier(0.2, 0, 0.2, 1);
   --motion-settle:   cubic-bezier(0.3, 1.25, 0.5, 1); /* slight settle, never a bounce */
+  --motion-squish:   cubic-bezier(0.3, 1.5, 0.5, 1);  /* a clay tile pressed into place */
   --motion-flap-step: 38ms;   /* one split-flap character tick */
 
   /* ---- Layout (§9.7) ---- */
   --rail-width: 220px;
   --rail-width-collapsed: 56px;
-  --status-strip-height: 32px;
+  --status-strip-height: 36px;
+  --shell-gap: 12px;          /* the clay slabs float this far apart */
   --content-max-width: 1440px;
   --content-gutter: 24px;
 }

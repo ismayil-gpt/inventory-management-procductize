@@ -19,7 +19,7 @@ export function Modal({ title, onClose, children, width = 520 }: { title: string
         aria-modal="true"
         aria-label={title}
         className="float-enter"
-        style={{ width, maxWidth: '100%', maxHeight: '90vh', overflow: 'auto', background: 'var(--surface)', border: '1px solid var(--hairline)', borderRadius: 'var(--radius-lg)', boxShadow: 'var(--shadow-floating)' }}
+        style={{ width, maxWidth: '100%', maxHeight: '90vh', overflow: 'auto', background: 'var(--surface)', border: 'none', borderRadius: 'var(--radius-lg)', boxShadow: 'var(--shadow-floating)' }}
       >
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: 'var(--space-4) var(--space-6)', borderBottom: '1px solid var(--hairline)', position: 'sticky', top: 0, background: 'var(--surface)' }}>
           <h2 style={{ margin: 0, fontSize: 'var(--text-lg)', fontWeight: 600, color: 'var(--ink)' }}>{title}</h2>

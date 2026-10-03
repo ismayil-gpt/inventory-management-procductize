@@ -93,7 +93,7 @@ export function ProductFormModal({ existing, onClose, onSaved }: Props) {
     }
   };
 
-  const input: React.CSSProperties = { height: '36px', width: '100%', borderRadius: 'var(--radius-md)', border: '1px solid var(--hairline)', background: 'var(--surface)', color: 'var(--ink)', padding: '0 12px', fontSize: 'var(--text-sm)' };
+  const input: React.CSSProperties = { height: '36px', width: '100%', borderRadius: 'var(--radius-md)', border: 'none', boxShadow: 'var(--clay-pressed)', background: 'var(--surface-sunken)', color: 'var(--ink)', padding: '0 12px', fontSize: 'var(--text-sm)' };
 
   return (
     <Modal title={existing ? t('products.form.editTitle') : t('products.form.newTitle')} onClose={onClose} width={560}>
@@ -133,8 +133,8 @@ export function ProductFormModal({ existing, onClose, onSaved }: Props) {
       {error && <div role="alert" style={{ marginTop: 'var(--space-3)', color: 'var(--critical)', fontSize: 'var(--text-xs)' }}>{error}</div>}
 
       <div style={{ display: 'flex', justifyContent: 'flex-end', gap: 'var(--space-3)', marginTop: 'var(--space-6)' }}>
-        <button type="button" onClick={onClose} style={{ height: '36px', padding: '0 16px', borderRadius: 'var(--radius-md)', border: '1px solid var(--hairline)', background: 'var(--surface)', color: 'var(--ink)', cursor: 'pointer', fontSize: 'var(--text-sm)' }}>{t('common.cancel')}</button>
-        <button type="button" onClick={submit} disabled={saving} style={{ height: '36px', padding: '0 20px', borderRadius: 'var(--radius-md)', border: 'none', background: saving ? 'var(--ink-faint)' : 'var(--primary)', color: 'var(--on-primary)', cursor: saving ? 'default' : 'pointer', fontSize: 'var(--text-sm)', fontWeight: 500 }}>{t('common.save')}</button>
+        <button type="button" onClick={onClose} style={{ height: '36px', padding: '0 16px', borderRadius: 'var(--radius-md)', border: 'none', boxShadow: 'var(--clay-raised-sm)', background: 'var(--surface)', color: 'var(--ink)', cursor: 'pointer', fontSize: 'var(--text-sm)' }}>{t('common.cancel')}</button>
+        <button type="button" onClick={submit} disabled={saving} style={{ height: '36px', padding: '0 20px', borderRadius: 'var(--radius-md)', border: 'none', boxShadow: 'var(--clay-tinted)', background: saving ? 'var(--ink-faint)' : 'var(--primary)', color: 'var(--on-primary)', cursor: saving ? 'default' : 'pointer', fontSize: 'var(--text-sm)', fontWeight: 500 }}>{t('common.save')}</button>
       </div>
     </Modal>
   );

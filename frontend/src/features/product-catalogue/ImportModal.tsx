@@ -44,12 +44,12 @@ export function ImportModal({ onClose }: { onClose: () => void }) {
       {done !== null ? (
         <div style={{ textAlign: 'center', padding: 'var(--space-6)' }}>
           <div style={{ fontSize: 'var(--text-lg)', fontWeight: 600, color: 'var(--ok)' }}>{t('products.import.done', { count: done })}</div>
-          <button type="button" onClick={onClose} style={{ ...btn, border: 'none', background: 'var(--primary)', color: 'var(--on-primary)', marginTop: 'var(--space-4)' }}>{t('common.save')}</button>
+          <button type="button" onClick={onClose} style={{ ...btn, border: 'none', background: 'var(--primary)', color: 'var(--on-primary)', marginTop: 'var(--space-4)', boxShadow: 'var(--clay-tinted)' }}>{t('common.save')}</button>
         </div>
       ) : (
         <>
           <div style={{ display: 'flex', gap: 'var(--space-3)', alignItems: 'center', flexWrap: 'wrap', marginBottom: 'var(--space-4)' }}>
-            <button type="button" onClick={() => void downloadImportTemplate()} style={{ ...btn, border: '1px solid var(--hairline)', background: 'var(--surface)', color: 'var(--ink)' }}>
+            <button type="button" onClick={() => void downloadImportTemplate()} style={{ ...btn, border: 'none', boxShadow: 'var(--clay-raised-sm)', background: 'var(--surface)', color: 'var(--ink)' }}>
               <Download size={16} strokeWidth={1.5} /> {t('products.import.template')}
             </button>
             <label style={{ ...btn, border: '1px solid var(--primary-ink)', background: 'var(--primary-soft)', color: 'var(--primary-ink)' }}>
@@ -71,7 +71,7 @@ export function ImportModal({ onClose }: { onClose: () => void }) {
                 <span style={{ color: report.summary.invalid ? 'var(--critical)' : 'var(--ink-muted)' }}>{t('products.import.invalid')}: <b className="tabular">{report.summary.invalid}</b></span>
               </div>
               {report.summary.invalid > 0 && (
-                <div style={{ maxHeight: '220px', overflow: 'auto', border: '1px solid var(--hairline)', borderRadius: 'var(--radius-md)' }}>
+                <div style={{ maxHeight: '220px', overflow: 'auto', border: 'none', boxShadow: 'var(--clay-raised)', borderRadius: 'var(--radius-panel)' }}>
                   {report.rows.filter((r) => r.status === 'error').map((r) => (
                     <div key={r.row} style={{ padding: '8px 12px', borderTop: '1px solid var(--hairline)', fontSize: 'var(--text-xs)' }}>
                       <b>{t('products.import.row')} {r.row}</b> {r.sku && <span style={{ fontFamily: 'var(--font-mono)' }}>({r.sku})</span>}
@@ -81,9 +81,9 @@ export function ImportModal({ onClose }: { onClose: () => void }) {
                 </div>
               )}
               <div style={{ display: 'flex', justifyContent: 'flex-end', gap: 'var(--space-3)', marginTop: 'var(--space-6)' }}>
-                <button type="button" onClick={onClose} style={{ ...btn, border: '1px solid var(--hairline)', background: 'var(--surface)', color: 'var(--ink)' }}>{t('common.cancel')}</button>
+                <button type="button" onClick={onClose} style={{ ...btn, border: 'none', boxShadow: 'var(--clay-raised-sm)', background: 'var(--surface)', color: 'var(--ink)' }}>{t('common.cancel')}</button>
                 <button type="button" onClick={commit} disabled={busy || report.summary.invalid > 0 || report.summary.valid === 0}
-                  style={{ ...btn, border: 'none', background: report.summary.invalid > 0 || report.summary.valid === 0 ? 'var(--ink-faint)' : 'var(--primary)', color: 'var(--on-primary)', fontWeight: 500 }}>
+                  style={{ ...btn, border: 'none', background: report.summary.invalid > 0 || report.summary.valid === 0 ? 'var(--ink-faint)' : 'var(--primary)', color: 'var(--on-primary)', fontWeight: 500, boxShadow: 'var(--clay-tinted)' }}>
                   {t('products.import.commit', { count: report.summary.valid })}
                 </button>
               </div>

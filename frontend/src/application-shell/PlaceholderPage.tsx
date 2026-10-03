@@ -8,8 +8,8 @@ export function PlaceholderPage({ titleKey }: { titleKey: string }) {
     <div
       style={{
         background: 'var(--surface)',
-        border: '1px solid var(--hairline)',
-        borderRadius: 'var(--radius-md)',
+        border: 'none', boxShadow: 'var(--clay-raised)',
+        borderRadius: 'var(--radius-panel)',
         padding: 'var(--space-16) var(--space-6)',
         textAlign: 'center',
       }}

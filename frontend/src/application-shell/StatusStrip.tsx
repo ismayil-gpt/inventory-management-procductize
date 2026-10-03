@@ -48,7 +48,7 @@ export function StatusStrip() {
     gap: '6px',
     paddingInline: 'var(--space-4)',
     borderInlineEnd: '1px solid var(--hairline)',
-    height: '100%',
+    height: '60%',
   };
 
   return (
@@ -57,8 +57,12 @@ export function StatusStrip() {
         height: 'var(--status-strip-height)',
         display: 'flex',
         alignItems: 'center',
+        margin: '0 var(--shell-gap) var(--shell-gap)',
+        paddingInline: 'var(--space-2)',
         background: 'var(--surface)',
-        borderTop: '1px solid var(--hairline)',
+        borderRadius: 'var(--radius-md)',
+        boxShadow: 'var(--clay-raised-sm)',
+        overflow: 'hidden',
         fontSize: 'var(--text-xs)',
         color: 'var(--ink-muted)',
       }}

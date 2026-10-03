@@ -1,8 +1,8 @@
 import { useTranslation } from 'react-i18next';
 import { SplitFlapText } from '../airfield-signs/SplitFlapText';
 
-// The signature element (CLAUDE.md §9.6): a gantry of airfield location signs,
-// one panel per segment. Takes an ARRAY of segments — never three fixed
+// The signature element (CLAUDE.md §9.6): a navy clay gantry holding one
+// yellow clay sign tile per segment. Takes an ARRAY of segments — never three fixed
 // values — so it renders any hierarchy depth (§5A.2). Codes are never
 // translated or mirrored; in RTL the panel order reverses (flex follows the
 // document direction) but each code stays LTR.
@@ -40,8 +40,8 @@ export function LocationDesignator({
       aria-label={hasScan ? `${t('locations.activeLocation')} ${fullPath}` : t('locations.activeLocation')}
       style={{
         background: 'var(--gantry)',
-        border: '1px solid var(--gantry-line)',
-        borderRadius: 'var(--radius-md)',
+        borderRadius: 'var(--radius-lg)',
+        boxShadow: 'var(--clay-gantry)',
         padding: 'var(--space-4)',
         display: 'flex',
         flexDirection: 'column',

@@ -10,12 +10,12 @@ const REPORTS: Array<{ key: 'stock-on-hand' | 'stock-movements' | 'replenishment
 
 export function ReportsPage() {
   const { t } = useTranslation();
-  const btn: React.CSSProperties = { display: 'inline-flex', alignItems: 'center', gap: '6px', height: '34px', padding: '0 12px', borderRadius: 'var(--radius-md)', fontSize: 'var(--text-sm)', cursor: 'pointer', border: '1px solid var(--hairline)', background: 'var(--surface)', color: 'var(--ink)' };
+  const btn: React.CSSProperties = { display: 'inline-flex', alignItems: 'center', gap: '6px', height: '34px', padding: '0 12px', borderRadius: 'var(--radius-md)', fontSize: 'var(--text-sm)', cursor: 'pointer', border: 'none', boxShadow: 'var(--clay-raised-sm)', background: 'var(--surface)', color: 'var(--ink)' };
 
   return (
     <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(300px, 1fr))', gap: 'var(--space-4)' }}>
       {REPORTS.map((r) => (
-        <div key={r.key} style={{ background: 'var(--surface)', border: '1px solid var(--hairline)', borderRadius: 'var(--radius-md)', padding: 'var(--space-6)' }}>
+        <div key={r.key} style={{ background: 'var(--surface)', border: 'none', boxShadow: 'var(--clay-raised)', borderRadius: 'var(--radius-panel)', padding: 'var(--space-6)' }}>
           <div style={{ fontSize: 'var(--text-lg)', fontWeight: 600, color: 'var(--ink)' }}>{t(r.titleKey)}</div>
           <p style={{ fontSize: 'var(--text-sm)', color: 'var(--ink-muted)', margin: '6px 0 var(--space-4)' }}>{t(r.descKey)}</p>
           <div style={{ display: 'flex', gap: 'var(--space-3)' }}>

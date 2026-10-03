@@ -43,7 +43,7 @@ export function ProductDetailPage() {
   if (isLoading) return <div style={{ color: 'var(--ink-muted)' }}>{t('common.loading')}</div>;
   if (isError || !p) return <div style={{ color: 'var(--critical)' }}>{t('errors.generic')}</div>;
 
-  const actionBtn: React.CSSProperties = { display: 'inline-flex', alignItems: 'center', gap: '6px', height: '34px', padding: '0 12px', borderRadius: 'var(--radius-md)', fontSize: 'var(--text-sm)', cursor: 'pointer', border: '1px solid var(--hairline)', background: 'var(--surface)', color: 'var(--ink)' };
+  const actionBtn: React.CSSProperties = { display: 'inline-flex', alignItems: 'center', gap: '6px', height: '34px', padding: '0 12px', borderRadius: 'var(--radius-md)', fontSize: 'var(--text-sm)', cursor: 'pointer', border: 'none', boxShadow: 'var(--clay-raised-sm)', background: 'var(--surface)', color: 'var(--ink)' };
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--space-4)' }}>
@@ -72,7 +72,7 @@ export function ProductDetailPage() {
         </div>
       </div>
 
-      <div style={{ background: 'var(--surface)', border: '1px solid var(--hairline)', borderRadius: 'var(--radius-md)', padding: 'var(--space-6)' }}>
+      <div style={{ background: 'var(--surface)', border: 'none', boxShadow: 'var(--clay-raised)', borderRadius: 'var(--radius-panel)', padding: 'var(--space-6)' }}>
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: 'var(--space-4)', flexWrap: 'wrap' }}>
           <div>
             <h2 style={{ margin: 0, fontSize: 'var(--text-xl)', fontWeight: 600, color: 'var(--ink)' }}>{name(p.nameEn, p.nameAr)}</h2>
@@ -100,7 +100,7 @@ export function ProductDetailPage() {
       </div>
 
       {/* Stock positions */}
-      <div style={{ background: 'var(--surface)', border: '1px solid var(--hairline)', borderRadius: 'var(--radius-md)', overflow: 'hidden' }}>
+      <div style={{ background: 'var(--surface)', border: 'none', boxShadow: 'var(--clay-raised)', borderRadius: 'var(--radius-panel)', overflow: 'hidden' }}>
         <div style={{ padding: '12px 16px', fontSize: 'var(--text-2xs)', letterSpacing: 'var(--tracking-label)', textTransform: 'uppercase', color: 'var(--ink-muted)', borderBottom: '1px solid var(--hairline)' }}>
           {t('products.positions')}
         </div>

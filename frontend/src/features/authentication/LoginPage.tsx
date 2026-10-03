@@ -63,8 +63,8 @@ export function LoginPage() {
   };
 
   const field: React.CSSProperties = {
-    height: '36px', borderRadius: 'var(--radius-md)', border: '1px solid var(--hairline)',
-    background: 'var(--surface)', color: 'var(--ink)', padding: '0 12px', fontSize: 'var(--text-sm)', width: '100%',
+    height: '36px', borderRadius: 'var(--radius-md)', border: 'none', boxShadow: 'var(--clay-pressed)',
+    background: 'var(--surface-sunken)', color: 'var(--ink)', padding: '0 12px', fontSize: 'var(--text-sm)', width: '100%',
   };
   const label: React.CSSProperties = { fontSize: 'var(--text-xs)', color: 'var(--ink-muted)', marginBottom: '6px', display: 'block' };
 
@@ -72,7 +72,7 @@ export function LoginPage() {
     <div style={{ minHeight: '100vh', display: 'grid', placeItems: 'center', background: 'var(--canvas)', padding: 'var(--space-6)' }}>
       <div className="float-enter" style={{ width: '380px', maxWidth: '100%', display: 'flex', flexDirection: 'column', gap: 'var(--space-4)' }}>
         {/* Arrival gantry: the mark beside a location sign whose legend flaps into place. */}
-        <div style={{ background: 'var(--gantry)', border: '1px solid var(--gantry-line)', borderRadius: 'var(--radius-lg)', padding: 'var(--space-4)', display: 'flex', flexDirection: 'column', gap: 'var(--space-3)' }}>
+        <div style={{ background: 'var(--gantry)', border: 'none', boxShadow: 'var(--clay-gantry)', borderRadius: 'var(--radius-lg)', padding: 'var(--space-4)', display: 'flex', flexDirection: 'column', gap: 'var(--space-3)' }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: 'var(--space-3)' }}>
             <MizanMark size={60} title="Mizan" />
             <div dir="ltr" className="sign-location sign-enter" style={{ flex: 1, fontSize: '36px', lineHeight: 1, padding: '12px 16px 8px', textAlign: 'center', letterSpacing: 'var(--tracking-designator)' }}>
@@ -85,7 +85,7 @@ export function LoginPage() {
           </div>
         </div>
 
-        <div style={{ background: 'var(--surface)', border: '1px solid var(--hairline)', borderRadius: 'var(--radius-lg)', padding: 'var(--space-6)' }}>
+        <div style={{ background: 'var(--surface)', border: 'none', boxShadow: 'var(--clay-raised)', borderRadius: 'var(--radius-lg)', padding: 'var(--space-6)' }}>
 
         {wasSignedOutForInactivity && !error && (
           <div role="status" style={{ marginBottom: 'var(--space-4)', padding: '9px 12px', borderRadius: 'var(--radius-md)', background: 'var(--info-soft)', color: 'var(--primary-ink)', fontSize: 'var(--text-xs)' }}>
@@ -117,7 +117,7 @@ export function LoginPage() {
           )}
 
           <button type="submit" disabled={submitting} style={{
-            width: '100%', height: '44px', fontWeight: 600, borderRadius: 'var(--radius-md)', border: 'none',
+            width: '100%', height: '44px', fontWeight: 600, borderRadius: 'var(--radius-md)', border: 'none', boxShadow: 'var(--clay-tinted)',
             background: submitting ? 'var(--ink-faint)' : 'var(--primary)', color: 'var(--on-primary)',
             fontSize: 'var(--text-sm)', cursor: submitting ? 'default' : 'pointer',
           }}>

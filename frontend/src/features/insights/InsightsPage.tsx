@@ -11,11 +11,11 @@ import {
 import { usePreferences } from '../../application-shell/preferences.store';
 import { StockStatusIndicator } from '../../design-system/stock-status-indicator/StockStatusIndicator';
 
-const card: React.CSSProperties = { background: 'var(--surface)', border: '1px solid var(--hairline)', borderRadius: 'var(--radius-md)', padding: 'var(--space-6)' };
+const card: React.CSSProperties = { background: 'var(--surface)', border: 'none', boxShadow: 'var(--clay-raised)', borderRadius: 'var(--radius-panel)', padding: 'var(--space-6)' };
 const panelTitle: React.CSSProperties = { fontSize: 'var(--text-lg)', fontWeight: 600, color: 'var(--ink)' };
 const panelSub: React.CSSProperties = { fontSize: 'var(--text-xs)', color: 'var(--ink-muted)', marginTop: '2px' };
 const tooltipStyle: React.CSSProperties = {
-  background: 'var(--surface)', border: '1px solid var(--hairline-strong)', borderRadius: 'var(--radius-sm)',
+  background: 'var(--surface)', border: 'none', borderRadius: 'var(--radius-sm)',
   fontSize: 'var(--text-xs)', color: 'var(--ink)', boxShadow: 'var(--shadow-floating)', padding: '8px 10px',
 };
 const emptyStyle: React.CSSProperties = { padding: 'var(--space-8)', textAlign: 'center', color: 'var(--ink-muted)', fontSize: 'var(--text-sm)' };
@@ -58,7 +58,7 @@ function Sparkline({ data, tone }: { data: number[]; tone: string }) {
 function DaysBar({ days, maxDays, tone }: { days: number; maxDays: number; tone: string }) {
   const pct = Math.max(4, Math.min(100, (days / maxDays) * 100));
   return (
-    <div style={{ width: '72px', height: '6px', borderRadius: '3px', background: 'var(--surface-sunken)', overflow: 'hidden' }}>
+    <div style={{ width: '72px', height: '6px', borderRadius: '3px', background: 'var(--surface-sunken)', boxShadow: 'var(--clay-pressed)', overflow: 'hidden' }}>
       <div className="bar-grow" style={{ width: `${pct}%`, height: '100%', borderRadius: '3px', background: `var(--${tone})` }} />
     </div>
   );
@@ -179,7 +179,7 @@ function SpendBarList({ rows, currency, isRtl }: { rows: Array<{ label: string; 
             <span style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', maxWidth: '65%' }}>{r.label}</span>
             <span className="tabular" style={{ color: 'var(--ink-muted)', fontWeight: 500 }} dir="ltr">{formatCurrency(r.amount, currency, 0)}</span>
           </div>
-          <div style={{ height: '8px', borderRadius: '4px', background: 'var(--surface-sunken)', overflow: 'hidden', direction: isRtl ? 'rtl' : 'ltr' }}>
+          <div style={{ height: '8px', borderRadius: '4px', background: 'var(--surface-sunken)', boxShadow: 'var(--clay-pressed)', overflow: 'hidden', direction: isRtl ? 'rtl' : 'ltr' }}>
             <div className="bar-grow" style={{ width: `${(r.amount / max) * 100}%`, height: '100%', borderRadius: '4px', background: 'var(--chart-primary)' }} />
           </div>
         </div>
@@ -215,7 +215,7 @@ export function InsightsPage() {
     [summary.data, language, t],
   );
 
-  const control: React.CSSProperties = { height: '36px', borderRadius: 'var(--radius-md)', border: '1px solid var(--hairline)', background: 'var(--surface)', color: 'var(--ink)', padding: '0 12px', fontSize: 'var(--text-sm)' };
+  const control: React.CSSProperties = { height: '36px', borderRadius: 'var(--radius-md)', border: 'none', boxShadow: 'var(--clay-pressed)', background: 'var(--surface-sunken)', color: 'var(--ink)', padding: '0 12px', fontSize: 'var(--text-sm)' };
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--space-6)' }}>

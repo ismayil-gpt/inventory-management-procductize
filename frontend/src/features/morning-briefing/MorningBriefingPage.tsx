@@ -29,7 +29,7 @@ const longDate = (language: string, date: Date) => {
 };
 const timeOfDay = new Intl.DateTimeFormat('en-GB', { hour: '2-digit', minute: '2-digit', hour12: false, timeZone: 'Asia/Dubai' });
 
-const section: React.CSSProperties = { background: 'var(--surface)', border: '1px solid var(--hairline)', borderRadius: 'var(--radius-md)', overflow: 'hidden' };
+const section: React.CSSProperties = { background: 'var(--surface)', border: 'none', boxShadow: 'var(--clay-raised)', borderRadius: 'var(--radius-panel)', overflow: 'hidden' };
 const sectionHead: React.CSSProperties = { display: 'flex', alignItems: 'center', gap: 'var(--space-3)', padding: 'var(--space-4) var(--space-6)', borderBottom: '1px solid var(--hairline)' };
 const row: React.CSSProperties = { display: 'flex', alignItems: 'center', gap: 'var(--space-4)', padding: 'var(--space-4) var(--space-6)', borderTop: '1px solid var(--hairline)', flexWrap: 'wrap' };
 
@@ -85,11 +85,11 @@ function ApprovalRow({ rec, isAdmin }: { rec: Recommendation; isAdmin: boolean }
           <input
             type="number" min={1} value={qty} onChange={(e) => setQty(e.target.value)} className="tabular"
             aria-label={t('replenishment.orderQty')}
-            style={{ width: '88px', height: '40px', borderRadius: 'var(--radius-sm)', border: '1px solid var(--hairline-strong)', background: 'var(--surface)', color: 'var(--ink)', padding: '0 10px', fontSize: 'var(--text-sm)' }}
+            style={{ width: '88px', height: '40px', borderRadius: 'var(--radius-sm)', border: 'none', boxShadow: 'var(--clay-pressed)', background: 'var(--surface-sunken)', color: 'var(--ink)', padding: '0 10px', fontSize: 'var(--text-sm)' }}
           />
           <button
             type="button" onClick={() => void approve()} disabled={busy}
-            style={{ display: 'inline-flex', alignItems: 'center', gap: '6px', height: '40px', padding: '0 16px', borderRadius: 'var(--radius-md)', border: 'none', background: 'var(--sign-go)', color: 'var(--sign-on-go)', fontWeight: 600, fontSize: 'var(--text-sm)', cursor: busy ? 'default' : 'pointer' }}
+            style={{ display: 'inline-flex', alignItems: 'center', gap: '6px', height: '40px', padding: '0 16px', borderRadius: 'var(--radius-md)', border: 'none', boxShadow: 'var(--clay-tinted)', background: 'var(--sign-go)', color: 'var(--sign-on-go)', fontWeight: 600, fontSize: 'var(--text-sm)', cursor: busy ? 'default' : 'pointer' }}
           >
             <Check size={16} strokeWidth={2} aria-hidden /> {busy ? t('common.loading') : t('replenishment.approve')}
           </button>
@@ -114,7 +114,7 @@ function RunningOutRow({ item }: { item: AtRiskProduct }) {
         </div>
       </div>
       <div style={{ display: 'flex', alignItems: 'center', gap: 'var(--space-4)' }}>
-        <div style={{ width: '120px', height: '8px', borderRadius: '4px', background: 'var(--surface-sunken)', overflow: 'hidden', direction: language === 'ar' ? 'rtl' : 'ltr' }}>
+        <div style={{ width: '120px', height: '8px', borderRadius: '4px', background: 'var(--surface-sunken)', boxShadow: 'var(--clay-pressed)', overflow: 'hidden', direction: language === 'ar' ? 'rtl' : 'ltr' }}>
           <div className="bar-grow" style={{ width: `${Math.min(100, (days / RUNNING_OUT_WITHIN_DAYS) * 100)}%`, height: '100%', background: days <= 2 ? 'var(--critical)' : 'var(--warn)' }} />
         </div>
         <span className="tabular" style={{ minWidth: '64px', fontSize: 'var(--text-sm)', fontWeight: 600 }}>{t('briefing.daysLeft', { count: days })}</span>
@@ -152,12 +152,12 @@ export function MorningBriefingPage() {
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--space-4)' }}>
       {/* The briefing's headline is the count itself, on the gantry. */}
-      <section style={{ background: 'var(--gantry)', border: '1px solid var(--gantry-line)', borderRadius: 'var(--radius-lg)', padding: 'var(--space-6)', display: 'flex', alignItems: 'center', gap: 'var(--space-6)', flexWrap: 'wrap' }}>
+      <section style={{ background: 'var(--gantry)', border: 'none', boxShadow: 'var(--clay-gantry)', borderRadius: 'var(--radius-lg)', padding: 'var(--space-6)', display: 'flex', alignItems: 'center', gap: 'var(--space-6)', flexWrap: 'wrap' }}>
         <div className="sign-location sign-enter tabular" style={{ fontSize: '56px', lineHeight: 1, padding: '14px 22px 8px', minWidth: '2ch', textAlign: 'center' }}>
           {isLoading ? '—' : <CountUpNumber value={thingsToday} />}
         </div>
         <div style={{ flex: '1 1 320px', color: 'var(--gantry-ink)' }}>
-          <h2 style={{ margin: 0, fontSize: 'var(--text-xl)', fontWeight: 800, lineHeight: 1.3 }}>
+          <h2 style={{ margin: 0, fontSize: 'var(--text-xl)', fontWeight: 700, lineHeight: 1.3 }}>
             {isLoading ? t('common.loading') : thingsToday === 0 ? t('briefing.allClearTitle') : t('briefing.headline', { count: thingsToday })}
           </h2>
           <div style={{ marginTop: '4px', fontSize: 'var(--text-sm)', color: 'var(--gantry-muted)' }}>

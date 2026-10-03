@@ -100,13 +100,13 @@ export function MultiFactorStep({ mode, mfaToken, onSignedIn, onRestart }: Multi
           dir="ltr"
           placeholder="123456"
           aria-describedby={error ? 'mfa-error' : undefined}
-          style={{ width: '100%', height: '48px', borderRadius: 'var(--radius-md)', border: '1px solid var(--hairline-strong)', background: 'var(--surface)', color: 'var(--ink)', padding: '0 12px', fontFamily: 'var(--font-mono)', fontSize: '24px', letterSpacing: '0.3em', textAlign: 'center' }}
+          style={{ width: '100%', height: '48px', borderRadius: 'var(--radius-md)', border: 'none', boxShadow: 'var(--clay-pressed)', background: 'var(--surface-sunken)', color: 'var(--ink)', padding: '0 12px', fontFamily: 'var(--font-mono)', fontSize: '24px', letterSpacing: '0.3em', textAlign: 'center' }}
         />
       </div>
 
       {error && <div id="mfa-error" role="alert" className="sign-enter" style={{ padding: '9px 12px', borderRadius: 'var(--radius-md)', background: 'var(--critical-soft)', color: 'var(--critical)', fontSize: 'var(--text-xs)' }}>{error}</div>}
 
-      <button type="submit" disabled={busy || (mode === 'enroll' && !enrollment)} style={{ height: '44px', borderRadius: 'var(--radius-md)', border: 'none', background: busy ? 'var(--ink-faint)' : 'var(--primary)', color: 'var(--on-primary)', fontWeight: 600, fontSize: 'var(--text-sm)', cursor: busy ? 'default' : 'pointer' }}>
+      <button type="submit" disabled={busy || (mode === 'enroll' && !enrollment)} style={{ height: '44px', borderRadius: 'var(--radius-md)', border: 'none', background: busy ? 'var(--ink-faint)' : 'var(--primary)', color: 'var(--on-primary)', fontWeight: 600, fontSize: 'var(--text-sm)', cursor: busy ? 'default' : 'pointer', boxShadow: 'var(--clay-tinted)' }}>
         {busy ? t('common.loading') : t(mode === 'verify' ? 'mfa.verifyAction' : 'mfa.enrollAction')}
       </button>
       <button type="button" onClick={() => onRestart()} style={{ background: 'none', border: 'none', color: 'var(--ink-muted)', fontSize: 'var(--text-xs)', cursor: 'pointer' }}>

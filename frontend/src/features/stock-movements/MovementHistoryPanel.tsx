@@ -25,7 +25,7 @@ function signedQty(type: MovementType, quantity: number): string {
   return quantity > 0 ? `+${quantity}` : `${quantity}`; // GOODS_IN (always +) and ADJUSTMENT (already signed)
 }
 
-const control: React.CSSProperties = { height: '36px', borderRadius: 'var(--radius-md)', border: '1px solid var(--hairline)', background: 'var(--surface)', color: 'var(--ink)', padding: '0 12px', fontSize: 'var(--text-sm)' };
+const control: React.CSSProperties = { height: '36px', borderRadius: 'var(--radius-md)', border: 'none', boxShadow: 'var(--clay-pressed)', background: 'var(--surface-sunken)', color: 'var(--ink)', padding: '0 12px', fontSize: 'var(--text-sm)' };
 
 /** Real, filterable movement history — distinct from the scan-to-record
  * workflow's "this session" outbox list, which only ever shows what this
@@ -89,7 +89,7 @@ export function MovementHistoryPanel() {
 
       {/* Table */}
       {/* A scrolling region must be reachable by keyboard (WCAG 2.1.1). */}
-      <div role="region" aria-label={t('navigation.movements')} tabIndex={0} style={{ background: 'var(--surface)', border: '1px solid var(--hairline)', borderRadius: 'var(--radius-md)', overflow: 'auto', maxHeight: '65vh' }}>
+      <div role="region" aria-label={t('navigation.movements')} tabIndex={0} style={{ background: 'var(--surface)', border: 'none', boxShadow: 'var(--clay-raised)', borderRadius: 'var(--radius-panel)', overflow: 'auto', maxHeight: '65vh' }}>
         <table style={{ width: '100%', borderCollapse: 'collapse' }}>
           <thead>
             <tr>
@@ -134,7 +134,7 @@ export function MovementHistoryPanel() {
       </div>
 
       {movements.isSuccess && rows.length === limit && (
-        <button type="button" onClick={() => setLimit((n) => n + PAGE_SIZE)} style={{ alignSelf: 'center', height: '36px', padding: '0 20px', borderRadius: 'var(--radius-md)', border: '1px solid var(--hairline)', background: 'var(--surface)', color: 'var(--ink)', fontSize: 'var(--text-sm)', cursor: 'pointer' }}>
+        <button type="button" onClick={() => setLimit((n) => n + PAGE_SIZE)} style={{ alignSelf: 'center', height: '36px', padding: '0 20px', borderRadius: 'var(--radius-md)', border: 'none', boxShadow: 'var(--clay-raised-sm)', background: 'var(--surface)', color: 'var(--ink)', fontSize: 'var(--text-sm)', cursor: 'pointer' }}>
           {t('movements.loadMore')}
         </button>
       )}

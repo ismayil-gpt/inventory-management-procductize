@@ -54,12 +54,12 @@ export function ShelfView({ parent, highlightedId, onSelect }: ShelfViewProps) {
   const statusById = new Map((products.data?.items ?? []).map((p) => [p.id, p.status]));
 
   return (
-    <section aria-label={`${t('shelfView.title')} ${parent.designator}`} style={{ background: 'var(--surface)', border: '1px solid var(--hairline)', borderRadius: 'var(--radius-md)', overflow: 'hidden' }}>
+    <section aria-label={`${t('shelfView.title')} ${parent.designator}`} style={{ background: 'var(--surface)', border: 'none', boxShadow: 'var(--clay-raised)', borderRadius: 'var(--radius-panel)', overflow: 'hidden' }}>
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', gap: 'var(--space-3)', padding: '10px 16px', borderBottom: '1px solid var(--hairline)', flexWrap: 'wrap' }}>
         <span style={{ fontSize: 'var(--text-sm)', fontWeight: 600 }}>
           {t('shelfView.title')} <bdi dir="ltr" style={{ fontFamily: 'var(--font-mono)' }}>{parent.designator}</bdi>
         </span>
-        <button type="button" onClick={() => void printRack()} disabled={printing} style={{ display: 'inline-flex', alignItems: 'center', gap: '5px', height: '28px', padding: '0 10px', borderRadius: 'var(--radius-sm)', border: '1px solid var(--hairline)', background: 'var(--surface)', color: 'var(--ink)', fontSize: 'var(--text-xs)', cursor: 'pointer' }}>
+        <button type="button" onClick={() => void printRack()} disabled={printing} style={{ display: 'inline-flex', alignItems: 'center', gap: '5px', height: '28px', padding: '0 10px', borderRadius: 'var(--radius-sm)', border: 'none', boxShadow: 'var(--clay-raised-sm)', background: 'var(--surface)', color: 'var(--ink)', fontSize: 'var(--text-xs)', cursor: 'pointer' }}>
           <Printer size={13} strokeWidth={1.5} aria-hidden /> {printing ? t('common.loading') : t('locations.printRackLabels')}
         </button>
         <span style={{ display: 'flex', gap: 'var(--space-3)', fontSize: 'var(--text-xs)', color: 'var(--ink-muted)' }}>
@@ -73,7 +73,7 @@ export function ShelfView({ parent, highlightedId, onSelect }: ShelfViewProps) {
       </div>
 
       {/* The rack frame: uprights either side, a shelf board under each level. */}
-      <div style={{ padding: 'var(--space-4)', borderInline: '6px solid var(--hairline-strong)', margin: 'var(--space-3) var(--space-4) var(--space-4)', borderRadius: 'var(--radius-sm)' }}>
+      <div style={{ padding: 'var(--space-3) var(--space-4)', borderInline: '8px solid var(--hairline-strong)', margin: 'var(--space-3) var(--space-4) var(--space-4)', borderRadius: 'var(--radius-md)', background: 'var(--surface-sunken)', boxShadow: 'var(--clay-pressed)' }}>
         {shelves.map((shelf, index) => {
           const detail = details[index]?.data;
           const isHighlighted = shelf.id === highlightedId;
@@ -85,8 +85,9 @@ export function ShelfView({ parent, highlightedId, onSelect }: ShelfViewProps) {
               aria-current={isHighlighted ? 'location' : undefined}
               style={{
                 display: 'flex', alignItems: 'stretch', gap: 'var(--space-3)', width: '100%',
-                padding: 'var(--space-2) 0', background: 'transparent', border: 'none',
-                borderBottom: '4px solid var(--hairline-strong)', cursor: 'pointer', textAlign: 'start',
+                padding: 'var(--space-2) var(--space-2) var(--space-3)', marginBlock: '4px', background: 'transparent', border: 'none',
+                // Each level stands on its own rounded shelf board.
+                borderBottom: '5px solid var(--hairline-strong)', borderRadius: 'var(--radius-sm)', cursor: 'pointer', textAlign: 'start',
               }}
             >
               <span
@@ -94,14 +95,14 @@ export function ShelfView({ parent, highlightedId, onSelect }: ShelfViewProps) {
                 className={isHighlighted ? 'sign-location' : undefined}
                 style={{
                   flex: 'none', minWidth: '52px', display: 'grid', placeItems: 'center',
-                  fontFamily: 'var(--font-sign)', fontWeight: 800, fontSize: 'var(--text-base)',
+                  fontFamily: 'var(--font-sign)', fontWeight: 600, fontSize: 'var(--text-base)',
                   borderRadius: 'var(--radius-sign)', padding: '4px 8px',
-                  ...(isHighlighted ? {} : { color: 'var(--ink-muted)', border: '1px solid var(--hairline)' }),
+                  ...(isHighlighted ? {} : { color: 'var(--ink-muted)', background: 'var(--surface)', boxShadow: 'var(--clay-raised-sm)' }),
                 }}
               >
                 {shelf.code}
               </span>
-              <span style={{ flex: 1, minWidth: 0, display: 'flex', flexWrap: 'wrap', gap: '6px', alignItems: 'center', minHeight: '40px', padding: '2px', borderRadius: 'var(--radius-sm)', background: isHighlighted ? 'var(--gantry)' : undefined }}>
+              <span style={{ flex: 1, minWidth: 0, display: 'flex', flexWrap: 'wrap', gap: '6px', alignItems: 'center', minHeight: '40px', padding: '2px', borderRadius: 'var(--radius-sm)', background: isHighlighted ? 'var(--primary-soft)' : undefined }}>
                 {!detail && <span style={{ fontSize: 'var(--text-xs)', color: 'var(--ink-faint)' }}>{t('common.loading')}</span>}
                 {detail && detail.stock.length === 0 && <span style={{ fontSize: 'var(--text-xs)', color: 'var(--ink-faint)' }}>{t('shelfView.empty')}</span>}
                 {detail?.stock.map((row) => {
@@ -113,7 +114,7 @@ export function ShelfView({ parent, highlightedId, onSelect }: ShelfViewProps) {
                       style={{
                         display: 'inline-flex', alignItems: 'center', gap: '6px', maxWidth: '220px',
                         padding: '4px 8px', borderRadius: 'var(--radius-chip)', fontSize: 'var(--text-xs)',
-                        background: tone.fill, color: 'var(--ink)', border: `1px solid ${tone.edge}`,
+                        background: tone.fill, color: 'var(--ink)', border: `1px solid ${tone.edge}`, boxShadow: 'var(--clay-raised-sm)',
                       }}
                     >
                       <span style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{name(row.nameEn, row.nameAr)}</span>
