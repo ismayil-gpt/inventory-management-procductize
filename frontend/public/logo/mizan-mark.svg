@@ -1,16 +1,11 @@
-<svg viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Mizan">
+<svg viewBox="0 0 120 120" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Mizan">
   <title>Mizan mark</title>
-  <!-- A balance scale (mīzān) drawn as an airfield location sign: black field,
-       inset yellow border, yellow legend. Same drawing as MizanMark.tsx. -->
-  <rect width="64" height="64" rx="14" fill="#121412"/>
-  <rect x="4.5" y="4.5" width="55" height="55" rx="10.5" fill="none" stroke="#F2C230" stroke-width="2.5"/>
-  <g fill="#F2C230" stroke="#F2C230" stroke-linecap="round" stroke-linejoin="round">
-    <rect x="14" y="19.5" width="36" height="3.5" rx="1.75" stroke="none"/>
-    <rect x="30.25" y="21" width="3.5" height="23" stroke="none"/>
-    <rect x="22" y="43" width="20" height="4" rx="2" stroke="none"/>
-    <path d="M17 23 L11.5 33 M17 23 L22.5 33 M47 23 L41.5 33 M47 23 L52.5 33" fill="none" stroke-width="1.8"/>
-    <path d="M9.5 33 h15 a7.5 5.5 0 0 1 -15 0 z M39.5 33 h15 a7.5 5.5 0 0 1 -15 0 z" stroke="none"/>
+  <!-- The scannable carton: a navy carton, lit from above, with a barcode on its side, on a sign-yellow tile. -->
+  <rect width="120" height="120" rx="32" fill="#F4C64A"/>
+  <g stroke-width="2.5" stroke-linejoin="round">
+    <polygon points="27,40 60,58.86 60,98.86 27,80" fill="#2A3A52" stroke="#2A3A52"/>
+    <polygon points="60,58.86 93,40 93,80 60,98.86" fill="#1F2C40" stroke="#1F2C40"/>
+    <polygon points="60,21.14 93,40 60,58.86 27,40" fill="#3B4F6E" stroke="#3B4F6E"/>
   </g>
-  <circle cx="32" cy="21.25" r="3.6" fill="#F2C230"/>
-  <circle cx="32" cy="21.25" r="1.4" fill="#121412"/>
+  <g transform="matrix(1 -0.5714 0 1 60 58.86)" fill="#F4C64A"><rect x="6" y="9" width="4" height="24"/><rect x="13" y="9" width="3" height="24"/><rect x="19" y="9" width="5" height="24"/><rect x="27" y="9" width="3" height="24"/></g>
 </svg>

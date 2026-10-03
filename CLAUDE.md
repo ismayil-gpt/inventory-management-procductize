@@ -825,7 +825,11 @@ Natural-language queries over stock. Architecture: classify intent → run a str
 > buttons and the shell (rail, top bar, status strip) are raised slabs floating on the ground;
 > fields, tracks, switches and table headers are pressed in; signs are tiles of coloured clay on a
 > navy clay gantry, day and night. Tokens: `--clay-raised`, `--clay-raised-sm`, `--clay-pressed`,
-> `--clay-tinted`, `--clay-gantry`, `--radius-panel`, `--shell-gap`, `--motion-squish`. Where §9.2–§9.9
+> `--clay-tinted`, `--clay-gantry`, `--radius-panel`, `--shell-gap`, `--motion-squish`.
+> **Logo (2026-10-03):** the "scannable carton" — a navy carton in three-quarter view with four
+> sign-yellow barcode bars on its shaded side, on a sign-yellow tile (artifact
+> `FeThJp2bPS3iYbrorAeCRx`). Colours are the fixed `--brand-*` tokens, identical in every theme.
+> Component `design-system/brand-mark/MizanMark.tsx`; files in `frontend/public/logo/`. Where §9.2–§9.9
 > below disagree with this note, this note wins; the values in `design-tokens.css` are authoritative.
 >
 > **Revised client decision, 2026-10-01 — "Airfield" edition.** The client approved the

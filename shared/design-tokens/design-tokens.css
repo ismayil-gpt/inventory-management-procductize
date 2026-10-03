@@ -208,6 +208,14 @@
 }
 
 :root {
+  /* ---- Brand mark (2026-10-03): the scannable carton. Fixed in every theme
+     so the logo is identical on screen, in the favicon and in print. ---- */
+  --brand-tile:      #F4C64A;   /* sign yellow */
+  --brand-box-top:   #3B4F6E;   /* lit face */
+  --brand-box-left:  #2A3A52;
+  --brand-box-right: #1F2C40;   /* shaded face, carries the barcode */
+  --brand-code:      #F4C64A;
+
   /* ---- Typography (§9.3). Self-hosted via @fontsource — no external CDN.
      Figtree carries the interface; Fredoka's rounded strokes set the sign
      legends, headings and figures to match the clay; DM Mono for codes.

@@ -1198,3 +1198,13 @@ with every remaining square corner rounded. Branch `feature/design-clay-edition`
   keyboard, focus-visible (tightened: shadows no longer count as focus), tablet 768/1024 and
   preferences all pass. Contrast table regenerated from the new tokens: all pairs pass.
 - `CLAUDE.md` §9 records the decision; where the older §9 text disagrees, the clay note wins.
+
+### 2026-10-03 (later) — New logo: the scannable carton
+
+Three rounds of concepts (balance marks, then inventory pictures, then dimensional marks and
+monograms). The client chose the **scannable carton**: a navy carton in three-quarter view, lit
+from above, with a barcode on its shaded side, on a sign-yellow tile. Four bold bars instead of a
+realistic code so it still reads at 16px. Colours are new fixed `--brand-*` tokens (the logo does
+not change with the theme). Updated: `MizanMark.tsx` (menu rail, sign-in), `public/logo/`
+`mizan-mark.svg` (also the favicon), `mizan-mark-mono.svg`, `mizan-logo.svg`. The lockup's names
+are live text in Fredoka and IBM Plex Sans Arabic with fallbacks, as before.
