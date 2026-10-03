@@ -1208,3 +1208,12 @@ realistic code so it still reads at 16px. Colours are new fixed `--brand-*` toke
 not change with the theme). Updated: `MizanMark.tsx` (menu rail, sign-in), `public/logo/`
 `mizan-mark.svg` (also the favicon), `mizan-mark-mono.svg`, `mizan-logo.svg`. The lockup's names
 are live text in Fredoka and IBM Plex Sans Arabic with fallbacks, as before.
+
+### 2026-10-03 (later) — Scrolling restyled
+
+The grey system scrollbars (with arrow buttons, one cutting through the rounded menu rail) are
+replaced by slim rounded clay thumbs in a clear track, in both themes (`styles/global.css`). The
+rail's thumb appears only on hover or keyboard focus. Inner scroll areas (rail, tables, dialogs)
+no longer drag the page along at their end. The work area's content now fades softly under the
+top bar and status strip instead of being sliced by a hard edge (a mask, nothing painted), and
+scrolls smoothly unless reduced motion is on. Axe, keyboard and tablet tests pass.
