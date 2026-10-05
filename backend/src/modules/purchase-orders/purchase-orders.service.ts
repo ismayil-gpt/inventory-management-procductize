@@ -1,5 +1,6 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import PDFDocument from 'pdfkit';
+import { drawBrandMark } from '../../documents/pdf-brand-mark';
 import type { Supplier } from '@prisma/client';
 import { PrismaService } from '../../database/prisma.service';
 import { EmailService } from '../../email/email.service';
@@ -113,11 +114,10 @@ export class PurchaseOrdersService {
       doc.on('error', reject);
     });
 
-    // Header is a location sign (brand, 2026-10-01): black panel, yellow legend.
-    doc.roundedRect(50, 44, 128, 36, 7).fill('#121412');
-    doc.roundedRect(53, 47, 122, 30, 5).lineWidth(1.5).stroke('#F2C230');
-    doc.fillColor('#F2C230').fontSize(20).font('Helvetica-Bold').text('MIZAN', 50, 54, { width: 128, align: 'center' });
-    doc.fillColor('#4C554F').fontSize(9).font('Helvetica').text('Inventory', 50, 86);
+    // Header: the brand mark (the scannable carton, 2026-10-03) and the product name.
+    drawBrandMark(doc, 50, 44, 44);
+    doc.fillColor('#1C2737').fontSize(22).font('Helvetica-Bold').text('Mizan', 104, 50);
+    doc.fillColor('#4C554F').fontSize(9).font('Helvetica').text('Inventory', 104, 75);
 
     doc.fillColor('#141815').fontSize(16).font('Helvetica-Bold').text('PURCHASE ORDER', 50, 120);
     doc.fontSize(10).font('Helvetica').fillColor('#141815');
