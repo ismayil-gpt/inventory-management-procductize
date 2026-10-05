@@ -99,6 +99,8 @@ export function UsersPage() {
                         <Trash2 size={13} />
                       </button>
                     )}
+                    {/* You cannot delete yourself; keep the button's space so Edit lines up down the column. */}
+                    {u.id === currentUserId && <span aria-hidden style={{ width: '30px', flex: 'none' }} />}
                   </div>
                 </td>
               </tr>

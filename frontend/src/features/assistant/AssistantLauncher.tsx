@@ -2,11 +2,9 @@ import { useTranslation } from 'react-i18next';
 import { MessageCircle } from 'lucide-react';
 import { useAssistantUi } from './assistant.store';
 
-// Persistent floating trigger, bottom corner — the common chat-widget convention
-// the user asked for. `insetInlineEnd` (§10) flips it to the bottom-left in RTL
-// automatically. A circle is the one deliberate exception to §9.5's radius cap —
-// same reasoning as the gold accent (§9.1): one bold, recognisable element, tokens
-// throughout, no gradient/bubble styling.
+// Persistent floating trigger in the reading-end corner, just above the status
+// strip (`insetInlineEnd` flips it to the left in Arabic, §10). A yellow clay
+// sign tile, not a round chat bubble (§9.2 — no capsule shapes).
 export function AssistantLauncher() {
   const { t } = useTranslation();
   const isOpen = useAssistantUi((s) => s.isOpen);
@@ -23,24 +21,23 @@ export function AssistantLauncher() {
       className="float-enter"
       style={{
         position: 'fixed',
-        insetBlockEnd: 'calc(var(--status-strip-height) + var(--space-4))',
-        insetInlineEnd: 'var(--space-6)',
+        insetBlockEnd: 'calc(var(--status-strip-height) + 2 * var(--shell-gap) + var(--space-2))',
+        insetInlineEnd: 'calc(var(--shell-gap) + var(--space-4))',
         width: '52px',
         height: '52px',
-        // A location sign tile, not a round bubble (§9.2 — no capsule shapes).
         borderRadius: 'var(--radius-md)',
-        border: '2px solid var(--sign-line)',
+        border: 'none',
         background: 'var(--sign)',
         color: 'var(--sign-legend)',
         display: 'inline-flex',
         alignItems: 'center',
         justifyContent: 'center',
         cursor: 'pointer',
-        boxShadow: 'var(--shadow-floating)',
+        boxShadow: 'var(--clay-tinted), 0 12px 24px -10px var(--clay-drop)',
         zIndex: 40,
       }}
     >
-      <MessageCircle size={22} strokeWidth={1.5} />
+      <MessageCircle size={22} strokeWidth={1.75} aria-hidden />
     </button>
   );
 }

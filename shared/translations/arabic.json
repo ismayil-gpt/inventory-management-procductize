@@ -16,7 +16,20 @@
     "sourcesSummary": "مبنية على سجلات عددها {{count}}",
     "suggestLow": "ما المنتجات منخفضة المخزون؟",
     "suggestPending": "ما الذي ينتظر الموافقة؟",
-    "suggestCoffee": "كم لدينا من القهوة؟"
+    "suggestCoffee": "كم لدينا من القهوة؟",
+    "subtitle": "إجابات من سجلات مخزونك",
+    "lookingUp": "جارٍ البحث في سجلات المخزون…",
+    "retry": "اسأل مرة أخرى",
+    "clear": "بدء محادثة جديدة",
+    "figure": {
+      "totalStock": "المتوفر",
+      "reorderPoint": "حد إعادة الطلب",
+      "status": "الحالة",
+      "suggestedQty": "الكمية المقترحة",
+      "reasonCode": "السبب",
+      "quantity": "الكمية",
+      "type": "الحركة"
+    }
   },
   "roles": {
     "ADMIN": "مدير النظام",
@@ -314,7 +327,8 @@
     "print": "طباعة",
     "language": "اللغة",
     "theme": "المظهر",
-    "logout": "تسجيل الخروج"
+    "logout": "تسجيل الخروج",
+    "close": "إغلاق"
   },
   "navigation": {
     "dashboard": "لوحة المتابعة",

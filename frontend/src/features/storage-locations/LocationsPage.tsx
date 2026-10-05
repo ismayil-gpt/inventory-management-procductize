@@ -145,11 +145,11 @@ export function LocationsPage() {
               onClick={(e) => { e.stopPropagation(); setDeleting({ id: node.id, designator: node.designator }); }}
               aria-label={t('common.delete')}
               title={t('common.delete')}
-              style={{ display: 'inline-flex', alignItems: 'center', justifyContent: 'center', height: '22px', width: '22px', borderRadius: 'var(--radius-sm)', border: 'none', background: 'transparent', color: 'var(--ink-faint)', cursor: 'pointer', flexShrink: 0 }}
+              style={{ display: 'inline-flex', alignItems: 'center', justifyContent: 'center', height: '28px', width: '28px', borderRadius: 'var(--radius-sm)', border: 'none', background: 'transparent', color: 'var(--ink-faint)', cursor: 'pointer', flexShrink: 0 }}
               onMouseEnter={(e) => (e.currentTarget.style.color = 'var(--critical)')}
               onMouseLeave={(e) => (e.currentTarget.style.color = 'var(--ink-faint)')}
             >
-              <Trash2 size={13} />
+              <Trash2 size={15} strokeWidth={1.5} aria-hidden />
             </button>
           )}
         </div>
