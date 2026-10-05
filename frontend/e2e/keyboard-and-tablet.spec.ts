@@ -16,11 +16,11 @@ async function focusWithoutIndicator(page: Page, presses = 45): Promise<string[]
       if (!el || el === document.body) return null;
       const style = getComputedStyle(el);
       const outline = style.outlineStyle !== 'none' && parseFloat(style.outlineWidth) > 0;
-      const ring = style.boxShadow && style.boxShadow !== 'none';
+      // Box shadows do not count: every clay surface carries one at rest, so only an outline proves focus.
       // A ring on the field's own wrapper (e.g. the top-bar search box) is equally visible.
       const wrapper = el.parentElement ? getComputedStyle(el.parentElement) : null;
       const wrapperRing = wrapper && wrapper.outlineStyle !== 'none' && parseFloat(wrapper.outlineWidth) > 0;
-      if (outline || ring || wrapperRing) return null;
+      if (outline || wrapperRing) return null;
       const name = (el.getAttribute('aria-label') || el.textContent || el.getAttribute('placeholder') || '').trim().slice(0, 30);
       return `${el.tagName.toLowerCase()}${el.id ? '#' + el.id : ''} "${name}"`;
     });

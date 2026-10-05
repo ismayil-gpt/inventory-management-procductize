@@ -49,10 +49,12 @@ export function BarcodeInput({ onSubmit, busy = false, error = null, label }: Ba
       onClick={() => chooseMode(m)}
       style={{
         display: 'inline-flex', alignItems: 'center', gap: '6px',
-        padding: '7px 12px', fontSize: 'var(--text-xs)', fontWeight: 500, cursor: 'pointer',
-        border: 'none', background: mode === m ? 'var(--surface)' : 'transparent',
-        color: mode === m ? 'var(--primary-ink)' : 'var(--ink-muted)',
-        borderBottom: mode === m ? '2px solid var(--primary-ink)' : '2px solid transparent',
+        padding: '7px 14px', fontSize: 'var(--text-xs)', fontWeight: 600, cursor: 'pointer',
+        border: 'none', borderRadius: 'var(--radius-sm)',
+        // The chosen mode rises out of the pressed-in switch.
+        background: mode === m ? 'var(--surface)' : 'transparent',
+        boxShadow: mode === m ? 'var(--clay-raised-sm)' : 'none',
+        color: mode === m ? 'var(--ink)' : 'var(--ink-muted)',
       }}
     >
       {icon}
@@ -61,13 +63,13 @@ export function BarcodeInput({ onSubmit, busy = false, error = null, label }: Ba
   );
 
   return (
-    <section style={{ background: 'var(--surface)', border: '1px solid var(--hairline)', borderRadius: 'var(--radius-md)' }}>
+    <section style={{ background: 'var(--surface)', border: 'none', boxShadow: 'var(--clay-raised)', borderRadius: 'var(--radius-panel)' }}>
       {label && (
         <div style={{ padding: '10px 16px 0', fontSize: 'var(--text-2xs)', letterSpacing: 'var(--tracking-label)', textTransform: 'uppercase', color: 'var(--ink-muted)' }}>
           {label}
         </div>
       )}
-      <div style={{ display: 'flex', gap: '2px', padding: '8px 12px 0', borderBottom: '1px solid var(--hairline)' }}>
+      <div style={{ display: 'flex', width: 'fit-content', gap: '4px', margin: '12px 16px 0', padding: '4px', borderRadius: 'var(--radius-md)', background: 'var(--surface-sunken)', boxShadow: 'var(--clay-pressed)' }}>
         {tab('manual', <Keyboard size={15} strokeWidth={1.5} />, t('barcode.manualMode'))}
         {tab('scan', <ScanLine size={15} strokeWidth={1.5} />, t('barcode.scanMode'))}
       </div>
@@ -82,8 +84,8 @@ export function BarcodeInput({ onSubmit, busy = false, error = null, label }: Ba
               onChange={(e) => setValue(e.target.value)}
               placeholder={t('barcode.manualPlaceholder')}
               style={{
-                flex: 1, height: '36px', borderRadius: 'var(--radius-md)', border: '1px solid var(--hairline)',
-                background: 'var(--surface)', color: 'var(--ink)', padding: '0 12px',
+                flex: 1, height: '36px', borderRadius: 'var(--radius-md)', border: 'none', boxShadow: 'var(--clay-pressed)',
+                background: 'var(--surface-sunken)', color: 'var(--ink)', padding: '0 12px',
                 fontSize: 'var(--text-sm)', fontFamily: 'var(--font-mono)',
               }}
             />
@@ -92,7 +94,7 @@ export function BarcodeInput({ onSubmit, busy = false, error = null, label }: Ba
               disabled={busy || !value.trim()}
               style={{
                 display: 'inline-flex', alignItems: 'center', gap: '6px', height: '36px', padding: '0 16px',
-                borderRadius: 'var(--radius-md)', border: 'none',
+                borderRadius: 'var(--radius-md)', border: 'none', boxShadow: 'var(--clay-tinted)',
                 background: busy || !value.trim() ? 'var(--ink-faint)' : 'var(--primary)',
                 color: 'var(--on-primary)', fontSize: 'var(--text-sm)', fontWeight: 500,
                 cursor: busy || !value.trim() ? 'default' : 'pointer',
@@ -112,7 +114,8 @@ export function BarcodeInput({ onSubmit, busy = false, error = null, label }: Ba
             style={{
               width: '100%', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '8px',
               padding: 'var(--space-6)', borderRadius: 'var(--radius-md)', textAlign: 'center', cursor: 'pointer',
-              border: holdsScanner ? '2px solid var(--sign-line)' : '1px dashed var(--hairline-strong)',
+              border: holdsScanner ? 'none' : '2px dashed var(--hairline-strong)',
+              boxShadow: holdsScanner ? 'var(--clay-gantry)' : 'none',
               background: holdsScanner ? 'var(--gantry)' : 'transparent',
               color: holdsScanner ? 'var(--gantry-ink)' : 'var(--ink-muted)',
             }}

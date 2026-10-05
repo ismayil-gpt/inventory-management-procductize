@@ -53,7 +53,7 @@ export function PurchaseOrdersPage() {
 
       {error && <div role="alert" className="sign-stop" style={{ padding: '10px 14px', fontSize: 'var(--text-sm)' }}>{error}</div>}
 
-      <div style={{ background: 'var(--surface)', border: '1px solid var(--hairline)', borderRadius: 'var(--radius-md)', overflow: 'auto' }}>
+      <div style={{ background: 'var(--surface)', border: 'none', boxShadow: 'var(--clay-raised)', borderRadius: 'var(--radius-panel)', overflow: 'auto' }}>
         <table style={{ width: '100%', borderCollapse: 'collapse' }}>
           <thead>
             <tr>
@@ -84,7 +84,7 @@ export function PurchaseOrdersPage() {
                     type="button"
                     onClick={() => void viewPdf(po.id)}
                     disabled={openingId === po.id}
-                    style={{ display: 'inline-flex', alignItems: 'center', gap: '6px', height: '32px', padding: '0 12px', borderRadius: 'var(--radius-md)', border: '1px solid var(--hairline-strong)', background: 'var(--surface)', color: 'var(--ink)', fontSize: 'var(--text-xs)', fontWeight: 600, cursor: 'pointer', whiteSpace: 'nowrap' }}
+                    style={{ display: 'inline-flex', alignItems: 'center', gap: '6px', height: '32px', padding: '0 12px', borderRadius: 'var(--radius-md)', border: 'none', boxShadow: 'var(--clay-raised-sm)', background: 'var(--surface)', color: 'var(--ink)', fontSize: 'var(--text-xs)', fontWeight: 600, cursor: 'pointer', whiteSpace: 'nowrap' }}
                   >
                     <FileText size={14} strokeWidth={1.5} aria-hidden /> {openingId === po.id ? t('common.loading') : t('purchaseOrders.viewPdf')}
                   </button>

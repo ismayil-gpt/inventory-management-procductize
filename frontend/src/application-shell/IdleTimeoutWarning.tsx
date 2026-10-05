@@ -15,7 +15,7 @@ export function IdleTimeoutWarning({ secondsLeft, onStay }: { secondsLeft: numbe
         aria-labelledby="idle-timeout-title"
         aria-describedby="idle-timeout-body"
         className="float-enter"
-        style={{ width: 'min(420px, 100%)', background: 'var(--surface)', border: '1px solid var(--hairline)', borderRadius: 'var(--radius-lg)', boxShadow: 'var(--shadow-floating)', padding: 'var(--space-6)', display: 'flex', flexDirection: 'column', gap: 'var(--space-4)' }}
+        style={{ width: 'min(420px, 100%)', background: 'var(--surface)', border: 'none', borderRadius: 'var(--radius-lg)', boxShadow: 'var(--shadow-floating)', padding: 'var(--space-6)', display: 'flex', flexDirection: 'column', gap: 'var(--space-4)' }}
       >
         <h2 id="idle-timeout-title" style={{ margin: 0, fontSize: 'var(--text-lg)', fontWeight: 600 }}>{t('idleTimeout.title')}</h2>
         <p id="idle-timeout-body" style={{ margin: 0, fontSize: 'var(--text-base)', color: 'var(--ink-muted)' }}>
@@ -25,7 +25,7 @@ export function IdleTimeoutWarning({ secondsLeft, onStay }: { secondsLeft: numbe
           type="button"
           autoFocus
           onClick={onStay}
-          style={{ height: '44px', borderRadius: 'var(--radius-md)', border: 'none', background: 'var(--sign-go)', color: 'var(--sign-on-go)', fontWeight: 600, fontSize: 'var(--text-sm)', cursor: 'pointer' }}
+          style={{ height: '44px', borderRadius: 'var(--radius-md)', border: 'none', boxShadow: 'var(--clay-tinted)', background: 'var(--sign-go)', color: 'var(--sign-on-go)', fontWeight: 600, fontSize: 'var(--text-sm)', cursor: 'pointer' }}
         >
           {t('idleTimeout.stay')}
         </button>

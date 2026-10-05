@@ -2,7 +2,8 @@
 @tailwind components;
 @tailwind utilities;
 
-/* Base — the interface is an instrument: quiet, dense, precise (§9.1). */
+/* Base — the interface is an instrument moulded in clay: soft surfaces,
+   precise content (§9.1, Clay edition 2026-10-03). */
 html,
 body,
 #root {
@@ -18,6 +19,75 @@ body {
   line-height: var(--leading-sm);
   -webkit-font-smoothing: antialiased;
   text-rendering: optimizeLegibility;
+}
+
+/* ---------------------------------------------------------------------------
+ * Scrollbars — a slim rounded clay thumb floating in a clear track, never the
+ * grey system bar with arrow buttons. The thumb is inset from the track edge
+ * (transparent border + padding-box) so it never touches a rounded corner.
+ * ------------------------------------------------------------------------ */
+::-webkit-scrollbar {
+  width: 12px;
+  height: 12px;
+}
+::-webkit-scrollbar-track,
+::-webkit-scrollbar-corner {
+  background: transparent;
+}
+::-webkit-scrollbar-button {
+  display: none;
+  width: 0;
+  height: 0;
+}
+::-webkit-scrollbar-thumb {
+  background-color: var(--hairline-strong);
+  background-clip: padding-box;
+  border: 3px solid transparent;
+  border-radius: 999px;
+  min-height: 40px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background-color: var(--ink-faint);
+}
+::-webkit-scrollbar-thumb:active {
+  background-color: var(--ink-muted);
+}
+/* Firefox has no thumb shape control; a thin bar in the same colours. */
+@supports not selector(::-webkit-scrollbar) {
+  * {
+    scrollbar-width: thin;
+    scrollbar-color: var(--hairline-strong) transparent;
+  }
+}
+
+/* The menu rail only shows its thumb while the pointer or focus is on it. */
+nav[aria-label='Primary']::-webkit-scrollbar-thumb {
+  background-color: transparent;
+}
+nav[aria-label='Primary']:hover::-webkit-scrollbar-thumb,
+nav[aria-label='Primary']:focus-within::-webkit-scrollbar-thumb {
+  background-color: var(--hairline-strong);
+}
+
+/* Inner scroll areas (rail, tables, dialogs) keep the wheel to themselves
+   instead of dragging the page along when they reach their end. */
+nav[aria-label='Primary'],
+[role='region'],
+[role='dialog'] {
+  overscroll-behavior: contain;
+}
+
+/* The work area: content fades out under the top bar and status strip rather
+   than being sliced off by a hard straight edge. A mask, not a coloured
+   gradient — nothing is painted, the content just softens at the edges. */
+.shell-scroll {
+  -webkit-mask-image: linear-gradient(to bottom, transparent 0, #000 var(--space-4), #000 calc(100% - var(--space-4)), transparent 100%);
+  mask-image: linear-gradient(to bottom, transparent 0, #000 var(--space-4), #000 calc(100% - var(--space-4)), transparent 100%);
+}
+@media (prefers-reduced-motion: no-preference) {
+  .shell-scroll {
+    scroll-behavior: smooth;
+  }
 }
 
 /* Arabic leads with Plex Sans Arabic so Latin fallbacks never set the rhythm. */
@@ -104,9 +174,25 @@ button:not(:disabled):active {
   transform: scale(0.97);
 }
 
-/* Rail links: inactive items warm on hover; the sliding sign marks the active one. */
+/* Rail links: inactive items rise out of the clay on hover; the sliding
+   sign marks the active one. */
 .rail-link:not(.active):hover {
-  background: var(--surface-sunken);
+  box-shadow: var(--clay-raised-sm);
+  color: var(--ink);
+}
+
+/* Tables sit inside raised panels. The header row is a pressed-in well
+   with rounded ends, so no square band crosses a rounded panel. */
+thead tr {
+  box-shadow: var(--clay-pressed);
+}
+thead th:first-child {
+  border-start-start-radius: var(--radius-sm);
+  border-end-start-radius: var(--radius-sm);
+}
+thead th:last-child {
+  border-start-end-radius: var(--radius-sm);
+  border-end-end-radius: var(--radius-sm);
 }
 
 /* Table rows warm on hover rather than snapping. */
@@ -148,41 +234,43 @@ tbody tr {
 }
 
 /* ---------------------------------------------------------------------------
- * Signs — the one bold element (§9.6). Three types, three meanings.
+ * Signs — the one bold element (§9.6). Three types, three meanings, each a
+ * tile of coloured clay with its own highlight and shade.
  * ------------------------------------------------------------------------ */
 .sign-location {
   background: var(--sign);
   color: var(--sign-legend);
-  border: 3px solid var(--sign-line);
+  border: none;
   border-radius: var(--radius-sign);
+  box-shadow: var(--clay-tinted);
   font-family: var(--font-sign);
-  font-weight: 800;
+  font-weight: 600;
 }
 .sign-go {
   background: var(--sign-go);
   color: var(--sign-on-go);
   border-radius: var(--radius-sign);
+  box-shadow: var(--clay-tinted);
   font-weight: 600;
 }
 .sign-stop {
   background: var(--sign-stop);
   color: var(--sign-on-stop);
   border-radius: var(--radius-sign);
-  outline: 2px solid var(--sign-on-stop);
-  outline-offset: -5px;
+  box-shadow: var(--clay-tinted);
   font-weight: 600;
 }
 
-/* A sign that has just changed swings in from its top edge, like a panel
-   hung from a gantry settling after being swapped. */
-@keyframes mizan-sign-swing {
-  0%   { opacity: 0; transform: perspective(600px) rotateX(-70deg); }
-  70%  { opacity: 1; transform: perspective(600px) rotateX(6deg); }
+/* A sign that has just changed is pressed into place like a clay tile:
+   it lands squashed, overshoots a little, then settles. */
+@keyframes mizan-sign-squish {
+  0%   { opacity: 0; transform: scale(0.6, 0.4); }
+  55%  { opacity: 1; transform: scale(1.06, 0.92); }
   100% { transform: none; }
 }
 .sign-enter {
-  transform-origin: top center;
-  animation: mizan-sign-swing var(--motion-medium) var(--motion-easing) both;
+  transform-origin: center bottom;
+  animation: mizan-sign-squish calc(var(--motion-medium) * 1.6) var(--motion-squish) both;
 }
 
 /* Split-flap cells: each character drops from the top half as it ticks. */
@@ -198,7 +286,7 @@ tbody tr {
   animation: mizan-flap var(--motion-flap-step) linear both;
 }
 
-/* "Listening" indicator — a square lamp that blinks like an apron beacon. */
+/* "Listening" indicator — a small rounded lamp that blinks like an apron beacon. */
 @keyframes mizan-beacon {
   0%, 55%  { opacity: 1; }
   60%, 100% { opacity: 0.2; }
@@ -207,7 +295,7 @@ tbody tr {
   width: 8px;
   height: 8px;
   border-radius: var(--radius-dot);
-  background: var(--sign-legend);
+  background: var(--sign);
   display: inline-block;
   animation: mizan-beacon 1.6s steps(1, end) infinite;
 }

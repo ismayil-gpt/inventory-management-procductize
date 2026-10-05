@@ -32,11 +32,11 @@ export function CycleCountPage() {
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--space-4)' }}>
       <div>
-        <button type="button" onClick={() => void start()} style={{ display: 'inline-flex', alignItems: 'center', gap: '6px', height: '36px', padding: '0 14px', borderRadius: 'var(--radius-md)', border: 'none', background: 'var(--primary)', color: 'var(--on-primary)', fontWeight: 500, fontSize: 'var(--text-sm)', cursor: 'pointer' }}>
+        <button type="button" onClick={() => void start()} style={{ display: 'inline-flex', alignItems: 'center', gap: '6px', height: '36px', padding: '0 14px', borderRadius: 'var(--radius-md)', border: 'none', boxShadow: 'var(--clay-tinted)', background: 'var(--primary)', color: 'var(--on-primary)', fontWeight: 500, fontSize: 'var(--text-sm)', cursor: 'pointer' }}>
           <Plus size={16} strokeWidth={1.5} /> {t('cycleCount.start')}
         </button>
       </div>
-      <div style={{ background: 'var(--surface)', border: '1px solid var(--hairline)', borderRadius: 'var(--radius-md)', overflow: 'auto' }}>
+      <div style={{ background: 'var(--surface)', border: 'none', boxShadow: 'var(--clay-raised)', borderRadius: 'var(--radius-panel)', overflow: 'auto' }}>
         <table style={{ width: '100%', borderCollapse: 'collapse' }}>
           <thead><tr><th style={th}>{t('cycleCount.session')}</th><th style={th}>{t('cycleCount.note')}</th><th style={{ ...th, textAlign: 'end' }}>{t('cycleCount.lines')}</th><th style={th}>{t('purchaseOrders.status')}</th><th style={th}></th></tr></thead>
           <tbody>
@@ -47,7 +47,7 @@ export function CycleCountPage() {
                 <td style={{ ...td, textAlign: 'end' }} className="tabular">{s.lineCount}</td>
                 <td style={td}><span style={{ fontSize: 'var(--text-xs)', color: s.status === 'OPEN' ? 'var(--warn)' : 'var(--ink-muted)' }}>{t(`cycleCount.status.${s.status}`)}</span></td>
                 <td style={{ ...td, textAlign: 'end' }}>
-                  <button type="button" onClick={() => void open(s.id)} style={{ height: '30px', padding: '0 12px', borderRadius: 'var(--radius-sm)', border: '1px solid var(--hairline)', background: 'var(--surface)', color: 'var(--ink)', fontSize: 'var(--text-xs)', cursor: 'pointer' }}>{s.status === 'OPEN' ? t('cycleCount.continue') : t('cycleCount.view')}</button>
+                  <button type="button" onClick={() => void open(s.id)} style={{ height: '30px', padding: '0 12px', borderRadius: 'var(--radius-sm)', border: 'none', boxShadow: 'var(--clay-raised-sm)', background: 'var(--surface)', color: 'var(--ink)', fontSize: 'var(--text-xs)', cursor: 'pointer' }}>{s.status === 'OPEN' ? t('cycleCount.continue') : t('cycleCount.view')}</button>
                 </td>
               </tr>
             ))}
@@ -88,7 +88,7 @@ function CycleCountSession({ report, setReport, onExit }: { report: CycleCountRe
     finally { setBusy(false); }
   };
 
-  const control: React.CSSProperties = { height: '36px', borderRadius: 'var(--radius-md)', border: '1px solid var(--hairline)', background: 'var(--surface)', color: 'var(--ink)', padding: '0 12px', fontSize: 'var(--text-sm)' };
+  const control: React.CSSProperties = { height: '36px', borderRadius: 'var(--radius-md)', border: 'none', boxShadow: 'var(--clay-pressed)', background: 'var(--surface-sunken)', color: 'var(--ink)', padding: '0 12px', fontSize: 'var(--text-sm)' };
   const btn: React.CSSProperties = { display: 'inline-flex', alignItems: 'center', gap: '6px', height: '36px', padding: '0 14px', borderRadius: 'var(--radius-md)', fontSize: 'var(--text-sm)', cursor: 'pointer' };
   const th: React.CSSProperties = { textAlign: 'start', fontSize: 'var(--text-2xs)', letterSpacing: 'var(--tracking-label)', textTransform: 'uppercase', color: 'var(--ink-muted)', fontWeight: 500, padding: '8px 12px', background: 'var(--surface-sunken)' };
   const td: React.CSSProperties = { padding: '0 12px', height: '40px', fontSize: 'var(--text-sm)', borderTop: '1px solid var(--hairline)' };
@@ -105,23 +105,23 @@ function CycleCountSession({ report, setReport, onExit }: { report: CycleCountRe
       {isOpen && (
         <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 'var(--space-3)' }}>
           {!loc ? <BarcodeInput label={t('cycleCount.scanLocation')} onSubmit={resolveLoc} /> : (
-            <div style={{ background: 'var(--surface)', border: '1px solid var(--hairline)', borderRadius: 'var(--radius-md)', padding: 'var(--space-4)', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+            <div style={{ background: 'var(--surface)', border: 'none', boxShadow: 'var(--clay-raised)', borderRadius: 'var(--radius-panel)', padding: 'var(--space-4)', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
               <LocationChip designator={loc.designator} />
               <button type="button" onClick={() => setLoc(null)} style={{ background: 'none', border: 'none', color: 'var(--primary-ink)', fontSize: 'var(--text-xs)', cursor: 'pointer' }}>{t('movements.changeLocation')}</button>
             </div>
           )}
           {loc && (product ? (
-            <div style={{ background: 'var(--surface)', border: '1px solid var(--hairline)', borderRadius: 'var(--radius-md)', padding: 'var(--space-4)', display: 'flex', alignItems: 'center', gap: 'var(--space-3)' }}>
+            <div style={{ background: 'var(--surface)', border: 'none', boxShadow: 'var(--clay-raised)', borderRadius: 'var(--radius-panel)', padding: 'var(--space-4)', display: 'flex', alignItems: 'center', gap: 'var(--space-3)' }}>
               <div style={{ flex: 1, minWidth: 0 }}><div style={{ fontSize: 'var(--text-sm)', fontWeight: 500 }}>{name(product.nameEn, product.nameAr)}</div><div dir="ltr" style={{ fontFamily: 'var(--font-mono)', fontSize: 'var(--text-2xs)', color: 'var(--ink-muted)' }}>{product.sku}</div></div>
               <input type="number" min={0} value={counted} onChange={(e) => setCounted(e.target.value)} placeholder={t('cycleCount.counted')} className="tabular" style={{ ...control, width: '90px' }} autoFocus />
-              <button type="button" onClick={() => void record()} disabled={busy || counted === ''} style={{ ...btn, border: 'none', background: 'var(--primary)', color: 'var(--on-primary)' }}>{t('cycleCount.record')}</button>
+              <button type="button" onClick={() => void record()} disabled={busy || counted === ''} style={{ ...btn, border: 'none', background: 'var(--primary)', color: 'var(--on-primary)', boxShadow: 'var(--clay-tinted)' }}>{t('cycleCount.record')}</button>
             </div>
           ) : <BarcodeInput label={t('cycleCount.scanProduct')} onSubmit={resolveProd} />)}
         </div>
       )}
       {err && <div role="alert" style={{ color: 'var(--critical)', fontSize: 'var(--text-xs)' }}>{err}</div>}
 
-      <div style={{ background: 'var(--surface)', border: '1px solid var(--hairline)', borderRadius: 'var(--radius-md)', overflow: 'auto' }}>
+      <div style={{ background: 'var(--surface)', border: 'none', boxShadow: 'var(--clay-raised)', borderRadius: 'var(--radius-panel)', overflow: 'auto' }}>
         <table style={{ width: '100%', borderCollapse: 'collapse' }}>
           <thead><tr><th style={th}>{t('products.sku')}</th><th style={th}>{t('cycleCount.location')}</th><th style={{ ...th, textAlign: 'end' }}>{t('cycleCount.system')}</th><th style={{ ...th, textAlign: 'end' }}>{t('cycleCount.counted')}</th><th style={{ ...th, textAlign: 'end' }}>{t('cycleCount.variance')}</th></tr></thead>
           <tbody>
@@ -141,8 +141,8 @@ function CycleCountSession({ report, setReport, onExit }: { report: CycleCountRe
 
       {isOpen && report.lines.length > 0 && (
         <div style={{ display: 'flex', justifyContent: 'flex-end', gap: 'var(--space-3)' }}>
-          <button type="button" onClick={() => void close(false)} disabled={busy} style={{ ...btn, border: '1px solid var(--hairline)', background: 'var(--surface)', color: 'var(--ink)' }}>{t('cycleCount.closeOnly')}</button>
-          <button type="button" onClick={() => void close(true)} disabled={busy} style={{ ...btn, border: 'none', background: 'var(--primary)', color: 'var(--on-primary)', fontWeight: 500 }}>{t('cycleCount.closeApply')}</button>
+          <button type="button" onClick={() => void close(false)} disabled={busy} style={{ ...btn, border: 'none', boxShadow: 'var(--clay-raised-sm)', background: 'var(--surface)', color: 'var(--ink)' }}>{t('cycleCount.closeOnly')}</button>
+          <button type="button" onClick={() => void close(true)} disabled={busy} style={{ ...btn, border: 'none', background: 'var(--primary)', color: 'var(--on-primary)', fontWeight: 500, boxShadow: 'var(--clay-tinted)' }}>{t('cycleCount.closeApply')}</button>
         </div>
       )}
     </div>

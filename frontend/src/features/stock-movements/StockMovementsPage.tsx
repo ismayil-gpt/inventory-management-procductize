@@ -145,8 +145,8 @@ export function StockMovementsPage() {
     } finally { setRecording(false); }
   };
 
-  const control: React.CSSProperties = { height: '36px', borderRadius: 'var(--radius-md)', border: '1px solid var(--hairline)', background: 'var(--surface)', color: 'var(--ink)', padding: '0 12px', fontSize: 'var(--text-sm)' };
-  const card: React.CSSProperties = { background: 'var(--surface)', border: '1px solid var(--hairline)', borderRadius: 'var(--radius-md)', padding: 'var(--space-4)' };
+  const control: React.CSSProperties = { height: '36px', borderRadius: 'var(--radius-md)', border: 'none', boxShadow: 'var(--clay-pressed)', background: 'var(--surface-sunken)', color: 'var(--ink)', padding: '0 12px', fontSize: 'var(--text-sm)' };
+  const card: React.CSSProperties = { background: 'var(--surface)', border: 'none', boxShadow: 'var(--clay-raised)', borderRadius: 'var(--radius-panel)', padding: 'var(--space-4)' };
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--space-4)' }}>
@@ -240,7 +240,7 @@ export function StockMovementsPage() {
               {formError && <div role="alert" style={{ fontSize: 'var(--text-xs)', color: 'var(--critical)' }}>{formError}</div>}
 
               <button type="button" onClick={record} disabled={recording || quantity === ''} style={{
-                height: '40px', borderRadius: 'var(--radius-md)', border: 'none', fontWeight: 500, fontSize: 'var(--text-sm)',
+                height: '40px', borderRadius: 'var(--radius-md)', border: 'none', boxShadow: 'var(--clay-tinted)', fontWeight: 500, fontSize: 'var(--text-sm)',
                 background: recording || quantity === '' ? 'var(--ink-faint)' : 'var(--primary)', color: 'var(--on-primary)',
                 cursor: recording || quantity === '' ? 'default' : 'pointer',
               }}>

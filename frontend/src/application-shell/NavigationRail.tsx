@@ -208,11 +208,15 @@ export function NavigationRail() {
         position: 'relative',
         width: isCollapsed ? 'var(--rail-width-collapsed)' : 'var(--rail-width)',
         flex: 'none',
+        // A raised clay slab floating on the ground, like the top bar and status strip.
+        margin: 'var(--shell-gap)',
+        marginInlineEnd: 0,
         background: 'var(--surface)',
-        borderInlineEnd: '1px solid var(--hairline)',
+        borderRadius: 'var(--radius-panel)',
+        boxShadow: 'var(--clay-raised)',
         display: 'flex',
         flexDirection: 'column',
-        padding: 'var(--space-3) var(--space-2)',
+        padding: 'var(--space-3) var(--space-2) 0',
         overflowY: 'auto',
         overflowX: 'hidden',
         transition: 'width var(--motion-medium) var(--motion-easing)',
@@ -222,7 +226,7 @@ export function NavigationRail() {
         <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
           <MizanMark size={30} title={isCollapsed ? 'Mizan' : undefined} />
           {!isCollapsed && (
-            <span style={{ fontFamily: 'var(--font-sign)', fontWeight: 800, letterSpacing: '0.01em', color: 'var(--ink)', fontSize: '20px', lineHeight: 1, paddingTop: '3px' }}>
+            <span style={{ fontFamily: 'var(--font-sign)', fontWeight: 600, letterSpacing: '0.01em', color: 'var(--ink)', fontSize: '20px', lineHeight: 1, paddingTop: '3px' }}>
               Mizan
             </span>
           )}
@@ -247,7 +251,7 @@ export function NavigationRail() {
             height: indicator.height,
             background: 'var(--sign)',
             borderRadius: 'var(--radius-md)',
-            boxShadow: 'inset 0 0 0 2px var(--sign-line)',
+            boxShadow: 'var(--clay-tinted)',
             transition: 'top var(--motion-medium) var(--motion-settle), height var(--motion-medium) var(--motion-settle)',
             pointerEvents: 'none',
           }}
@@ -308,7 +312,8 @@ export function NavigationRail() {
                         ...(isCollapsed ? { position: 'absolute', top: '4px', insetInlineEnd: '4px', fontSize: '10px', padding: '0 4px' } : { fontSize: 'var(--text-xs)', padding: '0 6px' }),
                         fontWeight: 600,
                         lineHeight: '18px',
-                        borderRadius: 'var(--radius-dot)',
+                        borderRadius: 'var(--radius-chip)',
+                        boxShadow: 'var(--clay-tinted)',
                         // On the yellow active sign the count flips to ink so it stays visible.
                         background: isActive ? 'var(--sign-legend)' : 'var(--sign-go)',
                         color: isActive ? 'var(--sign)' : 'var(--sign-on-go)',
@@ -325,10 +330,10 @@ export function NavigationRail() {
       })}
 
       {/* Pinned to the bottom so collapse and sign out stay reachable when the list scrolls. */}
-      <div style={{ marginTop: 'auto', paddingTop: 'var(--space-3)', display: 'flex', flexDirection: 'column', gap: '2px', position: 'sticky', bottom: 0, background: 'var(--surface)', zIndex: 1 }}>
+      <div style={{ marginTop: 'auto', paddingTop: 'var(--space-3)', display: 'flex', flexDirection: 'column', gap: '2px', position: 'sticky', bottom: 0, paddingBottom: 'var(--space-3)', background: 'var(--surface)', borderEndStartRadius: 'var(--radius-panel)', borderEndEndRadius: 'var(--radius-panel)', zIndex: 1 }}>
         {/* Demo-login helper (development only — the backend omits this in production). */}
         {demoLogins.length > 0 && showDemo && !isCollapsed && (
-          <div style={{ marginBottom: 'var(--space-2)', padding: '10px', background: 'var(--surface-sunken)', border: '1px solid var(--hairline)', borderRadius: 'var(--radius-md)', display: 'flex', flexDirection: 'column', gap: '10px' }}>
+          <div style={{ marginBottom: 'var(--space-2)', padding: '10px', background: 'var(--surface-sunken)', border: 'none', boxShadow: 'var(--clay-raised)', borderRadius: 'var(--radius-panel)', display: 'flex', flexDirection: 'column', gap: '10px' }}>
             {demoLogins.map((login) => (
               <div key={login.role}>
                 <div style={{ fontSize: 'var(--text-2xs)', letterSpacing: 'var(--tracking-label)', textTransform: 'uppercase', color: 'var(--ink-muted)', marginBottom: '2px' }}>

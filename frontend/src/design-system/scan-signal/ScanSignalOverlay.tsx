@@ -62,7 +62,7 @@ export function ScanSignalOverlay() {
       >
         <look.Icon size={56} strokeWidth={2.25} aria-hidden />
         <div style={{ fontSize: 'var(--text-lg)', fontWeight: 600 }}>{look.label}</div>
-        <div dir="ltr" style={{ fontFamily: 'var(--font-sign)', fontWeight: 800, fontSize: '40px', lineHeight: 1.1, wordBreak: 'break-word' }}>
+        <div dir="ltr" style={{ fontFamily: 'var(--font-sign)', fontWeight: 600, fontSize: '40px', lineHeight: 1.1, wordBreak: 'break-word' }}>
           {signal.headline}
         </div>
         {signal.detail && <div style={{ fontSize: 'var(--text-base)', fontWeight: 600 }}>{signal.detail}</div>}

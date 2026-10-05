@@ -38,9 +38,9 @@ export function SecurityCompliancePage() {
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--space-4)' }}>
-      <section style={{ background: 'var(--gantry)', border: '1px solid var(--gantry-line)', borderRadius: 'var(--radius-lg)', padding: 'var(--space-6)', color: 'var(--gantry-ink)' }}>
+      <section style={{ background: 'var(--gantry)', border: 'none', boxShadow: 'var(--clay-gantry)', borderRadius: 'var(--radius-lg)', padding: 'var(--space-6)', color: 'var(--gantry-ink)' }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: 'var(--space-3)', flexWrap: 'wrap' }}>
-          <h2 style={{ margin: 0, fontSize: 'var(--text-xl)', fontWeight: 800 }}>{t('compliance.headline')}</h2>
+          <h2 style={{ margin: 0, fontSize: 'var(--text-xl)', fontWeight: 700 }}>{t('compliance.headline')}</h2>
           {residency && (
             <span style={{ padding: '2px 10px', borderRadius: 'var(--radius-chip)', fontSize: 'var(--text-xs)', fontWeight: 600, ...STATUS_LOOK[residency.status].style }}>
               {t(`compliance.status.${residency.status}`)}
@@ -75,7 +75,7 @@ export function SecurityCompliancePage() {
       </div>
       <p style={{ margin: 0, fontSize: 'var(--text-sm)', color: 'var(--ink-muted)', maxWidth: '78ch' }}>{t('compliance.controlsIntro')}</p>
 
-      <div style={{ background: 'var(--surface)', border: '1px solid var(--hairline)', borderRadius: 'var(--radius-md)', overflow: 'auto' }}>
+      <div style={{ background: 'var(--surface)', border: 'none', boxShadow: 'var(--clay-raised)', borderRadius: 'var(--radius-panel)', overflow: 'auto' }}>
         <table style={{ width: '100%', borderCollapse: 'collapse' }}>
           <thead>
             <tr>
@@ -111,7 +111,7 @@ export function SecurityCompliancePage() {
                       aria-expanded={isOpen}
                       aria-label={t('compliance.showEvidence')}
                       title={t('compliance.showEvidence')}
-                      style={{ display: 'inline-grid', placeItems: 'center', width: '32px', height: '32px', borderRadius: 'var(--radius-sm)', border: '1px solid var(--hairline)', background: 'var(--surface)', color: 'var(--ink-muted)', cursor: 'pointer' }}
+                      style={{ display: 'inline-grid', placeItems: 'center', width: '32px', height: '32px', borderRadius: 'var(--radius-sm)', border: 'none', boxShadow: 'var(--clay-raised-sm)', background: 'var(--surface)', color: 'var(--ink-muted)', cursor: 'pointer' }}
                     >
                       <ChevronDown size={16} strokeWidth={1.5} aria-hidden style={{ transform: isOpen ? 'rotate(180deg)' : undefined, transition: 'transform var(--motion-duration) var(--motion-easing)' }} />
                     </button>

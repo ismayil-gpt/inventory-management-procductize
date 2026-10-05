@@ -16,7 +16,9 @@ export function LocationChip({ designator }: { designator: string }) {
       style={{
         display: 'inline-flex',
         alignItems: 'stretch',
-        border: '1px solid var(--hairline-strong)',
+        // A small raised clay chip; segments are divided by hairlines.
+        background: 'var(--surface)',
+        boxShadow: 'var(--clay-raised-sm)',
         borderRadius: 'var(--radius-chip)',
         fontFamily: 'var(--font-mono)',
         fontSize: 'var(--text-xs)',

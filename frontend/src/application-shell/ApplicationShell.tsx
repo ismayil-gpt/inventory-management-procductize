@@ -49,6 +49,7 @@ export function ApplicationShell() {
       <div style={{ display: 'flex', flexDirection: 'column', flex: 1, minWidth: 0 }}>
         <TopBar title={t(titleKey)} />
         <main
+          className="shell-scroll"
           style={{
             flex: 1,
             overflow: 'auto',

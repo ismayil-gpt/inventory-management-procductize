@@ -81,7 +81,7 @@ export function BulkCreateModal({ parent, onClose, onCreated }: { parent: { id: 
     }
   };
 
-  const input: React.CSSProperties = { height: '34px', width: '100%', borderRadius: 'var(--radius-md)', border: '1px solid var(--hairline)', background: 'var(--surface)', color: 'var(--ink)', padding: '0 10px', fontSize: 'var(--text-sm)' };
+  const input: React.CSSProperties = { height: '34px', width: '100%', borderRadius: 'var(--radius-md)', border: 'none', boxShadow: 'var(--clay-pressed)', background: 'var(--surface-sunken)', color: 'var(--ink)', padding: '0 10px', fontSize: 'var(--text-sm)' };
   const fieldLabel: React.CSSProperties = { display: 'block', fontSize: 'var(--text-2xs)', letterSpacing: 'var(--tracking-label)', textTransform: 'uppercase', color: 'var(--ink-muted)', marginBottom: '3px' };
   const btn: React.CSSProperties = { display: 'inline-flex', alignItems: 'center', gap: '6px', height: '38px', padding: '0 18px', borderRadius: 'var(--radius-md)', fontSize: 'var(--text-sm)', cursor: 'pointer' };
 
@@ -98,9 +98,9 @@ export function BulkCreateModal({ parent, onClose, onCreated }: { parent: { id: 
       <Modal title={t('locations.bulkCreate')} onClose={onCreated} width={480}>
         <p role="status" style={{ margin: 0, fontSize: 'var(--text-base)', fontWeight: 600 }}>{t('locations.createdDone', { count: created.count })}</p>
         <div style={{ display: 'flex', justifyContent: 'flex-end', gap: 'var(--space-3)', marginTop: 'var(--space-6)', flexWrap: 'wrap' }}>
-          <button type="button" onClick={onCreated} style={{ ...btn, border: '1px solid var(--hairline)', background: 'var(--surface)', color: 'var(--ink)' }}>{t('locations.done')}</button>
+          <button type="button" onClick={onCreated} style={{ ...btn, border: 'none', boxShadow: 'var(--clay-raised-sm)', background: 'var(--surface)', color: 'var(--ink)' }}>{t('locations.done')}</button>
           {created.labelledLocationIds.length > 0 && (
-            <button type="button" onClick={() => void printNew()} disabled={printing} style={{ ...btn, border: 'none', background: 'var(--primary)', color: 'var(--on-primary)', fontWeight: 600 }}>
+            <button type="button" onClick={() => void printNew()} disabled={printing} style={{ ...btn, border: 'none', background: 'var(--primary)', color: 'var(--on-primary)', fontWeight: 600, boxShadow: 'var(--clay-tinted)' }}>
               <Printer size={15} strokeWidth={1.5} aria-hidden /> {printing ? t('common.loading') : t('locations.printNewLabels', { count: created.labelledLocationIds.length })}
             </button>
           )}
@@ -117,7 +117,7 @@ export function BulkCreateModal({ parent, onClose, onCreated }: { parent: { id: 
 
       <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--space-2)' }}>
         {levels.map((l, i) => (
-          <div key={i} style={{ display: 'flex', gap: 'var(--space-3)', alignItems: 'flex-end', flexWrap: 'wrap', padding: 'var(--space-3)', border: '1px solid var(--hairline)', borderRadius: 'var(--radius-md)', background: 'var(--surface-sunken)' }}>
+          <div key={i} style={{ display: 'flex', gap: 'var(--space-3)', alignItems: 'flex-end', flexWrap: 'wrap', padding: 'var(--space-3)', border: 'none', boxShadow: 'var(--clay-raised)', borderRadius: 'var(--radius-panel)', background: 'var(--surface-sunken)' }}>
             <div style={{ flex: '1 1 150px', minWidth: '130px' }}>
               <label htmlFor={`bulk-level-${i}-type`} style={fieldLabel}>{t('locations.type')}</label>
               <select id={`bulk-level-${i}-type`} style={input} value={l.locationTypeId} onChange={(e) => setLevel(i, { locationTypeId: e.target.value })}>
@@ -138,7 +138,7 @@ export function BulkCreateModal({ parent, onClose, onCreated }: { parent: { id: 
               <input id={`bulk-level-${i}-to`} style={input} type="number" min={0} className="tabular" value={l.to} onChange={(e) => setLevel(i, { to: Number(e.target.value) })} />
             </div>
             <button type="button" onClick={() => removeLevel(i)} disabled={levels.length === 1} aria-label={t('common.delete')} title={t('common.delete')}
-              style={{ height: '34px', width: '34px', display: 'inline-flex', alignItems: 'center', justifyContent: 'center', borderRadius: 'var(--radius-md)', border: '1px solid var(--hairline)', background: 'var(--surface)', color: levels.length === 1 ? 'var(--ink-faint)' : 'var(--critical)', cursor: levels.length === 1 ? 'default' : 'pointer' }}>
+              style={{ height: '34px', width: '34px', display: 'inline-flex', alignItems: 'center', justifyContent: 'center', borderRadius: 'var(--radius-md)', border: 'none', boxShadow: 'var(--clay-raised-sm)', background: 'var(--surface)', color: levels.length === 1 ? 'var(--ink-faint)' : 'var(--critical)', cursor: levels.length === 1 ? 'default' : 'pointer' }}>
               <Trash2 size={15} />
             </button>
           </div>
@@ -162,8 +162,8 @@ export function BulkCreateModal({ parent, onClose, onCreated }: { parent: { id: 
       {error && <div role="alert" style={{ marginTop: 'var(--space-3)', color: 'var(--critical)', fontSize: 'var(--text-xs)' }}>{error}</div>}
 
       <div style={{ display: 'flex', justifyContent: 'flex-end', gap: 'var(--space-3)', marginTop: 'var(--space-6)' }}>
-        <button type="button" onClick={onClose} style={{ ...btn, border: '1px solid var(--hairline)', background: 'var(--surface)', color: 'var(--ink)' }}>{t('common.cancel')}</button>
-        <button type="button" onClick={() => void create()} disabled={busy || !canCreate} style={{ ...btn, border: 'none', background: busy || !canCreate ? 'var(--ink-faint)' : 'var(--primary)', color: 'var(--on-primary)', fontWeight: 500 }}>
+        <button type="button" onClick={onClose} style={{ ...btn, border: 'none', boxShadow: 'var(--clay-raised-sm)', background: 'var(--surface)', color: 'var(--ink)' }}>{t('common.cancel')}</button>
+        <button type="button" onClick={() => void create()} disabled={busy || !canCreate} style={{ ...btn, border: 'none', background: busy || !canCreate ? 'var(--ink-faint)' : 'var(--primary)', color: 'var(--on-primary)', fontWeight: 500, boxShadow: 'var(--clay-tinted)' }}>
           {busy ? t('common.loading') : t('locations.createN', { count: preview.count })}
         </button>
       </div>

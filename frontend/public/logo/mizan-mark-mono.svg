@@ -1,12 +1,11 @@
-<svg viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Mizan">
+<svg viewBox="0 0 120 120" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Mizan">
   <title>Mizan mark (monochrome — uses currentColor)</title>
-  <rect x="2" y="2" width="60" height="60" rx="13" fill="none" stroke="currentColor" stroke-width="3"/>
-  <g fill="currentColor" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round">
-    <rect x="14" y="19.5" width="36" height="3.5" rx="1.75" stroke="none"/>
-    <rect x="30.25" y="21" width="3.5" height="23" stroke="none"/>
-    <rect x="22" y="43" width="20" height="4" rx="2" stroke="none"/>
-    <path d="M17 23 L11.5 33 M17 23 L22.5 33 M47 23 L41.5 33 M47 23 L52.5 33" fill="none" stroke-width="1.8"/>
-    <path d="M9.5 33 h15 a7.5 5.5 0 0 1 -15 0 z M39.5 33 h15 a7.5 5.5 0 0 1 -15 0 z" stroke="none"/>
-    <circle cx="32" cy="21.25" r="3.6" stroke="none"/>
+  <!-- Single colour: the three faces are told apart by tint, the barcode is cut out of the side. -->
+  <rect x="4" y="4" width="112" height="112" rx="30" fill="none" stroke="currentColor" stroke-width="6"/>
+  <g stroke-width="2.5" stroke-linejoin="round" fill="currentColor" stroke="currentColor">
+    <polygon points="27,40 60,58.86 60,98.86 27,80"/>
+    <polygon points="60,58.86 93,40 93,80 60,98.86" opacity=".8"/>
+    <polygon points="60,21.14 93,40 60,58.86 27,40" opacity=".55"/>
   </g>
+  <g transform="matrix(1 -0.5714 0 1 60 58.86)" fill="#FFFFFF"><rect x="6" y="9" width="4" height="24"/><rect x="13" y="9" width="3" height="24"/><rect x="19" y="9" width="5" height="24"/><rect x="27" y="9" width="3" height="24"/></g>
 </svg>

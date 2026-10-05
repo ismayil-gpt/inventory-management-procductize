@@ -1,7 +1,7 @@
 import { useTranslation } from 'react-i18next';
 import type { StockStatus } from '../../api-client/client';
 
-// §9.8 — a 6px square plus a text label. Never colour alone.
+// §9.8 — an 8px rounded square plus a text label. Never colour alone.
 const STATUS_MAP: Record<StockStatus, { color: string; labelKey: string; filled: boolean }> = {
   IN_STOCK: { color: 'var(--ok)', labelKey: 'stock.inStock', filled: true },
   LOW: { color: 'var(--warn)', labelKey: 'stock.low', filled: true },
@@ -17,7 +17,7 @@ export function StockStatusIndicator({ status }: { status: StockStatus }) {
       <span
         aria-hidden
         style={{
-          width: '6px', height: '6px', borderRadius: 'var(--radius-dot)',
+          width: '8px', height: '8px', borderRadius: 'var(--radius-dot)',
           background: cfg.filled ? cfg.color : 'transparent',
           border: cfg.filled ? 'none' : `1px solid ${cfg.color}`,
         }}

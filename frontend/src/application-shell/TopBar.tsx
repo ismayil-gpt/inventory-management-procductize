@@ -38,7 +38,7 @@ export function TopBar({ title }: TopBarProps) {
     minWidth: '36px',
     height: '36px',
     borderRadius: 'var(--radius-md)',
-    border: '1px solid var(--hairline-strong)',
+    border: 'none', boxShadow: 'var(--clay-raised-sm)',
     background: 'var(--surface)',
     color: 'var(--ink-muted)',
     cursor: 'pointer',
@@ -51,9 +51,11 @@ export function TopBar({ title }: TopBarProps) {
         display: 'flex',
         alignItems: 'center',
         gap: 'var(--space-3)',
-        padding: 'var(--space-2) var(--space-6)',
+        padding: 'var(--space-2) var(--space-4)',
+        margin: 'var(--shell-gap) var(--shell-gap) 0',
         background: 'var(--surface)',
-        borderBottom: '1px solid var(--hairline)',
+        borderRadius: 'var(--radius-panel)',
+        boxShadow: 'var(--clay-raised)',
         flexWrap: 'wrap',
       }}
     >
@@ -78,9 +80,9 @@ export function TopBar({ title }: TopBarProps) {
             gap: '8px',
             height: '36px',
             padding: '0 12px',
-            border: '1px solid var(--hairline-strong)',
+            border: 'none', boxShadow: 'var(--clay-pressed)',
             borderRadius: 'var(--radius-md)',
-            background: 'var(--surface)',
+            background: 'var(--surface-sunken)',
             color: 'var(--ink-muted)',
           }}
         >

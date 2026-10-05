@@ -107,8 +107,11 @@ export function LocationsPage() {
           style={{
             display: 'flex', alignItems: 'center', gap: '8px', height: '36px',
             paddingInlineStart: `${8 + depth * 18}px`, paddingInlineEnd: '12px',
+            // Rows are rounded clay pills inset from the panel edge; the chosen one rises.
+            marginInline: 'var(--space-2)', marginBlock: '2px', borderRadius: 'var(--radius-sm)',
             background: isSelected ? 'var(--primary-soft)' : 'transparent',
-            borderInlineStart: isSelected ? '2px solid var(--primary-ink)' : '2px solid transparent',
+            boxShadow: isSelected ? 'var(--clay-raised-sm)' : 'none',
+            borderInlineStart: isSelected ? '3px solid var(--primary-ink)' : '3px solid transparent',
           }}
           onMouseEnter={(e) => { if (!isSelected) e.currentTarget.style.background = 'var(--surface-sunken)'; }}
           onMouseLeave={(e) => { if (!isSelected) e.currentTarget.style.background = 'transparent'; }}
@@ -157,13 +160,13 @@ export function LocationsPage() {
 
   const loc = selected.data;
 
-  const toolbarBtn: React.CSSProperties = { display: 'inline-flex', alignItems: 'center', gap: '6px', height: '36px', padding: '0 14px', borderRadius: 'var(--radius-md)', fontSize: 'var(--text-sm)', cursor: 'pointer', border: '1px solid var(--hairline)', background: 'var(--surface)', color: 'var(--ink)' };
+  const toolbarBtn: React.CSSProperties = { display: 'inline-flex', alignItems: 'center', gap: '6px', height: '36px', padding: '0 14px', borderRadius: 'var(--radius-md)', fontSize: 'var(--text-sm)', cursor: 'pointer', border: 'none', boxShadow: 'var(--clay-raised-sm)', background: 'var(--surface)', color: 'var(--ink)' };
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--space-4)' }}>
       {isAdmin && (
         <div style={{ display: 'flex', gap: 'var(--space-3)', flexWrap: 'wrap', alignItems: 'center' }}>
-          <button type="button" onClick={() => { setBulkParent(null); setShowBulk(true); }} style={{ ...toolbarBtn, border: 'none', background: 'var(--primary)', color: 'var(--on-primary)', fontWeight: 500 }}>
+          <button type="button" onClick={() => { setBulkParent(null); setShowBulk(true); }} style={{ ...toolbarBtn, border: 'none', background: 'var(--primary)', color: 'var(--on-primary)', fontWeight: 500, boxShadow: 'var(--clay-tinted)' }}>
             <Plus size={16} strokeWidth={1.5} /> {t('locations.newRoot')}
           </button>
           <button type="button" onClick={() => setShowBulk(true)} disabled={!bulkParent} style={{ ...toolbarBtn, opacity: bulkParent ? 1 : 0.5 }}>
@@ -190,7 +193,7 @@ export function LocationsPage() {
 
       <div style={{ display: 'grid', gridTemplateColumns: 'minmax(320px, 1fr) minmax(320px, 1.2fr)', gap: 'var(--space-4)', alignItems: 'start' }}>
         {/* Tree */}
-        <div style={{ background: 'var(--surface)', border: '1px solid var(--hairline)', borderRadius: 'var(--radius-md)', overflow: 'hidden' }}>
+        <div style={{ background: 'var(--surface)', border: 'none', boxShadow: 'var(--clay-raised)', borderRadius: 'var(--radius-panel)', overflow: 'hidden' }}>
           <div style={{ display: 'flex', justifyContent: 'space-between', padding: '10px 12px', borderBottom: '1px solid var(--hairline)', fontSize: 'var(--text-2xs)', letterSpacing: 'var(--tracking-label)', textTransform: 'uppercase', color: 'var(--ink-muted)' }}>
             <span>{t('locations.title')}</span>
             <span>{t('locations.items')} · {t('locations.units')}</span>
@@ -204,7 +207,7 @@ export function LocationsPage() {
         {/* Selected / scanned location */}
         <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--space-4)' }}>
           {!selectedId && (
-            <div style={{ background: 'var(--surface)', border: '1px solid var(--hairline)', borderRadius: 'var(--radius-md)', padding: 'var(--space-12)', textAlign: 'center', color: 'var(--ink-muted)', fontSize: 'var(--text-sm)' }}>
+            <div style={{ background: 'var(--surface)', border: 'none', boxShadow: 'var(--clay-raised)', borderRadius: 'var(--radius-panel)', padding: 'var(--space-12)', textAlign: 'center', color: 'var(--ink-muted)', fontSize: 'var(--text-sm)' }}>
               {t('locations.selectHint')}
             </div>
           )}
@@ -218,11 +221,11 @@ export function LocationsPage() {
                 scanning
               />
               {shelfParent && <ShelfView parent={shelfParent} highlightedId={selectedId} onSelect={setSelectedId} />}
-              <div style={{ background: 'var(--surface)', border: '1px solid var(--hairline)', borderRadius: 'var(--radius-md)', overflow: 'hidden' }}>
+              <div style={{ background: 'var(--surface)', border: 'none', boxShadow: 'var(--clay-raised)', borderRadius: 'var(--radius-panel)', overflow: 'hidden' }}>
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '8px 16px', borderBottom: '1px solid var(--hairline)' }}>
                   <span style={{ fontSize: 'var(--text-2xs)', letterSpacing: 'var(--tracking-label)', textTransform: 'uppercase', color: 'var(--ink-muted)' }}>{t('locations.stockHere')}</span>
                   {loc.barcode && (
-                    <button type="button" onClick={() => void printShelf()} style={{ display: 'inline-flex', alignItems: 'center', gap: '5px', height: '28px', padding: '0 10px', borderRadius: 'var(--radius-sm)', border: '1px solid var(--hairline)', background: 'var(--surface)', color: 'var(--ink)', fontSize: 'var(--text-xs)', cursor: 'pointer' }}>
+                    <button type="button" onClick={() => void printShelf()} style={{ display: 'inline-flex', alignItems: 'center', gap: '5px', height: '28px', padding: '0 10px', borderRadius: 'var(--radius-sm)', border: 'none', boxShadow: 'var(--clay-raised-sm)', background: 'var(--surface)', color: 'var(--ink)', fontSize: 'var(--text-xs)', cursor: 'pointer' }}>
                       <Printer size={13} strokeWidth={1.5} /> {t('locations.printLabel')}
                     </button>
                   )}

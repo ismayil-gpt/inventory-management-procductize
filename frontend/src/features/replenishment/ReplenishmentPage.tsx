@@ -38,7 +38,7 @@ export function ReplenishmentPage() {
     } finally { setBusy(false); }
   };
 
-  const toolbarBtn: React.CSSProperties = { display: 'inline-flex', alignItems: 'center', gap: '6px', height: '36px', padding: '0 14px', borderRadius: 'var(--radius-md)', fontSize: 'var(--text-sm)', cursor: 'pointer', border: '1px solid var(--hairline)', background: 'var(--surface)', color: 'var(--ink)' };
+  const toolbarBtn: React.CSSProperties = { display: 'inline-flex', alignItems: 'center', gap: '6px', height: '36px', padding: '0 14px', borderRadius: 'var(--radius-md)', fontSize: 'var(--text-sm)', cursor: 'pointer', border: 'none', boxShadow: 'var(--clay-raised-sm)', background: 'var(--surface)', color: 'var(--ink)' };
   const pending = recs.data?.filter((r) => r.status === 'PENDING') ?? [];
   const approvedCount = recs.data?.filter((r) => r.status === 'APPROVED' || r.status === 'AMENDED').length ?? 0;
 
@@ -46,7 +46,7 @@ export function ReplenishmentPage() {
     <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--space-4)' }}>
       {isAdmin && (
         <div style={{ display: 'flex', gap: 'var(--space-3)', flexWrap: 'wrap', alignItems: 'center' }}>
-          <button type="button" onClick={() => void doRun()} disabled={busy} style={{ ...toolbarBtn, border: 'none', background: 'var(--primary)', color: 'var(--on-primary)', fontWeight: 500 }}>
+          <button type="button" onClick={() => void doRun()} disabled={busy} style={{ ...toolbarBtn, border: 'none', background: 'var(--primary)', color: 'var(--on-primary)', fontWeight: 500, boxShadow: 'var(--clay-tinted)' }}>
             <RefreshCw size={16} strokeWidth={1.5} /> {t('replenishment.runNow')}
           </button>
           <button type="button" onClick={() => void doGenerate()} disabled={busy || approvedCount === 0} style={{ ...toolbarBtn, opacity: approvedCount === 0 ? 0.5 : 1 }}>
@@ -58,7 +58,7 @@ export function ReplenishmentPage() {
 
       {recs.isLoading && <div style={{ color: 'var(--ink-muted)' }}>{t('common.loading')}</div>}
       {recs.data && recs.data.length === 0 && (
-        <div style={{ padding: 'var(--space-12)', textAlign: 'center', color: 'var(--ink-muted)', background: 'var(--surface)', border: '1px solid var(--hairline)', borderRadius: 'var(--radius-md)' }}>
+        <div style={{ padding: 'var(--space-12)', textAlign: 'center', color: 'var(--ink-muted)', background: 'var(--surface)', border: 'none', boxShadow: 'var(--clay-raised)', borderRadius: 'var(--radius-panel)' }}>
           {t('replenishment.empty')}
         </div>
       )}
@@ -95,11 +95,11 @@ function RecommendationCard({ rec, isAdmin, language, onDecided, statusTone }: {
     finally { setBusy(false); }
   };
 
-  const smallInput: React.CSSProperties = { height: '32px', width: '80px', borderRadius: 'var(--radius-md)', border: '1px solid var(--hairline)', background: 'var(--surface)', color: 'var(--ink)', padding: '0 10px', fontSize: 'var(--text-sm)' };
+  const smallInput: React.CSSProperties = { height: '32px', width: '80px', borderRadius: 'var(--radius-md)', border: 'none', boxShadow: 'var(--clay-pressed)', background: 'var(--surface-sunken)', color: 'var(--ink)', padding: '0 10px', fontSize: 'var(--text-sm)' };
   const actionBtn: React.CSSProperties = { display: 'inline-flex', alignItems: 'center', gap: '5px', height: '32px', padding: '0 12px', borderRadius: 'var(--radius-md)', fontSize: 'var(--text-sm)', cursor: 'pointer', border: 'none' };
 
   return (
-    <div style={{ background: 'var(--surface)', border: '1px solid var(--hairline)', borderRadius: 'var(--radius-md)', padding: 'var(--space-4) var(--space-6)' }}>
+    <div style={{ background: 'var(--surface)', border: 'none', boxShadow: 'var(--clay-raised)', borderRadius: 'var(--radius-panel)', padding: 'var(--space-4) var(--space-6)' }}>
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: 'var(--space-4)', flexWrap: 'wrap' }}>
         <div style={{ flex: 1, minWidth: '240px' }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
@@ -117,17 +117,17 @@ function RecommendationCard({ rec, isAdmin, language, onDecided, statusTone }: {
         {isAdmin && rec.status === 'PENDING' && !rejecting && (
           <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
             <input type="number" min={1} value={qty} onChange={(e) => setQty(e.target.value)} className="tabular" style={smallInput} aria-label={t('replenishment.orderQty')} />
-            <button type="button" onClick={() => void approve()} disabled={busy} style={{ ...actionBtn, background: 'var(--sign-go)', color: 'var(--sign-on-go)', fontWeight: 600 }}><Check size={15} /> {t('replenishment.approve')}</button>
-            <button type="button" onClick={() => setRejecting(true)} disabled={busy} style={{ ...actionBtn, background: 'var(--surface)', border: '1px solid var(--hairline)', color: 'var(--critical)' }}><X size={15} /> {t('replenishment.reject')}</button>
+            <button type="button" onClick={() => void approve()} disabled={busy} style={{ ...actionBtn, background: 'var(--sign-go)', color: 'var(--sign-on-go)', fontWeight: 600, boxShadow: 'var(--clay-tinted)' }}><Check size={15} /> {t('replenishment.approve')}</button>
+            <button type="button" onClick={() => setRejecting(true)} disabled={busy} style={{ ...actionBtn, background: 'var(--surface)', border: 'none', boxShadow: 'var(--clay-raised-sm)', color: 'var(--critical)' }}><X size={15} /> {t('replenishment.reject')}</button>
           </div>
         )}
       </div>
 
       {rejecting && (
         <div style={{ marginTop: 'var(--space-3)', display: 'flex', gap: '8px', alignItems: 'center', flexWrap: 'wrap' }}>
-          <input value={reason} onChange={(e) => setReason(e.target.value)} placeholder={t('replenishment.rejectReason')} style={{ flex: 1, minWidth: '220px', height: '34px', borderRadius: 'var(--radius-md)', border: '1px solid var(--hairline)', background: 'var(--surface)', color: 'var(--ink)', padding: '0 12px', fontSize: 'var(--text-sm)' }} />
-          <button type="button" onClick={() => void reject()} disabled={busy || reason.trim().length < 3} style={{ ...actionBtn, background: 'var(--sign-stop)', color: 'var(--sign-on-stop)', fontWeight: 600 }}>{t('replenishment.confirmReject')}</button>
-          <button type="button" onClick={() => setRejecting(false)} style={{ ...actionBtn, background: 'var(--surface)', border: '1px solid var(--hairline)', color: 'var(--ink)' }}>{t('common.cancel')}</button>
+          <input value={reason} onChange={(e) => setReason(e.target.value)} placeholder={t('replenishment.rejectReason')} style={{ flex: 1, minWidth: '220px', height: '34px', borderRadius: 'var(--radius-md)', border: 'none', boxShadow: 'var(--clay-pressed)', background: 'var(--surface-sunken)', color: 'var(--ink)', padding: '0 12px', fontSize: 'var(--text-sm)' }} />
+          <button type="button" onClick={() => void reject()} disabled={busy || reason.trim().length < 3} style={{ ...actionBtn, background: 'var(--sign-stop)', color: 'var(--sign-on-stop)', fontWeight: 600, boxShadow: 'var(--clay-tinted)' }}>{t('replenishment.confirmReject')}</button>
+          <button type="button" onClick={() => setRejecting(false)} style={{ ...actionBtn, background: 'var(--surface)', border: 'none', boxShadow: 'var(--clay-raised-sm)', color: 'var(--ink)' }}>{t('common.cancel')}</button>
         </div>
       )}
       {error && <div role="alert" style={{ marginTop: '6px', color: 'var(--critical)', fontSize: 'var(--text-xs)' }}>{error}</div>}

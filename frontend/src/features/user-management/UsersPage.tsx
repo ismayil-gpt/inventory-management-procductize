@@ -23,7 +23,7 @@ export function UsersPage() {
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--space-4)' }}>
       <div>
-        <button type="button" onClick={() => setEditing('new')} style={{ display: 'inline-flex', alignItems: 'center', gap: '6px', height: '36px', padding: '0 14px', borderRadius: 'var(--radius-md)', border: 'none', background: 'var(--primary)', color: 'var(--on-primary)', fontWeight: 500, fontSize: 'var(--text-sm)', cursor: 'pointer' }}>
+        <button type="button" onClick={() => setEditing('new')} style={{ display: 'inline-flex', alignItems: 'center', gap: '6px', height: '36px', padding: '0 14px', borderRadius: 'var(--radius-md)', border: 'none', boxShadow: 'var(--clay-tinted)', background: 'var(--primary)', color: 'var(--on-primary)', fontWeight: 500, fontSize: 'var(--text-sm)', cursor: 'pointer' }}>
           <Plus size={16} strokeWidth={1.5} /> {t('users.add')}
         </button>
       </div>
@@ -55,7 +55,7 @@ export function UsersPage() {
         />
       )}
 
-      <div style={{ background: 'var(--surface)', border: '1px solid var(--hairline)', borderRadius: 'var(--radius-md)', overflow: 'auto' }}>
+      <div style={{ background: 'var(--surface)', border: 'none', boxShadow: 'var(--clay-raised)', borderRadius: 'var(--radius-panel)', overflow: 'auto' }}>
         <table style={{ width: '100%', borderCollapse: 'collapse' }}>
           <thead>
             <tr>
@@ -82,20 +82,20 @@ export function UsersPage() {
                 <td style={{ ...td, textAlign: 'end' }}>
                   <div style={{ display: 'inline-flex', gap: '6px' }}>
                     {u.mfaEnabledAt && u.id !== currentUserId && (
-                      <button type="button" onClick={() => setResettingMfa(u)} style={{ display: 'inline-flex', alignItems: 'center', gap: '5px', height: '30px', padding: '0 10px', borderRadius: 'var(--radius-sm)', border: '1px solid var(--hairline)', background: 'var(--surface)', color: 'var(--ink)', fontSize: 'var(--text-xs)', cursor: 'pointer' }}>
+                      <button type="button" onClick={() => setResettingMfa(u)} style={{ display: 'inline-flex', alignItems: 'center', gap: '5px', height: '30px', padding: '0 10px', borderRadius: 'var(--radius-sm)', border: 'none', boxShadow: 'var(--clay-raised-sm)', background: 'var(--surface)', color: 'var(--ink)', fontSize: 'var(--text-xs)', cursor: 'pointer' }}>
                         <ShieldOff size={13} aria-hidden /> {t('users.resetMfa')}
                       </button>
                     )}
                     {u.openSessions > 0 && u.id !== currentUserId && (
-                      <button type="button" onClick={() => setEndingSessions(u)} title={t('users.endSessionsHint')} style={{ display: 'inline-flex', alignItems: 'center', gap: '5px', height: '30px', padding: '0 10px', borderRadius: 'var(--radius-sm)', border: '1px solid var(--hairline)', background: 'var(--surface)', color: 'var(--ink)', fontSize: 'var(--text-xs)', cursor: 'pointer' }}>
+                      <button type="button" onClick={() => setEndingSessions(u)} title={t('users.endSessionsHint')} style={{ display: 'inline-flex', alignItems: 'center', gap: '5px', height: '30px', padding: '0 10px', borderRadius: 'var(--radius-sm)', border: 'none', boxShadow: 'var(--clay-raised-sm)', background: 'var(--surface)', color: 'var(--ink)', fontSize: 'var(--text-xs)', cursor: 'pointer' }}>
                         <LogOut size={13} aria-hidden /> {t('users.endSessions')}
                       </button>
                     )}
-                    <button type="button" onClick={() => setEditing(u)} style={{ display: 'inline-flex', alignItems: 'center', gap: '5px', height: '30px', padding: '0 10px', borderRadius: 'var(--radius-sm)', border: '1px solid var(--hairline)', background: 'var(--surface)', color: 'var(--ink)', fontSize: 'var(--text-xs)', cursor: 'pointer' }}>
+                    <button type="button" onClick={() => setEditing(u)} style={{ display: 'inline-flex', alignItems: 'center', gap: '5px', height: '30px', padding: '0 10px', borderRadius: 'var(--radius-sm)', border: 'none', boxShadow: 'var(--clay-raised-sm)', background: 'var(--surface)', color: 'var(--ink)', fontSize: 'var(--text-xs)', cursor: 'pointer' }}>
                       <Pencil size={13} /> {t('products.edit')}
                     </button>
                     {u.id !== currentUserId && (
-                      <button type="button" onClick={() => setDeleting(u)} aria-label={t('common.delete')} title={t('common.delete')} style={{ display: 'inline-flex', alignItems: 'center', justifyContent: 'center', height: '30px', width: '30px', borderRadius: 'var(--radius-sm)', border: '1px solid var(--hairline)', background: 'var(--surface)', color: 'var(--critical)', cursor: 'pointer' }}>
+                      <button type="button" onClick={() => setDeleting(u)} aria-label={t('common.delete')} title={t('common.delete')} style={{ display: 'inline-flex', alignItems: 'center', justifyContent: 'center', height: '30px', width: '30px', borderRadius: 'var(--radius-sm)', border: 'none', boxShadow: 'var(--clay-raised-sm)', background: 'var(--surface)', color: 'var(--critical)', cursor: 'pointer' }}>
                         <Trash2 size={13} />
                       </button>
                     )}
@@ -135,7 +135,7 @@ function UserModal({ user, onClose }: { user: UserRow | null; onClose: () => voi
     } finally { setSaving(false); }
   };
 
-  const input: React.CSSProperties = { height: '36px', width: '100%', borderRadius: 'var(--radius-md)', border: '1px solid var(--hairline)', background: 'var(--surface)', color: 'var(--ink)', padding: '0 12px', fontSize: 'var(--text-sm)' };
+  const input: React.CSSProperties = { height: '36px', width: '100%', borderRadius: 'var(--radius-md)', border: 'none', boxShadow: 'var(--clay-pressed)', background: 'var(--surface-sunken)', color: 'var(--ink)', padding: '0 12px', fontSize: 'var(--text-sm)' };
   const lbl: React.CSSProperties = { fontSize: 'var(--text-xs)', color: 'var(--ink-muted)', marginBottom: '4px', display: 'block' };
 
   return (
@@ -158,8 +158,8 @@ function UserModal({ user, onClose }: { user: UserRow | null; onClose: () => voi
       </div>
       {error && <div role="alert" style={{ marginTop: 'var(--space-3)', color: 'var(--critical)', fontSize: 'var(--text-xs)' }}>{error}</div>}
       <div style={{ display: 'flex', justifyContent: 'flex-end', gap: 'var(--space-3)', marginTop: 'var(--space-6)' }}>
-        <button type="button" onClick={onClose} style={{ height: '36px', padding: '0 16px', borderRadius: 'var(--radius-md)', border: '1px solid var(--hairline)', background: 'var(--surface)', color: 'var(--ink)', cursor: 'pointer', fontSize: 'var(--text-sm)' }}>{t('common.cancel')}</button>
-        <button type="button" onClick={submit} disabled={saving} style={{ height: '36px', padding: '0 20px', borderRadius: 'var(--radius-md)', border: 'none', background: saving ? 'var(--ink-faint)' : 'var(--primary)', color: 'var(--on-primary)', fontWeight: 500, fontSize: 'var(--text-sm)', cursor: 'pointer' }}>{t('common.save')}</button>
+        <button type="button" onClick={onClose} style={{ height: '36px', padding: '0 16px', borderRadius: 'var(--radius-md)', border: 'none', boxShadow: 'var(--clay-raised-sm)', background: 'var(--surface)', color: 'var(--ink)', cursor: 'pointer', fontSize: 'var(--text-sm)' }}>{t('common.cancel')}</button>
+        <button type="button" onClick={submit} disabled={saving} style={{ height: '36px', padding: '0 20px', borderRadius: 'var(--radius-md)', border: 'none', boxShadow: 'var(--clay-tinted)', background: saving ? 'var(--ink-faint)' : 'var(--primary)', color: 'var(--on-primary)', fontWeight: 500, fontSize: 'var(--text-sm)', cursor: 'pointer' }}>{t('common.save')}</button>
       </div>
     </Modal>
   );

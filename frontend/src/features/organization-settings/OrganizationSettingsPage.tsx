@@ -46,7 +46,7 @@ export function OrganizationSettingsPage() {
     }
   };
 
-  const input: React.CSSProperties = { height: '36px', width: '100%', borderRadius: 'var(--radius-md)', border: '1px solid var(--hairline)', background: 'var(--surface)', color: 'var(--ink)', padding: '0 12px', fontSize: 'var(--text-sm)' };
+  const input: React.CSSProperties = { height: '36px', width: '100%', borderRadius: 'var(--radius-md)', border: 'none', boxShadow: 'var(--clay-pressed)', background: 'var(--surface-sunken)', color: 'var(--ink)', padding: '0 12px', fontSize: 'var(--text-sm)' };
   const lbl: React.CSSProperties = { fontSize: 'var(--text-xs)', color: 'var(--ink-muted)', marginBottom: '4px', display: 'block' };
   const disabled = !isAdmin;
 
@@ -61,7 +61,7 @@ export function OrganizationSettingsPage() {
       </div>
       <p style={{ margin: 0, fontSize: 'var(--text-sm)', color: 'var(--ink-muted)' }}>{t('settings.intro')}</p>
 
-      <div style={{ background: 'var(--surface)', border: '1px solid var(--hairline)', borderRadius: 'var(--radius-md)', padding: 'var(--space-6)', display: 'flex', flexDirection: 'column', gap: 'var(--space-4)' }}>
+      <div style={{ background: 'var(--surface)', border: 'none', boxShadow: 'var(--clay-raised)', borderRadius: 'var(--radius-panel)', padding: 'var(--space-6)', display: 'flex', flexDirection: 'column', gap: 'var(--space-4)' }}>
         <div>
           <span style={lbl}>{t('settings.code')}</span>
           <div style={{ ...input, display: 'flex', alignItems: 'center', background: 'var(--surface-sunken)', color: 'var(--ink-muted)', fontFamily: 'var(--font-mono)' }} dir="ltr">{org.data.code}</div>
@@ -92,7 +92,7 @@ export function OrganizationSettingsPage() {
         {isAdmin && (
           <div style={{ display: 'flex', alignItems: 'center', gap: 'var(--space-3)', marginTop: 'var(--space-2)' }}>
             <button type="button" onClick={() => void save()} disabled={saving || !form.nameEn.trim() || !form.nameAr.trim()}
-              style={{ height: '36px', padding: '0 20px', borderRadius: 'var(--radius-md)', border: 'none', background: saving ? 'var(--ink-faint)' : 'var(--primary)', color: 'var(--on-primary)', fontWeight: 500, fontSize: 'var(--text-sm)', cursor: 'pointer' }}>
+              style={{ height: '36px', padding: '0 20px', borderRadius: 'var(--radius-md)', border: 'none', boxShadow: 'var(--clay-tinted)', background: saving ? 'var(--ink-faint)' : 'var(--primary)', color: 'var(--on-primary)', fontWeight: 500, fontSize: 'var(--text-sm)', cursor: 'pointer' }}>
               {saving ? t('common.loading') : t('common.save')}
             </button>
             {saved && <span style={{ display: 'inline-flex', alignItems: 'center', gap: '5px', color: 'var(--ok)', fontSize: 'var(--text-sm)' }}><Check size={15} /> {t('settings.saved')}</span>}

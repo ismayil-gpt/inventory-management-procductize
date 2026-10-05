@@ -13,7 +13,7 @@ export function AuditLogPage() {
   const [action, setAction] = useState('');
   const rows = useAuditLog({ entityType: entityType || undefined, action: action || undefined });
 
-  const control: React.CSSProperties = { height: '36px', borderRadius: 'var(--radius-md)', border: '1px solid var(--hairline)', background: 'var(--surface)', color: 'var(--ink)', padding: '0 12px', fontSize: 'var(--text-sm)' };
+  const control: React.CSSProperties = { height: '36px', borderRadius: 'var(--radius-md)', border: 'none', boxShadow: 'var(--clay-pressed)', background: 'var(--surface-sunken)', color: 'var(--ink)', padding: '0 12px', fontSize: 'var(--text-sm)' };
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--space-4)' }}>
@@ -26,7 +26,7 @@ export function AuditLogPage() {
       </div>
 
       {/* A scrolling region must be reachable by keyboard (WCAG 2.1.1). */}
-      <div role="region" aria-label={t('navigation.auditLog')} tabIndex={0} style={{ background: 'var(--surface)', border: '1px solid var(--hairline)', borderRadius: 'var(--radius-md)', overflow: 'auto', maxHeight: '70vh' }}>
+      <div role="region" aria-label={t('navigation.auditLog')} tabIndex={0} style={{ background: 'var(--surface)', border: 'none', boxShadow: 'var(--clay-raised)', borderRadius: 'var(--radius-panel)', overflow: 'auto', maxHeight: '70vh' }}>
         <table style={{ width: '100%', borderCollapse: 'collapse' }}>
           <thead>
             <tr>
