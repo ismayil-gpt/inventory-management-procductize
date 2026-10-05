@@ -17,7 +17,20 @@
     "sourcesSummary_other": "Based on {{count}} records",
     "suggestLow": "Which products are low on stock?",
     "suggestPending": "What is waiting for approval?",
-    "suggestCoffee": "How much coffee do we have?"
+    "suggestCoffee": "How much coffee do we have?",
+    "subtitle": "Answers from your own stock records",
+    "lookingUp": "Looking up your stock records…",
+    "retry": "Ask again",
+    "clear": "Start a new conversation",
+    "figure": {
+      "totalStock": "On hand",
+      "reorderPoint": "Reorder point",
+      "status": "Status",
+      "suggestedQty": "Suggested order",
+      "reasonCode": "Reason",
+      "quantity": "Quantity",
+      "type": "Movement"
+    }
   },
   "roles": {
     "ADMIN": "Administrator",
@@ -316,7 +329,8 @@
     "print": "Print",
     "language": "Language",
     "theme": "Theme",
-    "logout": "Sign out"
+    "logout": "Sign out",
+    "close": "Close"
   },
   "navigation": {
     "dashboard": "Dashboard",

@@ -54,6 +54,8 @@ export function ApplicationShell() {
             flex: 1,
             overflow: 'auto',
             padding: 'var(--space-6)',
+            // Room under the last row so the floating assistant button never covers content.
+            paddingBottom: 'calc(var(--space-16) + var(--space-4))',
           }}
         >
           {/* Keyed on the path so each navigation replays the entry sequence. */}

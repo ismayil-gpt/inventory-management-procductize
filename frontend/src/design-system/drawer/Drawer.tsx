@@ -1,17 +1,39 @@
 import { ReactNode } from 'react';
+import { createPortal } from 'react-dom';
+import { useTranslation } from 'react-i18next';
 import { X } from 'lucide-react';
 import { useDialogFocus } from '../modal/dialog-focus.hook';
 
-// Edge-anchored panel (§9.5 — radius-lg, shadow only on floating layers). Anchors to
-// the reading-end edge via a logical property so it flips sides automatically in RTL
-// (§10) — right in English, left in Arabic — without any direction-specific code here.
-export function Drawer({ title, onClose, children, width = 380 }: { title: string; onClose: () => void; children: ReactNode; width?: number }) {
+// A floating clay slab anchored to the reading-end edge (right in English,
+// left in Arabic — logical properties, §10). Inset from the screen edges by the
+// shell gap so it sits with the rail, top bar and status strip rather than
+// being glued to the window edge. `icon` and `subtitle` are optional header
+// content; `headerActions` sits before the close button. Portalled into <body>
+// so no ancestor's mask or transform can capture this fixed layer (see Modal).
+export function Drawer({
+  title,
+  subtitle,
+  icon,
+  headerActions,
+  onClose,
+  children,
+  width = 420,
+}: {
+  title: string;
+  subtitle?: string;
+  icon?: ReactNode;
+  headerActions?: ReactNode;
+  onClose: () => void;
+  children: ReactNode;
+  width?: number;
+}) {
+  const { t } = useTranslation();
   const dialogRef = useDialogFocus<HTMLDivElement>(onClose);
-  return (
+  return createPortal(
     <div
       onClick={onClose}
       className="backdrop-enter"
-      style={{ position: 'fixed', inset: 0, background: 'rgb(0 0 0 / 0.4)', zIndex: 50 }}
+      style={{ position: 'fixed', inset: 0, background: 'rgb(0 0 0 / 0.28)', zIndex: 50 }}
     >
       <div
         onClick={(e) => e.stopPropagation()}
@@ -23,38 +45,38 @@ export function Drawer({ title, onClose, children, width = 380 }: { title: strin
         className="drawer-enter"
         style={{
           position: 'fixed',
-          insetBlock: 0,
-          insetInlineEnd: 0,
+          insetBlock: 'var(--shell-gap)',
+          insetInlineEnd: 'var(--shell-gap)',
           width,
-          maxWidth: '100%',
+          maxWidth: 'calc(100% - 2 * var(--shell-gap))',
           background: 'var(--surface)',
-          borderInlineStart: '1px solid var(--hairline)',
+          borderRadius: 'var(--radius-lg)',
           boxShadow: 'var(--shadow-floating)',
           display: 'flex',
           flexDirection: 'column',
+          overflow: 'hidden',
         }}
       >
-        <div
-          style={{
-            display: 'flex',
-            justifyContent: 'space-between',
-            alignItems: 'center',
-            padding: 'var(--space-4) var(--space-5)',
-            borderBottom: '1px solid var(--hairline)',
-          }}
-        >
-          <h2 style={{ margin: 0, fontSize: 'var(--text-lg)', fontWeight: 600, color: 'var(--ink)' }}>{title}</h2>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 'var(--space-3)', padding: 'var(--space-4) var(--space-4) var(--space-3) var(--space-5)' }}>
+          {icon}
+          <div style={{ flex: 1, minWidth: 0 }}>
+            <h2 style={{ margin: 0, fontFamily: 'var(--font-sign)', fontSize: 'var(--text-lg)', lineHeight: 'var(--leading-lg)', fontWeight: 600, color: 'var(--ink)' }}>{title}</h2>
+            {subtitle && <div style={{ fontSize: 'var(--text-xs)', color: 'var(--ink-muted)' }}>{subtitle}</div>}
+          </div>
+          {headerActions}
           <button
             type="button"
             onClick={onClose}
-            aria-label="Close"
-            style={{ background: 'none', border: 'none', color: 'var(--ink-muted)', cursor: 'pointer', display: 'inline-flex' }}
+            aria-label={t('common.close')}
+            title={t('common.close')}
+            style={{ width: '36px', height: '36px', display: 'inline-grid', placeItems: 'center', flex: 'none', borderRadius: 'var(--radius-sm)', border: 'none', background: 'var(--surface)', boxShadow: 'var(--clay-raised-sm)', color: 'var(--ink-muted)', cursor: 'pointer' }}
           >
-            <X size={18} strokeWidth={1.5} />
+            <X size={18} strokeWidth={1.5} aria-hidden />
           </button>
         </div>
         <div style={{ flex: 1, minHeight: 0, display: 'flex', flexDirection: 'column' }}>{children}</div>
       </div>
-    </div>
+    </div>,
+    document.body,
   );
 }

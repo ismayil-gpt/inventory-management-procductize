@@ -1217,3 +1217,32 @@ rail's thumb appears only on hover or keyboard focus. Inner scroll areas (rail, 
 no longer drag the page along at their end. The work area's content now fades softly under the
 top bar and status strip instead of being sliced by a hard edge (a mask, nothing painted), and
 scrolls smoothly unless reduced motion is on. Axe, keyboard and tablet tests pass.
+
+### 2026-10-05 — Assistant redesigned; whole-UI alignment check
+
+**Assistant** (`features/assistant/`, `design-system/drawer/`): a floating clay panel inset from
+the screen edges, with the Mizan mark and a one-line subtitle; questions sit on the reading-end
+side, answers are raised cards with the speaker and the development-model tag on one line; the
+records an answer used open from a pill and show readable field names ("On hand", "Reorder point")
+and stock status with its square and label; a "Looking up your stock records…" state; errors get
+an **Ask again** button; **Start a new conversation** clears the thread; mixed English/Arabic text
+keeps its own direction. The launcher button is a clay tile placed clear of the status strip, and
+the work area has room under its last row so the button never covers content.
+
+**Found and fixed**: pop-ups were drawn inside the work area, whose edge-fade mask (added
+2026-10-03) captured them — the dim backdrop covered only the work area and dialogs centred on it.
+`Modal` and `Drawer` now render through a portal into `<body>`. Their close buttons also said
+"Close" in English in both languages; they now use `common.close`.
+
+**Alignment check**: a script measured every screen and pop-up (section edges, table header vs cell
+alignment and padding, mixed control heights in a row, clipped text) in en/light and ar/dark at
+1440, and en at 1024 and 768. Fixed: storage tree delete buttons (22 → 28px), and the Users
+actions column, where Edit shifted on your own row because it has no Delete button.
+
+**Not fixed (environment)**: the assistant answered "temporarily unavailable". The ai-service was
+not running (restarted with uvicorn), and Ollama cannot load the model: the GPU shares memory with
+the desktop and only ~0.8 GB is free while 2.4 GB sits in file cache. Needs
+`sudo sh -c 'sync; echo 3 > /proc/sys/vm/drop_caches'` (or closing desktop apps) on this board.
+
+Tests: unit 15/15; axe on every screen and pop-up (en/light, ar/dark), keyboard, focus, tablet and
+preference tests all pass.
