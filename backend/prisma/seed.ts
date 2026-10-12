@@ -42,8 +42,9 @@ async function main() {
   await prisma.organization.deleteMany();
 
   // ---- Organization ----
+  // Same code the backend reports (ORGANIZATION_CODE), so the status strip and Settings agree.
   const org = await prisma.organization.create({
-    data: { code: 'DEMO', nameEn: 'Demo Organization', nameAr: 'مؤسسة تجريبية', timezone: 'Asia/Dubai', defaultLanguage: 'en' },
+    data: { code: process.env.ORGANIZATION_CODE ?? 'DEMO', nameEn: 'Demo Organization', nameAr: 'مؤسسة تجريبية', timezone: 'Asia/Dubai', defaultLanguage: 'en' },
   });
   const organizationId = org.id;
 

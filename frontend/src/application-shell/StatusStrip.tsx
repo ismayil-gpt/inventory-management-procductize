@@ -1,10 +1,22 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useSyncExternalStore } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useHealth, useSystemInfo } from '../api-client/client';
 import { useOutbox } from '../offline-queue/outbox.store';
 import { Link } from 'react-router-dom';
 import { Building2 } from 'lucide-react';
 import { useAuthStore } from '../features/authentication/auth.store';
+
+// The browser's own online state. React Query pauses the health check while
+// offline and keeps the last "ok", so the strip must not rely on it alone.
+const subscribeToConnection = (onChange: () => void) => {
+  window.addEventListener('online', onChange);
+  window.addEventListener('offline', onChange);
+  return () => {
+    window.removeEventListener('online', onChange);
+    window.removeEventListener('offline', onChange);
+  };
+};
+const isBrowserOnline = () => navigator.onLine;
 
 // Persistent 32px status strip (§9.7). Never hidden — it is how the store keeper
 // trusts scans are saving. Here it also proves the frontend<->backend link.
@@ -34,11 +46,13 @@ export function StatusStrip() {
     return () => window.clearInterval(id);
   }, []);
 
-  const connected = health.isSuccess && health.data.status === 'ok';
-  const connectionColor = connected ? 'var(--ok)' : health.isLoading ? 'var(--warn)' : 'var(--critical)';
+  const isOnline = useSyncExternalStore(subscribeToConnection, isBrowserOnline);
+  const connected = isOnline && health.isSuccess && health.data.status === 'ok';
+  const isChecking = isOnline && health.isLoading;
+  const connectionColor = connected ? 'var(--ok)' : isChecking ? 'var(--warn)' : 'var(--critical)';
   const connectionLabel = connected
     ? t('status.synced')
-    : health.isLoading
+    : isChecking
       ? t('status.syncing')
       : t('status.offline');
 
@@ -79,8 +93,9 @@ export function StatusStrip() {
       </span>
       <span style={cell}>
         DB&nbsp;
-        <span style={{ color: health.data?.database === 'connected' ? 'var(--ok)' : 'var(--ink-faint)' }}>
-          {health.data?.database ?? '—'}
+        {/* Offline, the last database state is unknown, not "connected". */}
+        <span style={{ color: connected && health.data?.database === 'connected' ? 'var(--ok)' : 'var(--ink-faint)' }}>
+          {connected ? health.data?.database ?? '—' : '—'}
         </span>
       </span>
       <span style={{ ...cell, color: pendingCount > 0 ? 'var(--warn)' : 'var(--ink-muted)' }} className="tabular">

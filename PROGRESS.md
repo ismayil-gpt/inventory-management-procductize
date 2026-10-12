@@ -1246,3 +1246,26 @@ the desktop and only ~0.8 GB is free while 2.4 GB sits in file cache. Needs
 
 Tests: unit 15/15; axe on every screen and pop-up (en/light, ar/dark), keyboard, focus, tablet and
 preference tests all pass.
+
+### 2026-10-05 (later) — Client demo video; fixes it uncovered
+
+**Video** (2:35, 1920×1080, English captions burned in plus an English .srt, original music):
+scripted recordings of the real app on fresh demo data, organisation shown as Grow Plus
+Technologies (code GPT), clay title cards (opening, the problem, the purchase order, end card
+with gptechnologies.ae and +971 4 259 9011). The AI chat assistant is not shown (§2.2).
+Purchase-order email went to a local mail catcher on 127.0.0.1 during recording; nothing left
+the board. Tooling lives outside the repo for now (session scratchpad); see the video notes.
+
+**Fixes found while recording** (`854ed51`, branch `fix/status-strip-offline-and-pdf-brand`):
+- The status strip said "Synced" while offline with scans queued: React Query pauses its health
+  check offline and keeps the last "ok". It now follows the browser's online state; the offline
+  e2e test asserts "Offline" then "Synced".
+- Purchase-order and report PDFs still drew the old airfield sign; they now draw the carton mark.
+- The seed's organisation code follows `ORGANIZATION_CODE` (status strip and Settings agree).
+
+**Noted, not changed**: Scan and move shows the scanned shelf as a small chip row, not the
+full-width designator strip that §9.6 asks for whenever a location is scanned (the strip appears
+on Storage locations).
+
+**Environment**: backend/.env now has `ORGANIZATION_CODE=GPT`; the demo organisation is named
+Grow Plus Technologies / جرو بلس تكنولوجيز (set through the audited API).

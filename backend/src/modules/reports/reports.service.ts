@@ -1,6 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import * as ExcelJS from 'exceljs';
 import PDFDocument from 'pdfkit';
+import { drawBrandMark } from '../../documents/pdf-brand-mark';
 import { PrismaService } from '../../database/prisma.service';
 import { computeStatus } from '../products/products.service';
 
@@ -123,9 +124,9 @@ export class ReportsService {
       doc.on('error', reject);
     });
 
-    // Header is a location sign (brand, 2026-10-01): black panel, yellow legend.
-    doc.roundedRect(40, 28, 92, 26, 5).fill('#121412');
-    doc.fillColor('#F2C230').fontSize(15).font('Helvetica-Bold').text('MIZAN', 40, 35, { width: 92, align: 'center' });
+    // Header: the brand mark (the scannable carton, 2026-10-03) and the product name.
+    drawBrandMark(doc, 40, 26, 28);
+    doc.fillColor('#1C2737').fontSize(15).font('Helvetica-Bold').text('Mizan', 76, 33);
     doc.fillColor('#141815').fontSize(13).text(data.title, 40, 58);
     doc.fillColor('#4C554F').fontSize(8).font('Helvetica').text(`Generated ${new Date().toISOString().slice(0, 16).replace('T', ' ')} · Mizan`, 40, 76);
 
