@@ -1,0 +1,15 @@
+{
+  // The tool configs run in Node, not the browser, so it gets Node's types and
+  // the app (tsconfig.json) does not.
+  "compilerOptions": {
+    "target": "ES2022",
+    "lib": ["ES2022"],
+    "module": "ESNext",
+    "moduleResolution": "bundler",
+    "skipLibCheck": true,
+    "strict": true,
+    "noEmit": true,
+    "types": ["node"]
+  },
+  "include": ["vite.config.ts", "vitest.config.ts", "playwright.config.ts"]
+}

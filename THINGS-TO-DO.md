@@ -36,7 +36,7 @@ at every layer.
 |---|---|
 | Product name | **Mizan** (ميزان — Arabic for *balance / scales*) |
 | Meaning | Fits inventory: keeping stock "in balance"; also connotes audit/justice |
-| Logo | Balance-scale mark in deep teal with a single gold pivot — files in [`brand/`](brand/) |
+| Logo | Scannable carton: a navy carton with four sign-yellow barcode bars on a sign-yellow tile — files in [`brand/`](brand/) and `frontend/public/logo/` |
 | Logo variants | `mizan-logo.svg` (full lockup), `mizan-mark.svg` (icon), `mizan-mark-mono.svg` (single-colour) |
 | Customer / tenant | Configuration-driven — any organization can be the first customer; the product is resellable |
 
