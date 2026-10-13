@@ -1269,3 +1269,15 @@ on Storage locations).
 
 **Environment**: backend/.env now has `ORGANIZATION_CODE=GPT`; the demo organisation is named
 Grow Plus Technologies / جرو بلس تكنولوجيز (set through the audited API).
+
+### 2026-10-13 — Repository housekeeping
+
+- Removed `BidGate-Brochure.pdf`, another product's brochure committed by mistake (it remains in
+  history at `6fcace1`).
+- `brand/` now holds the scannable-carton files, identical to `frontend/public/logo/`; the old
+  airfield balance-scale files are gone.
+- `SMTP_REQUIRE_TLS=true` added to `.env.example` (STARTTLS required unless a lab relay has none).
+- Frontend type errors in `vite.config.ts` (`node:path`, `node:fs`, `__dirname`, `process`) fixed:
+  `@types/node` added, and the tool configs (vite, vitest, playwright) type-check under a separate
+  `tsconfig.node.json`, so the browser code no longer sees Node's types. Both configs pass
+  `tsc`; unit tests 15/15; build succeeds.

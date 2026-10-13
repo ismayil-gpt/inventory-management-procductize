@@ -376,9 +376,8 @@ inventory/                                 (GitHub: ismayil-gpt/inventory-manage
 │   ├── client-acceptance/                 demo-script.md, acceptance-checklist.md
 │   └── gpu-readiness-and-upgrades.md
 ├── hosting/                               optional public demo hosting (Firebase), demo data only
-├── brand/                                 ⚠️ still the old airfield logo files (§29)
-├── audit/                                 git-ignored visual audit of 2026-09-25 (86 screenshots)
-└── BidGate-Brochure.pdf                   ⚠️ another product's brochure, committed by mistake (§29)
+├── brand/                                 the carton logo files (copies of frontend/public/logo/)
+└── audit/                                 git-ignored visual audit of 2026-09-25 (86 screenshots)
 ```
 
 Naming rules (CLAUDE.md §3.4): kebab-case files, PascalCase components, names that say what the
@@ -674,8 +673,8 @@ at 16 px.
 
 Rejected concepts: moulded scales, level shelf, gantry, meem on the beam (chosen, then withdrawn
 by the client), balanced M, located carton, stacked cartons, rack M, dimensional carton, opened
-carton, stock layers, pinned carton. The root `brand/` folder still holds the old airfield
-balance-scale files (§29).
+carton, stock layers, pinned carton. The root `brand/` folder holds the same carton files as
+`frontend/public/logo/`.
 
 ---
 
@@ -1080,14 +1079,10 @@ Full text in [`OPEN-QUESTIONS.md`](OPEN-QUESTIONS.md).
 - Audit retention period undecided (#24).
 
 **Repository housekeeping**
-- `BidGate-Brochure.pdf` (a tender-evaluation product's brochure) was committed by mistake on
-  2026-10-01 (`6fcace1`).
-- `brand/` at the root still holds the old airfield balance-scale logo files; the current ones are
-  in `frontend/public/logo/`.
-- `SMTP_REQUIRE_TLS` is missing from `.env.example`.
 - The demo-video tooling is outside the repository, in `/tmp`.
-- `vite.config.ts` has three type errors (no `@types/node`).
-- Branch `fix/status-strip-offline-and-pdf-brand` is not pushed.
+- Cleared 2026-10-13: the stray `BidGate-Brochure.pdf` removed (it stays in history from
+  `6fcace1`), `brand/` refreshed to the carton logo, `SMTP_REQUIRE_TLS` added to `.env.example`,
+  `vite.config.ts` type errors fixed (`@types/node` and a separate `tsconfig.node.json`).
 
 **Deliberately not built** (CLAUDE.md §5A.6, §13.6): multi-tenant isolation, self-service
 onboarding, white-labelling beyond name and logo, licensing, cross-customer reporting, RFID,
@@ -1107,15 +1102,13 @@ expiry and batch tracking, ERP integration, native mobile apps, Arabic PDF/Excel
 | Product phase (multi-tenancy, licensing, …) | ⬜ by design |
 
 **Suggested order**
-1. Push and merge `fix/status-strip-offline-and-pdf-brand`; remove the brochure; refresh `brand/`;
-   add `SMTP_REQUIRE_TLS` to the template.
-2. Run client acceptance with the demo script, checklist and video.
-3. Copy the backup key off the board; decide the audit retention period (#24).
-4. First production install on the target server; record the result as DESC evidence; move to
+1. Run client acceptance with the demo script, checklist and video.
+2. Copy the backup key off the board; decide the audit retention period (#24).
+3. First production install on the target server; record the result as DESC evidence; move to
    Node 22 and NestJS 12 there.
-5. Re-run the Arabic language-model gate on the production GPU before showing the assistant.
-6. Build the structure-administration screens and endpoints (§29) to finish Phase 1.
-7. Bring the demo-video tooling into the repository so the video can be re-shot after changes.
+4. Re-run the Arabic language-model gate on the production GPU before showing the assistant.
+5. Build the structure-administration screens and endpoints (§29) to finish Phase 1.
+6. Bring the demo-video tooling into the repository so the video can be re-shot after changes.
 
 ---
 
